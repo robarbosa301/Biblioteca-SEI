@@ -100,9 +100,14 @@ render=function(){
 render();
 
 
-const primeiroAno={"Matemática":"matematica","Língua Portuguesa":"lingua-portuguesa","Ciências":"ciencias"};
+const primeiroAno={"Matemática":"matematica","Língua Portuguesa":"lingua-portuguesa","Ciências":"ciencias","História":"historia","Geografia":"geografia","Arte":"arte","Educação Física":"educacao-fisica","Ensino Religioso":"ensino-religioso","Inglês":"ingles"};
 const renderAnterior=render;
 render=function(){if(g!==0||y!=="1º ano"||s===null||!primeiroAno[s]){renderAnterior();return}nav();title.textContent=s;content.className="panel";content.replaceChildren();const aviso=document.createElement("p");aviso.className="sei-preview-notice";aviso.textContent="Prévia: questões sujeitas à validação pedagógica.";content.append(aviso);const art=document.createElement("article");art.className="sheet original-physics";const img=document.createElement("img");img.className="original-page";img.src="assets/fundamental-1/1-ano/"+primeiroAno[s]+".png";img.alt="Prévia de "+s+" do 1º ano do Ensino Fundamental";art.append(img);content.append(art);const actions=document.createElement("div");actions.className="actions";const btn=document.createElement("button");btn.textContent="Visualizar / salvar em PDF";btn.onclick=()=>{document.getElementById("print-area").replaceChildren(art.cloneNode(true));window.print()};actions.append(btn);content.append(actions)};
 render();
+
+
+const segundoAno={"Matemática":"matematica","Língua Portuguesa":"lingua-portuguesa","Ciências":"ciencias","História":"historia"};
+const anteriorSegundoAno=render;
+render=function(){if(g!==0||y!=="2º ano"||s===null||!segundoAno[s]){anteriorSegundoAno();return}nav();title.textContent=s;content.className="panel";content.replaceChildren();const aviso=document.createElement("p");aviso.className="sei-preview-notice";aviso.textContent="Prévia: questões sujeitas à validação pedagógica.";content.append(aviso);const art=document.createElement("article");art.className="sheet original-physics";const img=document.createElement("img");img.className="original-page";img.src="assets/fundamental-1/2-ano/"+segundoAno[s]+".png";img.alt="Prévia de "+s+" do 2º ano do Ensino Fundamental";art.append(img);content.append(art);const actions=document.createElement("div");actions.className="actions";const btn=document.createElement("button");btn.textContent="Visualizar / salvar em PDF";btn.onclick=()=>{document.getElementById("print-area").replaceChildren(art.cloneNode(true));window.print()};actions.append(btn);content.append(actions)};render();
 
 </script></body></html>
