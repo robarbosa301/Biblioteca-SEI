@@ -123,4 +123,4 @@ nav();title.textContent=s;content.className="panel";content.replaceChildren();
 const aviso=document.createElement("p");aviso.className="sei-preview-notice";aviso.textContent="Prévia: questões sujeitas à validação pedagógica.";content.append(aviso);
 const art=document.createElement("article");art.className="sheet original-physics";const img=document.createElement("img");img.className="original-page";img.src="assets/fundamental-1/4-ano/"+quartoAno[s]+".png";img.alt="Prévia de "+s+" do 4º ano do Ensino Fundamental";art.append(img);content.append(art);
 const actions=document.createElement("div");actions.className="actions";const btn=document.createElement("button");btn.textContent="Visualizar / salvar em PDF";btn.onclick=()=>{document.getElementById("print-area").replaceChildren(art.cloneNode(true));window.print()};actions.append(btn);content.append(actions)};render();
-</script></body></html>
+Object.assign(quartoAno,{"História":"historia","Geografia":"geografia","Arte":"arte"});render();</script></body></html>
