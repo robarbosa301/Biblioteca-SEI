@@ -68,6 +68,8 @@ const seiPublishedPages={
   "2|1º ano|Literatura": "assets/ensino-medio/1-ano/literatura.png",
   "2|1º ano|Matemática": "assets/ensino-medio/1-ano/matematica.png",
   "2|1º ano|Química": "assets/ensino-medio/1-ano/quimica.png",
+  "2|2º ano|Literatura": "assets/ensino-medio/2-ano/literatura.png",
+  "3|3º ano|Literatura": "assets/convenio/3-ano/literatura.png",
   "3|3º ano|Matemática": "assets/convenio/3-ano/matematica.png"
 };
 const seiBeforeCatalog=render;
