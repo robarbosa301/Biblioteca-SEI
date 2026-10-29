@@ -65,6 +65,7 @@ const seiPublishedPages={
   "2|1º ano|Biologia": "assets/ensino-medio/1-ano/biologia.png",
   "2|1º ano|Física": "assets/ensino-medio/1-ano/fisica.png",
   "2|1º ano|Língua Portuguesa": "assets/ensino-medio/1-ano/lingua-portuguesa.png",
+  "2|1º ano|Literatura": "assets/ensino-medio/1-ano/literatura.png",
   "2|1º ano|Matemática": "assets/ensino-medio/1-ano/matematica.png",
   "2|1º ano|Química": "assets/ensino-medio/1-ano/quimica.png",
   "3|3º ano|Matemática": "assets/convenio/3-ano/matematica.png"
