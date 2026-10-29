@@ -43,6 +43,8 @@ const paletteCache=new Map();
 function sheetColor(img,card){
  const apply=color=>{card.style.setProperty('--sheet-color',color);card.classList.add('subject-card')};
  apply('#116bb2');
+ const themes={'Língua Portuguesa':'#9d1826','Português':'#9d1826','Literatura':'#875327','Redação':'#a52b3c','Matemática':'#1361bd','Física':'#087eb5','Química':'#9634bd','Biologia':'#3d852f','História':'#ae713c','Geografia':'#387854','Filosofia':'#b85b36','Sociologia':'#757c42','Inglês':'#c63c46','Arte':'#a03799','Educação Física':'#a88a21'};
+ if(g===3&&themes[card.querySelector('strong').textContent]){apply(themes[card.querySelector('strong').textContent]);return}
  const sample=()=>{try{if(paletteCache.has(img.src)){apply(paletteCache.get(img.src));return}const c=document.createElement('canvas');c.width=120;c.height=40;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,img.naturalHeight*.19,img.naturalWidth,img.naturalHeight*.15,0,0,120,40);const pixels=ctx.getImageData(0,0,120,40).data,bins=new Map();for(let i=0;i<pixels.length;i+=4){const [r,g,b]=pixels.slice(i,i+3),hi=Math.max(r,g,b),lo=Math.min(r,g,b);if(hi-lo<55||hi<75||hi>245&&lo>170)continue;const key=[r,g,b].map(v=>Math.round(v/32)*32).join(',');bins.set(key,(bins.get(key)||0)+1)}const best=[...bins].sort((a,b)=>b[1]-a[1])[0];if(best){const color='rgb('+best[0]+')';paletteCache.set(img.src,color);apply(color)}}catch(e){/* retain readable blue when sampling is unavailable */}};
  if(img.complete&&img.naturalWidth)sample();else img.addEventListener('load',sample,{once:true});
 }
