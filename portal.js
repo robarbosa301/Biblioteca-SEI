@@ -3,10 +3,11 @@ const art='assets/portal/entrada-sei.png';
 const oldRender=render;
 const header=document.querySelector('body>header');
 header.innerHTML='<a class="portal-brand" href="#" aria-label="Biblioteca Digital SEI — início"><img src="'+art+'" alt="SEI Incentivo. Aqui se faz educação com qualidade. Biblioteca Digital SEI."></a>';
-const labels=['Fundamental I — 1º ao 5º ano','Fundamental II — 6º ao 9º ano','Ensino Médio — 1º e 2º ano','Convênio — 3º ano do Ensino Médio','Pré-vestibular'];
+function seriesLabel(year,group=g){return group===2?parseInt(year)+'ª série':group===3?'3ª série (Convênio)':year}
+const labels=['Fundamental I — 1º ao 5º ano','Fundamental II — 6º ao 9º ano','Ensino Médio — 1ª e 2ª série','3ª série (Convênio)','Pré-vestibular'];
 const home=document.createElement('section');home.className='portal-home';home.setAttribute('aria-label','Biblioteca Digital SEI — materiais da escola');
 home.innerHTML='<img class="portal-art" src="'+art+'" alt="Mascote e logomarca SEI. Aqui se faz educação com qualidade. Biblioteca Digital SEI. Materiais da escola."><div class="brand-shimmer" aria-hidden="true"></div><div class="mascot-motion" aria-hidden="true"></div><button class="motion-toggle" aria-pressed="false">Pausar animações</button>';
-labels.forEach((label,i)=>{const b=document.createElement('button');b.className='portal-entry entry-'+i;b.setAttribute('aria-label',label);b.innerHTML='<span class="sr-only">'+label+'</span>';b.onclick=()=>go(i,null,null);home.append(b)});
+labels.forEach((label,i)=>{const b=document.createElement('button');b.className='portal-entry entry-'+i;b.setAttribute('aria-label',label);b.innerHTML='<span class="sr-only">'+label+'</span>';if(i===2||i===3){const label=document.createElement('span');label.className='series-home-label';label.textContent=i===2?'1ª e 2ª série':'3ª série (Convênio)';b.append(label)}b.onclick=()=>go(i,null,null);home.append(b)});
 header.after(home);
 const wrap=document.querySelector('main');
 const back=document.createElement('button');back.className='back-button';back.textContent='← Voltar';back.onclick=()=>s!==null?go(g,y,null):y!==null?go(g,null,null):go(null,null,null);crumb.before(back);
@@ -14,8 +15,8 @@ const search=document.createElement('input');search.className='subject-search';s
 search.oninput=()=>{const q=search.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();for(const card of content.children)card.hidden=!card.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q)};
 const dialog=document.createElement('dialog');dialog.className='image-dialog';dialog.innerHTML='<form method="dialog"><button aria-label="Fechar ampliação">Fechar ×</button></form><img alt="Folha ampliada">';document.body.append(dialog);dialog.onclick=e=>{if(e.target===dialog)dialog.close()};
 function path(subject,year){return g===4?'assets/pre-vestibular/'+seiPages[subject]+'.jpeg':seiPublishedPages[g+'|'+year+'|'+subject]}
-function go(group,year,subject){g=group;y=year;s=subject;const params=new URLSearchParams();if(g!==null)params.set('etapa',g);if(y!==null)params.set('turma',y);if(s!==null)params.set('disciplina',s);history.pushState(null,'','#'+params);render();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
-function fromHash(){const p=new URLSearchParams(location.hash.slice(1));const n=Number(p.get('etapa'));g=p.has('etapa')&&groups[n]?n:null;y=g!==null&&groups[g].years.includes(p.get('turma'))?p.get('turma'):null;s=y!==null&&groups[g].subjects.includes(p.get('disciplina'))?p.get('disciplina'):null;render()}
+function go(group,year,subject){g=group;y=year;s=subject;const params=new URLSearchParams();if(g!==null)params.set('etapa',g);if(y!==null)params.set('turma',seriesLabel(y));if(s!==null)params.set('disciplina',s);history.pushState(null,'','#'+params);render();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
+function fromHash(){const p=new URLSearchParams(location.hash.slice(1));const n=Number(p.get('etapa'));g=p.has('etapa')&&groups[n]?n:null;y=g!==null?groups[g].years.find(year=>year===p.get('turma')||seriesLabel(year,g)===p.get('turma'))??null:null;s=y!==null&&groups[g].subjects.includes(p.get('disciplina'))?p.get('disciplina'):null;render()}
 window.addEventListener('popstate',fromHash);
 header.querySelector('a').onclick=e=>{e.preventDefault();go(null,null,null)};
 let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -30,6 +31,16 @@ function navigation(){
  crumb.replaceChildren();crumb.hidden=true;
 }
 
+function applySeriesCorrection(img){
+ img.alt=s+' • '+seriesLabel(y)+' • '+groups[g].name;
+ const special=['matematica','quimica','fisica','biologia','lingua-portuguesa'].some(slug=>img.src.endsWith('/'+slug+'.png'));
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 1024 1536');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('series-correction');svg.setAttribute('aria-hidden','true');
+ const add=(tag,attrs,value)=>{const n=document.createElementNS(svg.namespaceURI,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(value)n.textContent=value;svg.append(n)};
+ const label=g===3?'3ª SÉRIE':parseInt(y)+'ª SÉRIE';
+ if(special){add('rect',{x:260,y:42,width:237,height:135,rx:12,fill:'#041533',stroke:'#0eb9e9','stroke-width':4});add('text',{x:379,y:101,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':900,'font-size':38},label);add('text',{x:379,y:143,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':800,'font-size':23},g===3?'CONVÊNIO':'ENSINO MÉDIO')}
+ else{add('rect',{x:504,y:110,width:326,height:75,rx:4,fill:'#fff'});add('text',{x:512,y:140,fill:'#121b24','font-family':'Arial,sans-serif','font-weight':800,'font-size':28},g===3?'Convênio — 3ª série':parseInt(y)+'ª série — Ensino');add('text',{x:512,y:169,fill:'#121b24','font-family':'Arial,sans-serif','font-weight':800,'font-size':28},g===3?'do Ensino Médio':'Médio')}
+ img.closest('article').classList.add('series-sheet');img.after(svg);
+}
 const coverRoot='assets/portal/covers/';
 const subjectCovers={'Língua Portuguesa':'portugues','Português':'portugues','Matemática':'matematica','Ciências':'ciencias','História':'historia','Geografia':'geografia','Arte':'arte','Artes':'arte','Educação Física':'educacao-fisica','Ensino Religioso':'religiao','Inglês':'ingles','Literatura':'literatura','Redação':'redacao','Física':'fisica','Química':'quimica','Biologia':'biologia','Filosofia':'filosofia','Sociologia':'sociologia'};
 function yearArt(year,index){
@@ -41,7 +52,7 @@ function card(label,description,src,fn){
  const im=document.createElement('img');im.src=y===null?src:coverRoot+'subject-'+subjectCovers[label]+'.webp';im.alt='';im.loading='lazy';im.decoding='async';
  const info=document.createElement('span');info.className='cover-copy';
  const strong=document.createElement('strong');strong.textContent=label;
- const context=document.createElement('small');context.textContent=y===null?groups[g].name:groups[g].name+' · '+y;
+ const context=document.createElement('small');context.textContent=y===null?groups[g].name:groups[g].name+' · '+(g===3?'3ª série':seriesLabel(y));
  const arrow=document.createElement('span');arrow.className='cover-arrow';arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
  const action=document.createElement('span');action.className='cover-action';action.textContent=y===null?description:'Abrir folha';
  info.append(strong);b.append(im,info,arrow,action);b.onclick=fn;b.setAttribute('aria-label',label+' — '+context.textContent+' — '+description);content.append(b);
@@ -49,9 +60,9 @@ function card(label,description,src,fn){
 }
 
 render=function(){const atHome=g===null;document.body.classList.toggle('at-home',atHome);home.hidden=!atHome;header.hidden=atHome;wrap.hidden=atHome;search.hidden=true;search.value='';if(atHome)return;
-if(s!==null){oldRender();navigation();const img=content.querySelector('.original-page');if(img){const b=document.createElement('button');b.textContent='Ampliar folha';b.onclick=()=>{dialog.querySelector('img').src=img.src;dialog.querySelector('img').alt=img.alt;dialog.showModal()};content.querySelector('.actions').prepend(b);img.onclick=b.onclick;img.style.cursor='zoom-in'}return;}
+if(s!==null){oldRender();navigation();const img=content.querySelector('.original-page');if(img){if(g===2||g===3)applySeriesCorrection(img);const b=document.createElement('button');b.textContent='Ampliar folha';b.onclick=()=>{const enlarged=img.closest('article').cloneNode(true);dialog.replaceChildren(dialog.querySelector('form'),enlarged);dialog.showModal()};content.querySelector('.actions').prepend(b);img.onclick=b.onclick;img.style.cursor='zoom-in'}return;}
 navigation();content.replaceChildren();content.className='portal-grid';
-if(y===null){title.textContent=groups[g].name;groups[g].years.forEach((year,index)=>card(g===3?'Convênio · '+year:year,groups[g].subjects.length+' disciplinas',yearArt(year,index),()=>go(g,year,null)))}else{title.textContent=groups[g].name+' · '+y;search.hidden=false;groups[g].subjects.forEach(subject=>card(subject==='Artes'?'Arte':subject,'Abrir atividade',path(subject,y),()=>go(g,y,subject)))}
+if(y===null){title.textContent=groups[g].name;groups[g].years.forEach((year,index)=>card(seriesLabel(year),groups[g].subjects.length+' disciplinas',yearArt(year,index),()=>go(g,year,null)))}else{title.textContent=groups[g].name+' · '+(g===3?'3ª série':seriesLabel(y));search.hidden=false;groups[g].subjects.forEach(subject=>card(subject==='Artes'?'Arte':subject,'Abrir atividade',path(subject,y),()=>go(g,y,subject)))}
 };
 document.querySelector('body>footer').textContent='Sistema de Ensino Incentivo • São Miguel do Guamá — PA';fromHash();
 })();
