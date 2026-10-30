@@ -24,3 +24,32 @@
 @media print{.journey{display:none!important}}
 
 .subject-card>span{background:color-mix(in srgb,var(--sheet-color) 18%,white);color:#12304c;border-top-width:5px}.subject-card small{color:#12304c;opacity:.85}.subject-card strong{font-weight:800}
+
+/* Original illustrated covers, matching the approved SEI entry artwork. */
+.portal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.portal-card.illustrated-cover{position:relative;isolation:isolate;aspect-ratio:1.6;min-height:0;border:2px solid #39d7ff;border-radius:20px;background:#06377b;color:white;box-shadow:inset 0 0 0 2px #99ecff66,0 6px 20px #07468130;overflow:hidden;transition:transform .24s,box-shadow .24s}
+.portal-card.illustrated-cover:before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#01194d77 0%,transparent 62%),linear-gradient(90deg,#021a4b55,transparent 80%);pointer-events:none}
+.portal-card.illustrated-cover img{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;transition:transform .45s ease}
+.portal-card.illustrated-cover .cover-copy{position:absolute;z-index:2;inset:0 0 auto;padding:22px 64px 16px 22px;text-shadow:0 2px 6px #001737;display:block;border:0;background:transparent;min-height:0}
+.illustrated-cover .cover-copy strong{font-family:Arial,sans-serif;font-weight:900;font-size:clamp(24px,3.2vw,38px);line-height:1.04;letter-spacing:-.7px;color:#fff;overflow-wrap:normal}
+.illustrated-cover .cover-copy small{font-size:clamp(12px,1.5vw,16px);line-height:1.25;font-weight:700;color:#8df2ff;margin-top:9px}
+.portal-card.illustrated-cover .cover-arrow{position:absolute;z-index:3;top:18px;right:16px;width:42px;height:42px;padding:0;display:grid;place-items:center;border-radius:50%;border:2px solid #9eefff;background:linear-gradient(140deg,#04b8ee,#0844b3);box-shadow:0 0 12px #22dbff99,inset 0 0 7px #b7f8ff;font-size:29px;font-weight:bold;transition:transform .25s}
+.portal-card.illustrated-cover .cover-action{position:absolute;z-index:2;bottom:12px;left:16px;padding:6px 10px;border:1px solid #b3edff66;border-radius:20px;background:#03214dc9;color:#e6faff;font-size:11px;font-weight:600;min-height:0}
+.portal-card.illustrated-cover:hover{transform:translateY(-5px);box-shadow:0 0 0 2px #8ceaff,0 12px 28px #006da646}
+.illustrated-cover:hover img{transform:scale(1.035)}.illustrated-cover:hover .cover-arrow{transform:translateX(3px)}
+.portal-card.illustrated-cover:active{transform:scale(.98)}
+@media(max-width:600px){
+ .portal-grid{gap:12px}
+ .portal-card.illustrated-cover{aspect-ratio:1.12;border-radius:15px}
+ .portal-card.illustrated-cover img{object-position:65% center}
+ .portal-card.illustrated-cover .cover-copy{padding:14px 31px 12px 11px}
+ .illustrated-cover .cover-copy strong{font-size:clamp(19px,5vw,29px);line-height:1.08;letter-spacing:-.45px}
+ .illustrated-cover .cover-copy small{font-size:10px;margin-top:7px;max-width:120px}
+ .portal-card.illustrated-cover .cover-arrow{width:25px;height:25px;top:12px;right:7px;font-size:19px;border-width:1.5px}
+ .portal-card.illustrated-cover .cover-action{bottom:8px;left:8px;font-size:9px;padding:4px 7px}
+}
+@media(max-width:350px){.portal-grid{grid-template-columns:1fr}.portal-card.illustrated-cover{aspect-ratio:1.6}}
+
+
+/* Single compact navigation, without repeated steps or breadcrumbs. */
+.journey{padding:8px;gap:8px;margin-bottom:16px;border-radius:15px}.journey .journey-home{margin-left:auto}.journey .journey-home:only-child{margin-left:0}.journey-steps,#crumb{display:none!important}.wrap h2{margin:16px 0 22px}.sheet-switcher{padding-top:8px}
