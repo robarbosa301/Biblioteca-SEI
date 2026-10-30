@@ -32,27 +32,12 @@ function navigation(){
 }
 
 function applySeriesCorrection(img){
- img.alt=s+' • '+seriesLabel(y)+' • '+groups[g].name;
- const special=['matematica','quimica','fisica','biologia','lingua-portuguesa'].some(slug=>img.src.endsWith('/'+slug+'.png'));
- const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 1024 1536');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('series-correction');svg.setAttribute('aria-hidden','true');
- const add=(tag,attrs,value)=>{const n=document.createElementNS(svg.namespaceURI,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(value)n.textContent=value;svg.append(n)};
- const label=g===3?'3ª SÉRIE':parseInt(y)+'ª SÉRIE';
- if(special){add('rect',{x:260,y:42,width:237,height:180,rx:12,fill:'#041533',stroke:'#0eb9e9','stroke-width':4});add('text',{x:379,y:113,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':900,'font-size':38},label);add('text',{x:379,y:164,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':800,'font-size':23},g===3?'CONVÊNIO':'ENSINO MÉDIO')}
- else{
-  const slug=img.src.split('/').pop().replace('.png','');
-  const key=(g===3?'3':parseInt(y))+'-'+slug;
-  const patch=seiCleanHeaders[key];
-  if(patch){
-   const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
-   const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='patch-edge';blur.setAttribute('x','-10%');blur.setAttribute('y','-15%');blur.setAttribute('width','120%');blur.setAttribute('height','130%');
-   const feather=document.createElementNS(svg.namespaceURI,'feGaussianBlur');feather.setAttribute('stdDeviation','3');blur.append(feather);defs.append(blur);
-   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='patch-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','500');mask.setAttribute('y','83');mask.setAttribute('width','315');mask.setAttribute('height','90');
-   const area=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:502,y:85,width:311,height:86,fill:'#fff',filter:'url(#patch-edge)'}))area.setAttribute(k,v);mask.append(area);defs.append(mask);
-   const clean=document.createElementNS(svg.namespaceURI,'image');clean.setAttribute('href',patch);clean.setAttribute('x','500');clean.setAttribute('y','83');clean.setAttribute('width','315');clean.setAttribute('height','90');clean.setAttribute('mask','url(#patch-mask)');svg.append(clean);
-  }
-  add('text',{x:509,y:139,fill:'#111820',stroke:'#f9f0e4','stroke-width':1.5,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':800,'font-size':26,textLength:286,lengthAdjust:'spacingAndGlyphs'},g===3?'3ª série — Convênio':parseInt(y)+'ª série — Ensino Médio');
- }
- add('rect',{x:27,y:1472,width:84,height:33,fill:'#090915'});add('text',{x:30,y:1497,fill:'#fff','font-family':'Arial,sans-serif','font-weight':700,'font-size':21},g===3?'3ª série':parseInt(y)+'ª série');
+ const c=seiHeaderConfig(g,y,s);
+ img.alt=s+' • '+c.label+' • '+groups[g].name;
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ svg.setAttribute('viewBox','0 0 1024 1536');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('series-correction');svg.setAttribute('aria-hidden','true');
+ svg.innerHTML=seiHeaderMarkup(g,y,s);
+ if(g===2||g===3){const rect=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:27,y:1472,width:84,height:33,fill:'#090915'}))rect.setAttribute(k,v);svg.append(rect);const text=document.createElementNS(svg.namespaceURI,'text');for(const [k,v] of Object.entries({x:30,y:1497,fill:'#fff','font-family':'Arial,sans-serif','font-weight':700,'font-size':21}))text.setAttribute(k,v);text.textContent=g===3?'3ª série':parseInt(y)+'ª série';svg.append(text)}
  img.closest('article').classList.add('series-sheet');img.after(svg);
 }
 const coverRoot='assets/portal/covers/';
@@ -74,7 +59,7 @@ function card(label,description,src,fn){
 }
 
 render=function(){const atHome=g===null;document.body.classList.toggle('at-home',atHome);home.hidden=!atHome;header.hidden=atHome;wrap.hidden=atHome;search.hidden=true;search.value='';if(atHome)return;
-if(s!==null){oldRender();navigation();const img=content.querySelector('.original-page');if(img){if(g===2||g===3)applySeriesCorrection(img);const actions=content.querySelector('.actions');const b=document.createElement('button');b.textContent='Ampliar folha';b.onclick=()=>{const enlarged=img.closest('article').cloneNode(true);dialog.replaceChildren(dialog.querySelector('form'),enlarged);dialog.showModal()};actions.prepend(b);img.onclick=b.onclick;img.style.cursor='zoom-in';const word=document.createElement('button');word.className='blank-word';word.textContent='↓ Modelo em branco (Word)';word.title='Folha editável com cabeçalho SEI e oito faixas numeradas';word.onclick=async()=>{word.disabled=true;word.textContent='Preparando Word…';try{await downloadBlankSeiDocx({group:g,year:y,subject:s,source:img.getAttribute('src')})}catch(error){alert('Não foi possível preparar o Word: '+error.message)}finally{word.disabled=false;word.textContent='↓ Modelo em branco (Word)'}};actions.append(word);const hint=document.createElement('p');hint.className='word-hint';hint.textContent='Modelo editável: escreva suas questões abaixo das faixas numeradas e imprima pelo Word.';actions.after(hint)}return;}
+if(s!==null){oldRender();navigation();const img=content.querySelector('.original-page');if(img){applySeriesCorrection(img);const actions=content.querySelector('.actions');const b=document.createElement('button');b.textContent='Ampliar folha';b.onclick=()=>{const enlarged=img.closest('article').cloneNode(true);dialog.replaceChildren(dialog.querySelector('form'),enlarged);dialog.showModal()};actions.prepend(b);img.onclick=b.onclick;img.style.cursor='zoom-in';const word=document.createElement('button');word.className='blank-word';word.textContent='↓ Modelo em branco (Word)';word.title='Folha editável com cabeçalho SEI e oito faixas numeradas';word.onclick=async()=>{word.disabled=true;word.textContent='Preparando Word…';try{await downloadBlankSeiDocx({group:g,year:y,subject:s,source:img.getAttribute('src')})}catch(error){alert('Não foi possível preparar o Word: '+error.message)}finally{word.disabled=false;word.textContent='↓ Modelo em branco (Word)'}};actions.append(word);const hint=document.createElement('p');hint.className='word-hint';hint.textContent='Modelo editável: escreva suas questões abaixo das faixas numeradas e imprima pelo Word.';actions.after(hint)}return;}
 navigation();content.replaceChildren();content.className='portal-grid';
 if(y===null){title.textContent=groups[g].name;groups[g].years.forEach((year,index)=>card(seriesLabel(year),groups[g].subjects.length+' disciplinas',yearArt(year,index),()=>go(g,year,null)))}else{title.textContent=groups[g].name+' · '+(g===3?'3ª série':seriesLabel(y));search.hidden=false;groups[g].subjects.forEach(subject=>card(subject==='Artes'?'Arte':subject,'Abrir atividade',path(subject,y),()=>go(g,y,subject)))}
 };
