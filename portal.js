@@ -39,15 +39,17 @@ function applySeriesCorrection(img){
  const label=g===3?'3ª SÉRIE':parseInt(y)+'ª SÉRIE';
  if(special){add('rect',{x:260,y:42,width:237,height:180,rx:12,fill:'#041533',stroke:'#0eb9e9','stroke-width':4});add('text',{x:379,y:113,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':900,'font-size':38},label);add('text',{x:379,y:164,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':800,'font-size':23},g===3?'CONVÊNIO':'ENSINO MÉDIO')}
  else{
-  // The old grade is part of the printed artwork. Reuse its own parchment/scene
-  // immediately above the lettering, feathering the edge so there is no white box.
-  const top=88,height=78,offset=86;
+  // The old grade is part of the printed artwork. Soften that small portion of
+  // the original scene, then draw the corrected lettering without a solid box.
+  const top=88,height=78;
   const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
   const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='series-feather';blur.setAttribute('x','-10%');blur.setAttribute('y','-20%');blur.setAttribute('width','120%');blur.setAttribute('height','140%');
   const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','11');blur.append(gaussian);defs.append(blur);
+  const soften=document.createElementNS(svg.namespaceURI,'filter');soften.id='series-soften';soften.setAttribute('filterUnits','userSpaceOnUse');soften.setAttribute('x','490');soften.setAttribute('y','70');soften.setAttribute('width','340');soften.setAttribute('height','110');
+  const softenBlur=document.createElementNS(svg.namespaceURI,'feGaussianBlur');softenBlur.setAttribute('stdDeviation','24');soften.append(softenBlur);defs.append(soften);
   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='series-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','497');mask.setAttribute('y',String(top-8));mask.setAttribute('width','323');mask.setAttribute('height',String(height+16));
   const windowRect=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:503,y:top,width:310,height,fill:'#fff',filter:'url(#series-feather)'}))windowRect.setAttribute(k,v);mask.append(windowRect);defs.append(mask);
-  const scene=document.createElementNS(svg.namespaceURI,'image');scene.setAttribute('href',img.currentSrc||img.src);scene.setAttribute('x','0');scene.setAttribute('y',String(offset));scene.setAttribute('width','1024');scene.setAttribute('height','1536');scene.setAttribute('mask','url(#series-mask)');svg.append(scene);
+  const scene=document.createElementNS(svg.namespaceURI,'image');scene.setAttribute('href',img.currentSrc||img.src);scene.setAttribute('x','0');scene.setAttribute('y','0');scene.setAttribute('width','1024');scene.setAttribute('height','1536');scene.setAttribute('filter','url(#series-soften)');scene.setAttribute('mask','url(#series-mask)');svg.append(scene);
   const ink={fill:'#111820',stroke:'#f8efe3','stroke-width':2.5,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':800};
   add('text',{x:511,y:118,...ink,'font-size':28},g===3?'3ª série':parseInt(y)+'ª série');
   add('text',{x:511,y:147,...ink,'font-size':25},g===3?'Convênio':'Ensino Médio');
