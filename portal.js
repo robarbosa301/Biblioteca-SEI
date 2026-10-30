@@ -45,7 +45,7 @@ function applySeriesCorrection(img){
   const top=twoLine?88:107,height=twoLine?78:48,offset=twoLine?86:57;
   const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
   const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='series-feather';blur.setAttribute('x','-10%');blur.setAttribute('y','-20%');blur.setAttribute('width','120%');blur.setAttribute('height','140%');
-  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','3');blur.append(gaussian);defs.append(blur);
+  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','11');blur.append(gaussian);defs.append(blur);
   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='series-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','497');mask.setAttribute('y',String(top-8));mask.setAttribute('width','323');mask.setAttribute('height',String(height+16));
   const windowRect=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:503,y:top,width:310,height,fill:'#fff',filter:'url(#series-feather)'}))windowRect.setAttribute(k,v);mask.append(windowRect);defs.append(mask);
   const scene=document.createElementNS(svg.namespaceURI,'image');scene.setAttribute('href',img.currentSrc||img.src);scene.setAttribute('x','0');scene.setAttribute('y',String(offset));scene.setAttribute('width','1024');scene.setAttribute('height','1536');scene.setAttribute('mask','url(#series-mask)');svg.append(scene);
