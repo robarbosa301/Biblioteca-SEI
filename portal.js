@@ -40,15 +40,15 @@ function applySeriesCorrection(img){
  if(special){add('rect',{x:260,y:42,width:237,height:180,rx:12,fill:'#041533',stroke:'#0eb9e9','stroke-width':4});add('text',{x:379,y:113,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':900,'font-size':38},label);add('text',{x:379,y:164,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':800,'font-size':23},g===3?'CONVÊNIO':'ENSINO MÉDIO')}
  else{
   const slug=img.src.split('/').pop().replace('.png','');
-  const key=g===2&&parseInt(y)===2&&['historia','filosofia'].includes(slug)?slug+'-2':slug;
+  const key=(g===3?'3':parseInt(y))+'-'+slug;
   const patch=seiCleanHeaders[key];
   if(patch){
    const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
    const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='patch-edge';blur.setAttribute('x','-10%');blur.setAttribute('y','-15%');blur.setAttribute('width','120%');blur.setAttribute('height','130%');
    const feather=document.createElementNS(svg.namespaceURI,'feGaussianBlur');feather.setAttribute('stdDeviation','3');blur.append(feather);defs.append(blur);
-   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='patch-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','500');mask.setAttribute('y','83');mask.setAttribute('width','315');mask.setAttribute('height','84');
-   const area=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:503,y:86,width:309,height:78,fill:'#fff',filter:'url(#patch-edge)'}))area.setAttribute(k,v);mask.append(area);defs.append(mask);
-   const clean=document.createElementNS(svg.namespaceURI,'image');clean.setAttribute('href',patch);clean.setAttribute('x','500');clean.setAttribute('y','83');clean.setAttribute('width','315');clean.setAttribute('height','84');clean.setAttribute('mask','url(#patch-mask)');svg.append(clean);
+   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='patch-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','500');mask.setAttribute('y','83');mask.setAttribute('width','315');mask.setAttribute('height','90');
+   const area=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:502,y:85,width:311,height:86,fill:'#fff',filter:'url(#patch-edge)'}))area.setAttribute(k,v);mask.append(area);defs.append(mask);
+   const clean=document.createElementNS(svg.namespaceURI,'image');clean.setAttribute('href',patch);clean.setAttribute('x','500');clean.setAttribute('y','83');clean.setAttribute('width','315');clean.setAttribute('height','90');clean.setAttribute('mask','url(#patch-mask)');svg.append(clean);
   }
   add('text',{x:509,y:139,fill:'#111820',stroke:'#f9f0e4','stroke-width':1.5,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':800,'font-size':26,textLength:286,lengthAdjust:'spacingAndGlyphs'},g===3?'3ª série — Convênio':parseInt(y)+'ª série — Ensino Médio');
  }
