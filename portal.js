@@ -39,18 +39,18 @@ function applySeriesCorrection(img){
  const label=g===3?'3ª SÉRIE':parseInt(y)+'ª SÉRIE';
  if(special){add('rect',{x:260,y:42,width:237,height:180,rx:12,fill:'#041533',stroke:'#0eb9e9','stroke-width':4});add('text',{x:379,y:113,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':900,'font-size':38},label);add('text',{x:379,y:164,'text-anchor':'middle',fill:'#fff','font-family':'Arial,sans-serif','font-weight':800,'font-size':23},g===3?'CONVÊNIO':'ENSINO MÉDIO')}
  else{
-  // The old grade is baked into the art. Replace only its dark ink pixels,
-  // retaining the rest of the original scene and the SEI mark at the right.
+  // The old grade is part of the printed artwork. Soften that small portion of
+  // the original scene, then draw the corrected lettering without a solid box.
   const doubleLine=['História','Filosofia','Sociologia','Arte','Educação Física'].includes(s);
-  const top=g===3?87:doubleLine?90:113,height=g===3?77:doubleLine?71:37;
+  const top=g===3?83:doubleLine?86:105,height=g===3?89:doubleLine?80:49;
   const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
-  const inkFilter=document.createElementNS(svg.namespaceURI,'filter');inkFilter.id='old-ink';inkFilter.setAttribute('filterUnits','userSpaceOnUse');inkFilter.setAttribute('x','500');inkFilter.setAttribute('y',String(top));inkFilter.setAttribute('width','310');inkFilter.setAttribute('height',String(height));
-  const matrix=document.createElementNS(svg.namespaceURI,'feColorMatrix');matrix.setAttribute('type','matrix');matrix.setAttribute('values','0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -0.333 -0.333 -0.333 0 1');inkFilter.append(matrix);
-  const transfer=document.createElementNS(svg.namespaceURI,'feComponentTransfer');const alpha=document.createElementNS(svg.namespaceURI,'feFuncA');alpha.setAttribute('type','discrete');alpha.setAttribute('tableValues','0 0 0 0 0 0 0 1 1 1');transfer.append(alpha);inkFilter.append(transfer);
-  const dilate=document.createElementNS(svg.namespaceURI,'feMorphology');dilate.setAttribute('operator','dilate');dilate.setAttribute('radius','1.3');inkFilter.append(dilate);defs.append(inkFilter);
-  const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='series-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('mask-type','alpha');mask.setAttribute('x','500');mask.setAttribute('y',String(top));mask.setAttribute('width','310');mask.setAttribute('height',String(height));
-  const inkImage=document.createElementNS(svg.namespaceURI,'image');inkImage.setAttribute('href',img.currentSrc||img.src);inkImage.setAttribute('x','0');inkImage.setAttribute('y','0');inkImage.setAttribute('width','1024');inkImage.setAttribute('height','1536');inkImage.setAttribute('filter','url(#old-ink)');mask.append(inkImage);defs.append(mask);
-  const scene=document.createElementNS(svg.namespaceURI,'image');scene.setAttribute('href',img.currentSrc||img.src);scene.setAttribute('x','0');scene.setAttribute('y','80');scene.setAttribute('width','1024');scene.setAttribute('height','1536');scene.setAttribute('mask','url(#series-mask)');svg.append(scene);
+  const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='series-feather';blur.setAttribute('x','-10%');blur.setAttribute('y','-20%');blur.setAttribute('width','120%');blur.setAttribute('height','140%');
+  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','2');blur.append(gaussian);defs.append(blur);
+  const soften=document.createElementNS(svg.namespaceURI,'filter');soften.id='series-soften';soften.setAttribute('filterUnits','userSpaceOnUse');soften.setAttribute('x','475');soften.setAttribute('y','25');soften.setAttribute('width','365');soften.setAttribute('height','185');
+  const softenBlur=document.createElementNS(svg.namespaceURI,'feGaussianBlur');softenBlur.setAttribute('stdDeviation','46');soften.append(softenBlur);defs.append(soften);
+  const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='series-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','497');mask.setAttribute('y',String(top-8));mask.setAttribute('width','323');mask.setAttribute('height',String(height+16));
+  const windowRect=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:503,y:top,width:310,height,fill:'#fff',filter:'url(#series-feather)'}))windowRect.setAttribute(k,v);mask.append(windowRect);defs.append(mask);
+  const scene=document.createElementNS(svg.namespaceURI,'image');scene.setAttribute('href',img.currentSrc||img.src);scene.setAttribute('x','0');scene.setAttribute('y','0');scene.setAttribute('width','1024');scene.setAttribute('height','1536');scene.setAttribute('filter','url(#series-soften)');scene.setAttribute('mask','url(#series-mask)');svg.append(scene);
   const ink={fill:'#111820',stroke:'#f8efe3','stroke-width':2.5,'paint-order':'stroke','font-family':'Arial,sans-serif','font-weight':800};
   add('text',{x:511,y:118,...ink,'font-size':28},g===3?'3ª série':parseInt(y)+'ª série');
   add('text',{x:511,y:147,...ink,'font-size':25},g===3?'Convênio':'Ensino Médio');
