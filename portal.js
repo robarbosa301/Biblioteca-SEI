@@ -41,10 +41,11 @@ function applySeriesCorrection(img){
  else{
   // The old grade is part of the printed artwork. Soften that small portion of
   // the original scene, then draw the corrected lettering without a solid box.
-  const top=83,height=82;
+  const doubleLine=['História','Filosofia','Sociologia','Arte','Educação Física'].includes(s);
+  const top=g===3?83:doubleLine?86:105,height=g===3?89:doubleLine?80:49;
   const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
   const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='series-feather';blur.setAttribute('x','-10%');blur.setAttribute('y','-20%');blur.setAttribute('width','120%');blur.setAttribute('height','140%');
-  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','5');blur.append(gaussian);defs.append(blur);
+  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','2');blur.append(gaussian);defs.append(blur);
   const soften=document.createElementNS(svg.namespaceURI,'filter');soften.id='series-soften';soften.setAttribute('filterUnits','userSpaceOnUse');soften.setAttribute('x','475');soften.setAttribute('y','25');soften.setAttribute('width','365');soften.setAttribute('height','185');
   const softenBlur=document.createElementNS(svg.namespaceURI,'feGaussianBlur');softenBlur.setAttribute('stdDeviation','46');soften.append(softenBlur);defs.append(soften);
   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='series-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','497');mask.setAttribute('y',String(top-8));mask.setAttribute('width','323');mask.setAttribute('height',String(height+16));
