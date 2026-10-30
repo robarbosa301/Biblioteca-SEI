@@ -49,7 +49,7 @@ function yearArt(year,index){
 }
 function card(label,description,src,fn){
  const b=document.createElement('button');b.className='portal-card illustrated-cover '+(y===null?'year-cover':'subject-cover');
- const im=document.createElement('img');im.src=y===null?src:coverRoot+'subject-'+subjectCovers[label]+'.webp';im.alt='';im.loading='lazy';im.decoding='async';
+ const im=document.createElement('img');im.src=y===null?src:coverRoot+'subject-'+subjectCovers[label]+'.webp'+(label==='Física'?'?v=2':'');im.alt='';im.loading='lazy';im.decoding='async';
  const info=document.createElement('span');info.className='cover-copy';
  const strong=document.createElement('strong');strong.textContent=label;
  const context=document.createElement('small');context.textContent=y===null?groups[g].name:groups[g].name+' · '+(g===3?'3ª série':seriesLabel(y));
