@@ -34,11 +34,7 @@ function navigation(){
 function applySeriesCorrection(img){
  const c=seiHeaderConfig(g,y,s);
  img.alt=s+' • '+c.label+' • '+groups[g].name;
- const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
- svg.setAttribute('viewBox','0 0 1024 1536');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('series-correction');svg.setAttribute('aria-hidden','true');
- svg.innerHTML=seiHeaderMarkup(g,y,s);
- if(g===2||g===3){const rect=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:27,y:1472,width:84,height:33,fill:'#090915'}))rect.setAttribute(k,v);svg.append(rect);const text=document.createElementNS(svg.namespaceURI,'text');for(const [k,v] of Object.entries({x:30,y:1497,fill:'#fff','font-family':'Arial,sans-serif','font-weight':700,'font-size':21}))text.setAttribute(k,v);text.textContent=g===3?'3ª série':parseInt(y)+'ª série';svg.append(text)}
- img.closest('article').classList.add('series-sheet');img.after(svg);
+ // As folhas já trazem o cabeçalho no padrão de cada segmento; não sobrepor arte.
 }
 const coverRoot='assets/portal/covers/';
 const subjectCovers={'Língua Portuguesa':'portugues','Português':'portugues','Matemática':'matematica','Ciências':'ciencias','História':'historia','Geografia':'geografia','Arte':'arte','Artes':'arte','Educação Física':'educacao-fisica','Ensino Religioso':'religiao','Inglês':'ingles','Literatura':'literatura','Redação':'redacao','Física':'fisica','Química':'quimica','Biologia':'biologia','Filosofia':'filosofia','Sociologia':'sociologia'};
