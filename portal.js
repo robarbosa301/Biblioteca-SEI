@@ -41,12 +41,12 @@ function applySeriesCorrection(img){
  else{
   // The old grade is part of the printed artwork. Soften that small portion of
   // the original scene, then draw the corrected lettering without a solid box.
-  const top=88,height=78;
+  const top=83,height=82;
   const defs=document.createElementNS(svg.namespaceURI,'defs');svg.append(defs);
   const blur=document.createElementNS(svg.namespaceURI,'filter');blur.id='series-feather';blur.setAttribute('x','-10%');blur.setAttribute('y','-20%');blur.setAttribute('width','120%');blur.setAttribute('height','140%');
-  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','11');blur.append(gaussian);defs.append(blur);
-  const soften=document.createElementNS(svg.namespaceURI,'filter');soften.id='series-soften';soften.setAttribute('filterUnits','userSpaceOnUse');soften.setAttribute('x','490');soften.setAttribute('y','70');soften.setAttribute('width','340');soften.setAttribute('height','110');
-  const softenBlur=document.createElementNS(svg.namespaceURI,'feGaussianBlur');softenBlur.setAttribute('stdDeviation','24');soften.append(softenBlur);defs.append(soften);
+  const gaussian=document.createElementNS(svg.namespaceURI,'feGaussianBlur');gaussian.setAttribute('stdDeviation','5');blur.append(gaussian);defs.append(blur);
+  const soften=document.createElementNS(svg.namespaceURI,'filter');soften.id='series-soften';soften.setAttribute('filterUnits','userSpaceOnUse');soften.setAttribute('x','475');soften.setAttribute('y','25');soften.setAttribute('width','365');soften.setAttribute('height','185');
+  const softenBlur=document.createElementNS(svg.namespaceURI,'feGaussianBlur');softenBlur.setAttribute('stdDeviation','46');soften.append(softenBlur);defs.append(soften);
   const mask=document.createElementNS(svg.namespaceURI,'mask');mask.id='series-mask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','497');mask.setAttribute('y',String(top-8));mask.setAttribute('width','323');mask.setAttribute('height',String(height+16));
   const windowRect=document.createElementNS(svg.namespaceURI,'rect');for(const [k,v] of Object.entries({x:503,y:top,width:310,height,fill:'#fff',filter:'url(#series-feather)'}))windowRect.setAttribute(k,v);mask.append(windowRect);defs.append(mask);
   const scene=document.createElementNS(svg.namespaceURI,'image');scene.setAttribute('href',img.currentSrc||img.src);scene.setAttribute('x','0');scene.setAttribute('y','0');scene.setAttribute('width','1024');scene.setAttribute('height','1536');scene.setAttribute('filter','url(#series-soften)');scene.setAttribute('mask','url(#series-mask)');svg.append(scene);
