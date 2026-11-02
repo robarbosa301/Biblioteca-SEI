@@ -1,0 +1,59 @@
+:root{--azul:#0b2a5b;--fundo:#e8eef7}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fundo);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#10121b}
+#bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 12px;background:var(--azul);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#titulo{font-weight:700;margin-right:6px}
+.grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.grp.right{margin-left:auto}
+.lbl{font-size:13px;opacity:.85}
+.b{font:inherit;font-size:14px;border:0;border-radius:8px;padding:7px 11px;background:#fff;color:var(--azul);cursor:pointer;text-decoration:none;white-space:nowrap}
+.b:hover{background:#dfe9fb}
+.b.main{background:#ffd34d}
+.b.print{background:#c9f0d5}
+.b.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6)}
+#dlg .b.ghost{color:var(--azul);border-color:#9fb3d6}
+#dica,#aviso{max-width:900px;margin:10px auto 0;padding:0 16px;text-align:center;font-size:14px;color:#244867}
+#aviso{color:#8a4b00;font-weight:600}
+#pages{display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0 60px}
+.pwrap{position:relative;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.18);background:#fff}
+.page{position:absolute;left:0;top:0;width:210mm;height:297mm;background:#fff;transform-origin:0 0;overflow:hidden}
+.frame{position:absolute;left:5mm;top:7.07mm;width:200mm;height:282.86mm;display:block;pointer-events:none;user-select:none}
+.col{position:absolute;overflow:hidden;font-family:Arial,Helvetica,sans-serif;font-size:10pt;line-height:1.15;color:#000}
+#measure{position:absolute;left:-10000px;top:0;visibility:hidden}
+.campo{position:absolute;border:0;border-bottom:1px dashed #9aa;background:transparent;font:700 7.5pt Arial,sans-serif;color:#10121b;padding:0;outline:none}
+.campo::placeholder{color:#8a8a8a;font-weight:700}
+/* conteúdo colado */
+.col>*{margin:0 0 4pt}
+.col p{margin:0 0 4pt;word-wrap:break-word;overflow-wrap:anywhere}
+.col ul,.col ol{margin:0 0 4pt;padding-left:5mm}
+.col li{margin:0 0 1pt}
+.col img{max-width:100%;height:auto;display:inline-block;vertical-align:bottom}
+.col table{width:100%;max-width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 5pt;font-size:9pt}
+.col td,.col th{border:1px solid #555;padding:1.5pt 3pt;vertical-align:top;overflow-wrap:anywhere;word-wrap:break-word}
+.col th{background:#eef2f8;font-weight:700}
+.col .sz-center{text-align:center}.col .sz-right{text-align:right}.col .sz-justify{text-align:justify}
+.col .quebra{height:0;margin:0;border-top:2px dashed #7aa7e8;position:relative}
+.col .quebra::after{content:'próxima coluna';position:absolute;right:0;top:-1px;font:9px system-ui;color:#3a6fc4;background:#fff;padding:0 3px}
+.col .falta{border:1px dashed #d08a00;background:#fff7e6;color:#8a4b00;padding:3pt;font-size:8.5pt}
+.col [data-id]{cursor:pointer;border-radius:2px}
+.col [data-id]:hover{outline:1px dashed #9cb6e6;outline-offset:1px}
+.col .on{outline:2px solid #2f6fe0!important;outline-offset:1px;background:rgba(47,111,224,.06)}
+.vazio{position:absolute;color:#9aa4b2;font:italic 11pt Arial,sans-serif;text-align:center;padding:20mm 8mm}
+dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.dh{padding:10px 14px;background:var(--azul);color:#fff;font-weight:700}.dh small{font-weight:400;opacity:.8}
+#ed{min-height:200px;max-height:65vh;overflow:auto;padding:12px 14px;font:10pt/1.15 Arial,sans-serif;outline:none}
+#ed img{max-width:100%;height:auto}#ed table{border-collapse:collapse;width:100%}#ed td,#ed th{border:1px solid #888;padding:2px 4px}
+.df{display:flex;justify-content:flex-end;gap:8px;padding:10px 14px;border-top:1px solid #dde}
+@page{size:A4;margin:0}
+@media print{
+  html,body{background:#fff}
+  .no-print,#bar,#dica,#aviso,dialog{display:none!important}
+  #pages{display:block;padding:0;gap:0}
+  .pwrap{width:210mm!important;height:297mm!important;box-shadow:none;overflow:hidden;break-after:page;page-break-after:always}
+  .pwrap:last-child{break-after:auto;page-break-after:auto}
+  .page{transform:none!important}
+  .col [data-id]{outline:none!important;background:none!important}
+  .col .quebra{border:0}.col .quebra::after,.vazio{display:none}
+  .campo{border:0}.campo::placeholder{color:transparent}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Montar folha · SEI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b2a5b">
+<link rel="stylesheet" href="montar.css?v=1">
+</head>
+<body>
+<div id="bar" class="no-print">
+  <a class="b" href="index.html" id="voltar">‹ Voltar</a>
+  <div id="titulo">Montar folha</div>
+  <div class="grp">
+    <button class="b main" id="bColar" title="Cola o que você copiou (Ctrl+V)">📋 Colar</button>
+    <button class="b" id="bWord" title="Traz todo o conteúdo de um arquivo do Word, com imagens e tabelas">📄 Importar Word</button>
+    <button class="b" id="bImg" title="Inserir uma imagem do computador ou celular">🖼 Imagem</button>
+    <button class="b" id="bTexto">✎ Texto</button>
+    <button class="b" id="bQuebra" title="O que vier depois começa na próxima coluna">⤵ Próxima coluna</button>
+    <button class="b print" id="bPrint">🖨 Imprimir / PDF</button>
+  </div>
+  <div id="sel" class="grp" hidden>
+    <span class="lbl">Item selecionado:</span>
+    <button class="b" id="sUp" title="Subir">↑</button>
+    <button class="b" id="sDown" title="Descer">↓</button>
+    <button class="b" id="sEdit">✎ Editar</button>
+    <button class="b" id="sDel">✕ Excluir</button>
+  </div>
+  <div class="grp right">
+    <button class="b ghost" id="bLimpar">Limpar folha</button>
+  </div>
+  <input type="file" id="fWord" accept=".docx" hidden>
+  <input type="file" id="fImg" accept="image/*" hidden>
+</div>
+<p id="dica" class="no-print">Copie (Ctrl+C) a questão ou o assunto do seu arquivo ou da internet e aperte <b>Ctrl+V</b> aqui. Tudo se encaixa sozinho nas duas colunas. Clique num item para subir, descer, editar ou excluir.</p>
+<p id="aviso" class="no-print" hidden></p>
+<div id="pages"></div>
+<div id="measure" aria-hidden="true"></div>
+<dialog id="dlg" class="no-print">
+  <form method="dialog">
+    <div class="dh">Editar item <small>(negrito: Ctrl+B · itálico: Ctrl+I · sublinhado: Ctrl+U)</small></div>
+    <div id="ed" contenteditable="true"></div>
+    <div class="df"><button class="b ghost" value="cancel">Cancelar</button><button class="b main" value="ok" id="dOk">Salvar</button></div>
+  </form>
+</dialog>
+<script src="assets/vendor/mammoth.browser.min.js"></script>
+<script src="montar.js?v=1"></script><script src="offline.js?v=1"></script>
+</body>
+</html>
