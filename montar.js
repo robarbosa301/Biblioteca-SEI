@@ -5,7 +5,8 @@
   const $ = s => document.querySelector(s);
   const pagesEl = $('#pages'), measure = $('#measure');
   const src = decodeURIComponent((location.hash.match(/f=([^&]+)/) || [])[1] || '');
-  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '';
+  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', identificacao = 'Revisão 01';
+  const advanced = /assets\/(pre-vestibular|ensino-medio|convenio)\//.test(src);
   const KEY = 'sei-montar:' + src;
 
   /* ---------- armazenamento (IndexedDB, com folga para imagens) ---------- */
@@ -20,7 +21,9 @@
     };
   })();
   let saveT = null;
-  const save = () => { clearTimeout(saveT); saveT = setTimeout(() => db.set(KEY, { blocks, conteudo }), 300); };
+  const persist = () => db.set(KEY, { blocks, conteudo, identificacao });
+  const save = () => { clearTimeout(saveT); saveT = setTimeout(persist, 300); };
+  addEventListener('pagehide', persist);
 
   /* ---------- limpeza do que foi colado ---------- */
   const INLINE = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'SUB', 'SUP', 'BR']);
@@ -251,8 +254,23 @@
       c.style.left = cm((geo.ul[1] * K + 0.05) * F + PSM); c.style.top = cm(OY + geo.ul[0] * K * F - 0.36); c.style.width = cm((geo.turma ? 2.6 : 3.4) * F); c.style.height = '0.34cm';
       c.oninput = () => { conteudo = c.value; save(); };
       pg.appendChild(c);
+      if (advanced) {
+        const label = document.createElement('input'); label.className = 'campo identificacao';
+        label.setAttribute('aria-label', 'Identificação da folha, por exemplo Aula 1 ou Revisão 01');
+        label.value = identificacao; label.maxLength = 32;
+        Object.assign(label.style, { left: cm(PSM + 833 * K * F), top: cm(OY + 260 * K * F), width: cm(151 * K * F), height: cm(49 * K * F) });
+        label.oninput = () => { identificacao = label.value; save(); }; pg.appendChild(label);
+      }
     }
     const cols = colBoxes(n === 0).map(b => { const d = document.createElement('div'); d.className = 'col'; Object.assign(d.style, { left: cm(b.x), top: cm(b.y), width: cm(b.w), height: cm(b.h) }); pg.appendChild(d); return d; });
+    if (advanced) {
+      const box = colBoxes(n === 0)[0];
+      const divider = document.createElement('div'); divider.className = 'column-divider'; divider.setAttribute('aria-hidden', 'true');
+      Object.assign(divider.style, { left: '10.5cm', top: cm(box.y), height: cm(box.h) }); pg.appendChild(divider);
+      const number = document.createElement('span'); number.className = 'auto-page-number';
+      number.textContent = String(n + 1).padStart(2, '0'); number.setAttribute('aria-label', 'Página ' + (n + 1));
+      Object.assign(number.style, { left: cm(PSM + 943 * K * F), top: cm(OY + 1391 * K * F), width: cm(50 * K * F), height: cm(35 * K * F) }); pg.appendChild(number);
+    }
     return { wrap, pg, cols };
   }
   const fits = col => col.scrollHeight <= col.clientHeight + 0.5;
@@ -349,7 +367,7 @@
     $('#titulo').textContent = 'Montar folha · ' + nome.charAt(0).toUpperCase() + nome.slice(1);
     const back = sessionStorage.getItem('sei-voltar'); if (back) $('#voltar').href = back;
     const saved = await db.get(KEY);
-    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
+    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; identificacao = saved.identificacao ?? 'Revisão 01'; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
     render();
   })();
   window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; } };

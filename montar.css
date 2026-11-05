@@ -22,6 +22,10 @@ html,body{margin:0;background:var(--fundo);font-family:system-ui,-apple-system,S
 #measure{position:absolute;left:-10000px;top:0;visibility:hidden}
 .campo{position:absolute;border:0;border-bottom:1px dashed #9aa;background:transparent;font:700 7.5pt Arial,sans-serif;color:#10121b;padding:0;outline:none}
 .campo::placeholder{color:#8a8a8a;font-weight:700}
+.identificacao{background:#041629;color:#fff;border:0;border-radius:3px;text-align:center;font:700 9pt Arial,sans-serif;padding:0 2px}
+.identificacao:focus{outline:2px solid #22b9ef}
+.column-divider{position:absolute;width:0;border-left:0.75pt solid #087dce;pointer-events:none}
+.auto-page-number{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:3px;background:#fff;color:#063b8c;font:700 17pt Arial,sans-serif;pointer-events:none}
 /* conteúdo colado */
 .col>*{margin:0 0 4pt}
 .col p{margin:0 0 4pt;word-wrap:break-word;overflow-wrap:anywhere}
