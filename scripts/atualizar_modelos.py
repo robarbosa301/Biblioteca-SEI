@@ -69,7 +69,8 @@ def update(path):
     for name in ['word/header1.xml', 'word/header2.xml']:
         header = E.fromstring(entries[name])
         for shape in header.xpath('.//v:rect[starts-with(@id, "SEIDynamic")]', namespaces=NS):
-            shape.getparent().remove(shape)
+            run = shape.getparent().getparent()
+            run.getparent().remove(run)
         p = header.find('w:p', NS)
         p.append(box('SEIDynamicPage', 943, 1391, 50, 35, '01', 34, '063B8C', '#FFFFFF', field=True))
         if name.endswith('header1.xml'):
