@@ -248,7 +248,9 @@
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
     const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg);
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
-    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg'); pg.appendChild(fr);
+    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg');
+    if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
+    pg.appendChild(fr);
     if (n === 0) {
       const c = document.createElement('input'); c.className = 'campo'; c.placeholder = geo.turma ? 'Digite a turma' : 'Digite o conteúdo'; c.value = conteudo;
       c.style.left = cm((geo.ul[1] * K + 0.05) * F + PSM); c.style.top = cm(OY + geo.ul[0] * K * F - 0.36); c.style.width = cm((geo.turma ? 2.6 : 3.4) * F); c.style.height = '0.34cm';
@@ -269,7 +271,8 @@
       Object.assign(divider.style, { left: '10.5cm', top: cm(box.y), height: cm(box.h) }); pg.appendChild(divider);
       const number = document.createElement('span'); number.className = 'auto-page-number';
       number.textContent = String(n + 1).padStart(2, '0'); number.setAttribute('aria-label', 'Página ' + (n + 1));
-      Object.assign(number.style, { left: cm(PSM + 943 * K * F), top: cm(OY + 1391 * K * F), width: cm(50 * K * F), height: cm(35 * K * F) }); pg.appendChild(number);
+      const [px, py, pw, ph] = geo.page || [943, 1391, 50, 35];
+      Object.assign(number.style, { left: cm(PSM + px * K * F), top: cm(OY + py * K * F), width: cm(pw * K * F), height: cm(ph * K * F) }); pg.appendChild(number);
     }
     return { wrap, pg, cols };
   }
@@ -360,7 +363,7 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=2')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=3')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');

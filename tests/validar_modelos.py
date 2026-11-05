@@ -28,5 +28,5 @@ for kind in ['word', 'word-conteudo']:
                 settings = E.fromstring(z.read('word/settings.xml'))
                 assert settings.find('w:updateFields', NS).get(f'{{{NS["w"]}}}val') == 'true', path
             count += 1
-assert count == 114, count
+assert count == 120, count
 print(f'{count} modelos validados, nos três segmentos e nas duas versões.')
