@@ -20,8 +20,9 @@ for kind in ['word', 'word-conteudo']:
                 assert cols.get(f'{{{NS["w"]}}}sep') == '1', path
                 for name in ['word/header1.xml', 'word/header2.xml']:
                     root = E.fromstring(z.read(name))
-                    fields = root.xpath('.//v:rect[@id="SEIDynamicPage"]//w:fldSimple/@w:instr', namespaces=NS)
+                    fields = root.xpath('.//v:rect[@id="SEIDynamicPage"]//w:fldSimple/@w:instr | .//v:rect[@id="SEIDynamicPage"]//w:instrText/text()', namespaces=NS)
                     assert len(fields) == 1 and 'PAGE' in fields[0], (path, name)
+                    assert root.xpath('.//v:rect[@id="SEIDynamicPage"]//w:rPr[w:rFonts[@w:ascii="Arial"]][w:b][w:sz[@w:val="34"]]', namespaces=NS), (path, name)
                     titles = root.xpath('.//w:sdt[w:sdtPr/w:tag[@w:val="sei-identificacao"]]', namespaces=NS)
                     assert len(titles) == (1 if name.endswith('header1.xml') else 0), (path, name)
                     assert not root.xpath('.//w:sdtPr/w:lock', namespaces=NS), path

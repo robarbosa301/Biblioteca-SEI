@@ -25,7 +25,8 @@ with sync_playwright() as p:
         page.goto(base + '/index.html#' + urlencode({'etapa': group, 'turma': f'{grade}º ano'}))
         card = page.locator('.portal-card').filter(has_text='Espanhol')
         assert card.count() == 1
-        assert card.locator('img').evaluate('(img) => img.complete && img.naturalWidth > 0')
+        card.locator('img').evaluate('(img) => img.decode()')
+        assert card.locator('img').get_attribute('src') == 'assets/portal/covers/subject-espanhol.webp'
         card.click()
         image = page.locator('#content .original-page')
         image.evaluate('(img) => img.decode()')

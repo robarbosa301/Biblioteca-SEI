@@ -37,9 +37,28 @@ def box(name, x, y, width, height, text, size, color, fill, field=False):
     pp = E.SubElement(p, f'{{{W}}}pPr')
     pp.append(el('spacing', before=0, after=0, line=round(height * scale * 20), lineRule='exact'))
     pp.append(el('jc', val='center'))
+    # O estilo de fim do parágrafo também formata o resultado dos campos PAGE.
+    defaults = E.SubElement(pp, f'{{{W}}}rPr')
+    defaults.append(el('rFonts', ascii='Arial', hAnsi='Arial', cs='Arial', eastAsia='Arial'))
+    defaults.append(el('b'))
+    defaults.append(el('color', val=color))
+    defaults.append(el('sz', val=size))
+    defaults.append(el('szCs', val=size))
     if field:
-        parent = E.SubElement(p, f'{{{W}}}fldSimple')
-        parent.set(f'{{{W}}}instr', ' PAGE \\# "00" ')
+        for kind in ['begin', 'instruction', 'separate']:
+            part = E.SubElement(p, f'{{{W}}}r')
+            pr = E.SubElement(part, f'{{{W}}}rPr')
+            pr.append(el('rFonts', ascii='Arial', hAnsi='Arial', cs='Arial'))
+            pr.append(el('b'))
+            pr.append(el('color', val=color))
+            pr.append(el('sz', val=size))
+            if kind == 'instruction':
+                instruction = E.SubElement(part, f'{{{W}}}instrText')
+                instruction.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
+                instruction.text = ' PAGE \\# "00" \\* CHARFORMAT '
+            else:
+                part.append(el('fldChar', fldCharType=kind))
+        parent = p
     else:
         sdt = E.SubElement(p, f'{{{W}}}sdt')
         props = E.SubElement(sdt, f'{{{W}}}sdtPr')
@@ -54,6 +73,8 @@ def box(name, x, y, width, height, text, size, color, fill, field=False):
     pr.append(el('color', val=color))
     pr.append(el('sz', val=size))
     E.SubElement(r, f'{{{W}}}t').text = text
+    if field:
+        E.SubElement(p, f'{{{W}}}r').append(el('fldChar', fldCharType='end'))
     return run
 
 
@@ -62,6 +83,12 @@ def update(path):
         entries = {i.filename: z.read(i.filename) for i in z.infolist()}
     doc = E.fromstring(entries['word/document.xml'])
     for cols in doc.findall('.//w:sectPr/w:cols', NS):
+        section = cols.getparent()
+        numbering = section.find('w:pgNumType', NS)
+        if numbering is None:
+            numbering = el('pgNumType')
+            section.insert(list(section).index(cols), numbering)
+        numbering.set(f'{{{W}}}fmt', 'decimalZero')
         cols.set(f'{{{W}}}num', '2')
         cols.set(f'{{{W}}}sep', '1')
     entries['word/document.xml'] = E.tostring(doc, xml_declaration=True, encoding='UTF-8', standalone=True)

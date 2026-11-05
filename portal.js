@@ -37,14 +37,14 @@ function applySeriesCorrection(img){
  // As folhas já trazem o cabeçalho no padrão de cada segmento; não sobrepor arte.
 }
 const coverRoot='assets/portal/covers/';
-const subjectCovers={'Língua Portuguesa':'portugues','Português':'portugues','Matemática':'matematica','Ciências':'ciencias','História':'historia','Geografia':'geografia','Arte':'arte','Artes':'arte','Educação Física':'educacao-fisica','Ensino Religioso':'religiao','Inglês':'ingles','Literatura':'literatura','Redação':'redacao','Física':'fisica','Química':'quimica','Biologia':'biologia','Filosofia':'filosofia','Sociologia':'sociologia'};
+const subjectCovers={'Língua Portuguesa':'portugues','Português':'portugues','Matemática':'matematica','Ciências':'ciencias','História':'historia','Geografia':'geografia','Arte':'arte','Artes':'arte','Educação Física':'educacao-fisica','Ensino Religioso':'religiao','Inglês':'ingles','Espanhol':'espanhol','Literatura':'literatura','Redação':'redacao','Física':'fisica','Química':'quimica','Biologia':'biologia','Filosofia':'filosofia','Sociologia':'sociologia'};
 function yearArt(year,index){
  const key=g===0||g===1?'year-'+parseInt(year):g===2?'year-em'+parseInt(year):g===3?'year-convenio':'year-pre';
  return coverRoot+key+'.webp';
 }
 function card(label,description,src,fn){
  const b=document.createElement('button');b.className='portal-card illustrated-cover '+(y===null?'year-cover':'subject-cover');
- const im=document.createElement('img');im.src=y===null||label==='Espanhol'?src:coverRoot+'subject-'+subjectCovers[label]+'.webp'+(label==='Física'?'?v=2':'');im.alt='';im.loading='lazy';im.decoding='async';
+ const im=document.createElement('img');im.src=y===null?src:coverRoot+'subject-'+subjectCovers[label]+'.webp'+(label==='Física'?'?v=2':'');im.alt='';im.loading='lazy';im.decoding='async';
  const info=document.createElement('span');info.className='cover-copy';
  const strong=document.createElement('strong');strong.textContent=label;
  const context=document.createElement('small');context.textContent=y===null?groups[g].name:groups[g].name+' · '+(g===3?'3ª série':seriesLabel(y));
