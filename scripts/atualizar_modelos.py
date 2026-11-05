@@ -99,8 +99,9 @@ def update(path):
             run = shape.getparent().getparent()
             run.getparent().remove(run)
         p = header.find('w:p', NS)
-        page_box = (938, 1374, 58, 55) if path.stem == 'espanhol' and 'pre-vestibular' not in path.parts else (943, 1391, 50, 35)
-        p.append(box('SEIDynamicPage', *page_box, '01', 34, '063B8C', '#FFFFFF', field=True))
+        page_box = (949, 1397, 37, 32) if path.stem == 'espanhol' and 'pre-vestibular' not in path.parts else (943, 1391, 50, 35)
+        page_color = '9B1015' if path.stem == 'espanhol' and 'pre-vestibular' not in path.parts else '063B8C'
+        p.append(box('SEIDynamicPage', *page_box, '01', 34, page_color, '#FFFFFF', field=True))
         if name.endswith('header1.xml'):
             p.append(box('SEIDynamicTitle', 833, 260, 151, 49, 'Revisão 01', 18, 'FFFFFF', '#041629'))
         entries[name] = E.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)

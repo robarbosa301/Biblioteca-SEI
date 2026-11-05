@@ -5,6 +5,45 @@ from copy import deepcopy
 from lxml import etree as E
 from atualizar_modelos import ROOT, W, NS, box, el
 
+
+def standard_footer(header, entries, name, grade, segment):
+    """Reutiliza a faixa original de Português, incluindo contatos e selo."""
+    drawing_ns = {'w': W, 'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing',
+                  'a': 'http://schemas.openxmlformats.org/drawingml/2006/main',
+                  'pic': 'http://schemas.openxmlformats.org/drawingml/2006/picture'}
+    backdrop = label_box('SEISpanishFooterBackdrop', 0, 1374, 1024, 14, '', 2, '2C0606', '#2C0606')
+    rect = backdrop.find('.//{urn:schemas-microsoft-com:vml}rect')
+    rect.set('style', rect.get('style'))
+    header.find('w:p', NS).append(backdrop)
+    drawing = deepcopy(header.find('.//w:drawing', drawing_ns))
+    anchor = drawing.find('wp:anchor', drawing_ns)
+    anchor.set('relativeHeight', '1000')
+    anchor.set('behindDoc', '0')
+    anchor.find('wp:positionV/wp:posOffset', drawing_ns).text = str(round(254571 + 1388 * 7200000 / 1024))
+    cy = str(round(60 * 7200000 / 1024))
+    anchor.find('wp:extent', drawing_ns).set('cy', cy)
+    anchor.find('.//a:xfrm/a:ext', drawing_ns).set('cy', cy)
+    anchor.find('wp:docPr', drawing_ns).set('id', str(500 + grade))
+    blip = anchor.find('.//a:blip', drawing_ns)
+    blip.set('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed', 'rIdSEIFooter')
+    fill = blip.getparent()
+    for crop in fill.findall('a:srcRect', drawing_ns):
+        fill.remove(crop)
+    crop = E.Element('{'+drawing_ns['a']+'}srcRect', t='96094', b='0', l='0', r='0')
+    fill.insert(1, crop)
+    run = el('r'); run.append(drawing)
+    header.find('w:p', NS).append(run)
+    relpath = 'word/_rels/' + name.split('/')[-1] + '.rels'
+    rels = E.fromstring(entries[relpath])
+    E.SubElement(rels, '{http://schemas.openxmlformats.org/package/2006/relationships}Relationship',
+                 Id='rIdSEIFooter', Type='http://schemas.openxmlformats.org/officeDocument/2006/relationships/image',
+                 Target='media/sei-footer.png')
+    entries[relpath] = E.tostring(rels, xml_declaration=True, encoding='UTF-8', standalone=True)
+    entries['word/media/sei-footer.png'] = (ROOT / f'assets/{segment}/{grade}-ano/lingua-portuguesa.png').read_bytes()
+    x = 280 if grade == 3 else 248
+    h = label_box('SEISpanishFooterSubject', x, 1392, 423-x, 32, 'Espanhol', 22, 'DE6862', '#100300')
+    header.find('w:p', NS).append(h)
+
 LESSONS = {
     1: [
         ('Saludos', 'Escribe dos saludos y una despedida que puedas usar en clase.'),
@@ -66,12 +105,12 @@ def create(grade, segment):
             page_box = header.xpath('.//v:rect[@id="SEIDynamicPage"]', namespaces={**NS, 'v':'urn:schemas-microsoft-com:vml'})[0]
             old_run = page_box.getparent().getparent()
             old_run.getparent().remove(old_run)
-            p.append(box('SEIDynamicPage', 938, 1374, 58, 55, '01', 34, '063B8C', '#FFFFFF', field=True))
             if name.endswith('header1.xml'):
                 p.append(label_box('SEISpanishGrade', 504, 106, 280, 39, label, 24, '111111', '#FFFFFF'))
             else:
                 p.append(label_box('SEISpanishGrade', 140, 65, 205, 28, label, 18, 'FFFFFF', '#100300'))
-            p.append(label_box('SEISpanishFooter', 20, 1377, 125, 46, footer, 13, 'FFFFFF', '#100300'))
+            standard_footer(header, entries, name, grade, segment)
+            p.append(box('SEIDynamicPage', 949, 1397, 37, 32, '01', 34, '9B1015', '#FFFFFF', field=True))
             entries[name] = E.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
         doc = E.fromstring(entries['word/document.xml'])
         if kind == 'word':

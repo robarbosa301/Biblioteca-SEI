@@ -45,10 +45,10 @@
     const copy = article.cloneNode(true); copy.classList.add('bw-sheet');
     // As folhas novas renderizadas do Word incluem a margem física do A4.
     const native = /\/(ensino-medio|convenio)\/.*\/espanhol\.png/.test(path);
-    const height = native ? 24 : 318 / original.naturalHeight * 100;
+    const height = native ? 22 : 318 / original.naturalHeight * 100;
     copy.style.setProperty('--bw-header-height', height + '%');
-    copy.style.setProperty('--bw-side', native ? '4.5%' : '3.4%');
-    copy.style.setProperty('--bw-bottom', native ? '8%' : '5.5%');
+    copy.style.setProperty('--bw-side', '3.4%');
+    copy.style.setProperty('--bw-bottom', native ? '5.8%' : '5.5%');
     copy.style.setProperty('--bw-width', Math.min(190, 277 * original.naturalWidth / original.naturalHeight) + 'mm');
     copy.append(header(context(path)));
     for (const cls of ['bw-left', 'bw-right', 'bw-footer']) {

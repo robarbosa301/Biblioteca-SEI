@@ -361,6 +361,7 @@
       const number = document.createElement('span'); number.className = 'auto-page-number';
       number.textContent = String(n + 1).padStart(2, '0'); number.setAttribute('aria-label', 'Página ' + (n + 1));
       const [px, py, pw, ph] = geo.page || [943, 1391, 50, 35];
+      if (geo.pageColor) number.style.color = geo.pageColor;
       Object.assign(number.style, { left: cm(PSM + px * K * F), top: cm(OY + py * K * F), width: cm(pw * K * F), height: cm(ph * K * F) }); pg.appendChild(number);
     }
     return { wrap, pg, cols };
@@ -466,7 +467,7 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=3')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=4')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');
