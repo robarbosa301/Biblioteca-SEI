@@ -61,3 +61,13 @@ dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 
   .campo{border:0}.campo::placeholder{color:transparent}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+.format-toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 8px;background:#fff;border:1px solid #bed0e6;border-radius:10px;padding:10px;max-width:1180px;margin:10px auto 0;box-shadow:0 2px 8px #17365d12}
+.format-toolbar label{display:flex;flex-direction:column;gap:3px;font:12px Arial,sans-serif;color:#244867}
+.format-toolbar select{max-width:155px;min-height:34px;border:1px solid #9baec7;border-radius:5px;background:#fff;color:#153552;padding:4px;font:14px Arial,sans-serif}
+.format-toolbar button{min-width:34px;min-height:34px;border:1px solid #9baec7;border-radius:5px;background:#fff;color:#153552;font:700 15px Arial,sans-serif;cursor:pointer}
+.format-toolbar button[aria-pressed=true]{background:#d5e5ff;border-color:#2f6fe0}
+.format-toolbar button:disabled,.format-toolbar select:disabled{opacity:.45;cursor:default}
+#dialogToolbar{margin:0;border-radius:0;box-shadow:none;border-width:0 0 1px}
+#ed p{margin:0 0 4pt}#ed ul,#ed ol{padding-left:5mm}
+@media(max-width:700px){#formatToolbar{margin:8px 8px 0;padding:8px}.format-toolbar{gap:5px}.format-toolbar select{max-width:135px;font-size:13px}.format-toolbar label{font-size:11px}}

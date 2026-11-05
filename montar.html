@@ -6,7 +6,8 @@
 <title>Montar folha · SEI</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0b2a5b">
-<link rel="stylesheet" href="montar.css?v=3">
+<link rel="stylesheet" href="montar.css?v=4-formatacao">
+<link rel="stylesheet" href="impressao.css?v=1">
 </head>
 <body>
 <div id="bar" class="no-print">
@@ -18,7 +19,8 @@
     <button class="b" id="bImg" title="Inserir uma imagem do computador ou celular">🖼 Imagem</button>
     <button class="b" id="bTexto">✎ Texto</button>
     <button class="b" id="bQuebra" title="O que vier depois começa na próxima coluna">⤵ Próxima coluna</button>
-    <button class="b print" id="bPrint">🖨 Imprimir / PDF</button>
+    <button class="b print" id="bPrint">🖨 Imprimir em cores / PDF</button>
+    <button class="b print" id="bPrintBW">Imprimir em preto e branco</button>
   </div>
   <div id="sel" class="grp" hidden>
     <span class="lbl">Item selecionado:</span>
@@ -33,18 +35,20 @@
   <input type="file" id="fWord" accept=".docx" hidden>
   <input type="file" id="fImg" accept="image/*" hidden>
 </div>
-<p id="dica" class="no-print">Cole com <b>Ctrl+V</b> ou importe seu Word. O conteúdo segue pela coluna esquerda, depois pela direita e continua na próxima página, com numeração automática. Clique em “Revisão 01” para trocar por “Aula 1” ou outro título. Clique num item para editar.</p>
+<div id="formatToolbar" class="no-print"></div>
+<p id="dica" class="no-print">Cole com <b>Ctrl+V</b> ou importe seu Word. O conteúdo segue pela coluna esquerda, depois pela direita e continua na próxima página, com numeração automática. Clique em “Revisão 01” para trocar por “Aula 1” ou outro título. Selecione um item para usar a barra de formatação. Em “Editar”, selecione palavras para formatar apenas um trecho.</p>
 <p id="aviso" class="no-print" hidden></p>
 <div id="pages"></div>
 <div id="measure" aria-hidden="true"></div>
 <dialog id="dlg" class="no-print">
   <form method="dialog">
     <div class="dh">Editar item <small>(negrito: Ctrl+B · itálico: Ctrl+I · sublinhado: Ctrl+U)</small></div>
-    <div id="ed" contenteditable="true"></div>
+    <div id="dialogToolbar"></div>
+    <div id="ed" contenteditable="true" role="textbox" aria-label="Texto da folha" aria-multiline="true"></div>
     <div class="df"><button class="b ghost" value="cancel">Cancelar</button><button class="b main" value="ok" id="dOk">Salvar</button></div>
   </form>
 </dialog>
 <script src="assets/vendor/mammoth.browser.min.js"></script>
-<script src="montar.js?v=4-espanhol"></script><script src="offline.js?v=2"></script>
+<script src="impressao.js?v=1"></script><script src="formatacao.js?v=1"></script><script src="montar.js?v=6-formatacao"></script><script src="offline.js?v=2"></script>
 </body>
 </html>

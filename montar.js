@@ -24,12 +24,89 @@
   const persist = () => db.set(KEY, { blocks, conteudo, identificacao });
   const save = () => { clearTimeout(saveT); saveT = setTimeout(persist, 300); };
   addEventListener('pagehide', persist);
+  let past = [], future = [];
+  const snapshot = () => ({blocks:blocks.map(b => ({...b})), selId, nextId});
+  const remember = () => { past.push(snapshot()); if (past.length > 40) past.shift(); future = []; };
+  const historyStep = redo => {
+    const from = redo ? future : past, to = redo ? past : future;
+    if (!from.length) return;
+    to.push(snapshot()); const state = from.pop(); blocks = state.blocks; selId = state.selId; nextId = state.nextId;
+    render(); save(); updateToolbar();
+  };
+  let mainFormat = null;
+  function updateToolbar() {
+    if (!mainFormat) return;
+    const b = blocks.find(b => b.id === selId), tmp = document.createElement('div');
+    if (b) tmp.innerHTML = b.html;
+    const e = tmp.firstElementChild, st = e ? e.style : {};
+    mainFormat.update({enabled:!!e && !e.classList.contains('quebra'),canUndo:past.length>0,canRedo:future.length>0,
+      fontFamily:(st.fontFamily || 'Arial').replace(/["']/g,''),fontSize:parseFloat(st.fontSize)||10,
+      textAlign:st.textAlign || (e && e.classList.contains('sz-center') ? 'center' : e && e.classList.contains('sz-right') ? 'right' : e && e.classList.contains('sz-justify') ? 'justify' : 'left'),
+      lineHeight:st.lineHeight||1.15,marginBottom:parseFloat(st.marginBottom)||0,
+      bold:st.fontWeight==='bold',italic:st.fontStyle==='italic',underline:st.textDecoration==='underline'});
+  }
+  function formatBlock(action, value) {
+    const b = blocks.find(b => b.id === selId); if (!b) return;
+    const tmp = document.createElement('div'); tmp.innerHTML = b.html; let e = tmp.firstElementChild;
+    if (!e || e.classList.contains('quebra')) return;
+    remember();
+    if (action === 'bold') e.style.fontWeight = e.style.fontWeight === 'bold' ? 'normal' : 'bold';
+    else if (action === 'italic') e.style.fontStyle = e.style.fontStyle === 'italic' ? 'normal' : 'italic';
+    else if (action === 'underline') e.style.textDecoration = e.style.textDecoration === 'underline' ? 'none' : 'underline';
+    else if (['fontFamily','fontSize','textAlign','lineHeight','marginBottom'].includes(action)) {
+      if (action !== 'marginBottom') e.querySelectorAll('*').forEach(child => {
+        child.style[action] = '';
+        if (action === 'fontSize') child.removeAttribute('size');
+        if (action === 'fontFamily') child.removeAttribute('face');
+      });
+      e.style[action] = ['fontSize','marginBottom'].includes(action) ? value + 'pt' : value;
+    } else if (action === 'indent' || action === 'outdent') {
+      e.style.marginLeft = Math.max(0,Math.min(72,(parseFloat(e.style.marginLeft)||0) + (action==='indent'?12:-12))) + 'pt';
+    } else if (action === 'insertUnorderedList' || action === 'insertOrderedList') {
+      const tag = action === 'insertOrderedList' ? 'OL' : 'UL';
+      if (e.tagName === tag) {
+        const p = document.createElement('p'); p.setAttribute('style',e.getAttribute('style')||'');
+        Array.from(e.children).forEach((li,i) => { if(i) p.appendChild(document.createElement('br')); while(li.firstChild) p.appendChild(li.firstChild); }); e=p;
+      } else if (e.tagName === 'OL' || e.tagName === 'UL') {
+        const list=document.createElement(tag);list.setAttribute('style',e.getAttribute('style')||'');list.innerHTML=e.innerHTML;e=list;
+      } else {
+        const list=document.createElement(tag),li=document.createElement('li');list.setAttribute('style',e.getAttribute('style')||'');li.innerHTML=e.innerHTML;list.appendChild(li);e=list;
+      }
+    }
+    b.html = e.outerHTML; render(); save(); updateToolbar();
+  }
 
   /* ---------- limpeza do que foi colado ---------- */
   const INLINE = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'SUB', 'SUP', 'BR']);
   const UNWRAP = new Set(['SPAN', 'FONT', 'A', 'ABBR', 'MARK', 'SMALL', 'BIG', 'LABEL', 'CODE', 'S', 'DEL', 'INS', 'O:P', 'SECTION', 'ARTICLE', 'MAIN', 'HEADER', 'FOOTER', 'FIGURE', 'FIGCAPTION', 'CENTER', 'NOBR', 'TIME', 'CITE', 'Q', 'DFN', 'KBD', 'SAMP', 'VAR', 'PICTURE']);
   const DROP = new Set(['SCRIPT', 'STYLE', 'META', 'LINK', 'TITLE', 'HEAD', 'NOSCRIPT', 'IFRAME', 'OBJECT', 'EMBED', 'SVG', 'CANVAS', 'VIDEO', 'AUDIO', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'FORM', 'NAV', 'XML', 'SOURCE', 'TEMPLATE']);
   let faltouImagem = 0;
+
+  // Mantém a formatação escolhida, sem trazer estilos de página do Word colado.
+  function copyFormat(from, to, inline = false) {
+    if (!from.style) return;
+    const st = from.style;
+    const families = ['Arial','Calibri','Times New Roman','Verdana','Georgia','Courier New','Tahoma'];
+    const family = (st.fontFamily || from.getAttribute('face') || '').split(',')[0].replace(/["']/g, '').trim();
+    if (families.some(f => f.toLowerCase() === family.toLowerCase())) to.style.fontFamily = family;
+    const size = st.fontSize.match(/^([\d.]+)(pt|px)$/i);
+    if (size) to.style.fontSize = Math.max(6, Math.min(72, +size[1] * (size[2] === 'px' ? .75 : 1))) + 'pt';
+    if (!size && from.tagName === 'FONT' && from.getAttribute('size')) {
+      const points = [8,10,12,14,18,24,36][+from.getAttribute('size') - 1];
+      if (points) to.style.fontSize = points + 'pt';
+    }
+    if (['bold','700','800','900'].includes(st.fontWeight)) to.style.fontWeight = 'bold';
+    if (st.fontStyle === 'italic') to.style.fontStyle = 'italic';
+    if ((st.textDecorationLine || st.textDecoration).includes('underline')) to.style.textDecoration = 'underline';
+    if (!inline) {
+      if (['left','center','right','justify'].includes(st.textAlign)) to.style.textAlign = st.textAlign;
+      if (/^\d+(\.\d+)?$/.test(st.lineHeight)) to.style.lineHeight = Math.max(1, Math.min(3, +st.lineHeight));
+      for (const prop of ['marginBottom','marginLeft']) {
+        const val = st[prop].match(/^([\d.]+)(pt|px)$/i);
+        if (val) to.style[prop] = Math.max(0, Math.min(72, +val[1] * (val[2] === 'px' ? .75 : 1))) + 'pt';
+      }
+    }
+  }
 
   function cleanInline(node, out) {
     for (const n of Array.from(node.childNodes)) {
@@ -38,7 +115,12 @@
       const t = n.tagName.toUpperCase();
       if (DROP.has(t)) continue;
       if (t === 'IMG') { const im = img(n); if (im) out.appendChild(im); continue; }
-      if (INLINE.has(t)) { const e = document.createElement(t === 'STRONG' ? 'b' : t === 'EM' ? 'i' : t.toLowerCase()); if (t !== 'BR') cleanInline(n, e); out.appendChild(e); continue; }
+      if (INLINE.has(t)) { const e = document.createElement(t === 'STRONG' ? 'b' : t === 'EM' ? 'i' : t.toLowerCase()); copyFormat(n, e, true); if (t !== 'BR') cleanInline(n, e); out.appendChild(e); continue; }
+      if (t === 'SPAN' || t === 'FONT') {
+        const e = document.createElement('span'); copyFormat(n, e, true); cleanInline(n, e);
+        if (e.getAttribute('style')) out.appendChild(e); else while (e.firstChild) out.appendChild(e.firstChild);
+        continue;
+      }
       const st = (n.getAttribute && n.getAttribute('style')) || '';
       if (/font-weight\s*:\s*(bold|[6-9]00)/i.test(st) || /font-style\s*:\s*italic/i.test(st) || /text-decoration[^;]*underline/i.test(st) || /vertical-align\s*:\s*(super|sub)/i.test(st)) {
         let e = out;
@@ -66,13 +148,13 @@
   }
   const hasContent = e => e.textContent.replace(/ /g, ' ').trim() || e.querySelector('img,table');
   function cleanTable(t) {
-    const out = document.createElement('table'); const tb = document.createElement('tbody'); out.appendChild(tb);
+    const out = document.createElement('table'); copyFormat(t, out); const tb = document.createElement('tbody'); out.appendChild(tb);
     const rows = Array.from(t.querySelectorAll('tr')).filter(r => r.closest('table') === t);
     for (const r of rows) {
       const tr = document.createElement('tr');
       for (const c of Array.from(r.children)) {
         if (!/^T[DH]$/.test(c.tagName.toUpperCase())) continue;
-        const td = document.createElement(c.tagName.toUpperCase() === 'TH' ? 'th' : 'td');
+        const td = document.createElement(c.tagName.toUpperCase() === 'TH' ? 'th' : 'td'); copyFormat(c, td);
         for (const a of ['colspan', 'rowspan']) { const v = c.getAttribute(a); if (v && +v > 1) td.setAttribute(a, v); }
         const inner = cleanBlocks(c); inner.forEach(b => td.appendChild(b));
         tr.appendChild(td);
@@ -82,10 +164,10 @@
     return tb.children.length ? out : null;
   }
   function cleanList(l) {
-    const out = document.createElement(l.tagName.toUpperCase() === 'OL' ? 'ol' : 'ul');
+    const out = document.createElement(l.tagName.toUpperCase() === 'OL' ? 'ol' : 'ul'); copyFormat(l, out);
     for (const li of Array.from(l.children)) {
       if (li.tagName.toUpperCase() !== 'LI') continue;
-      const e = document.createElement('li'); cleanInline(li, e);
+      const e = document.createElement('li'); copyFormat(li, e); cleanInline(li, e);
       li.querySelectorAll(':scope > ul, :scope > ol').forEach(sub => { const s = cleanList(sub); if (s) e.appendChild(s); });
       if (hasContent(e)) out.appendChild(e);
     }
@@ -103,7 +185,7 @@
         if (t === 'TABLE') { flush(); const x = cleanTable(n); if (x) out.push(x); continue; }
         if (t === 'UL' || t === 'OL') { flush(); const x = cleanList(n); if (x) out.push(x); continue; }
         if (/^(P|H[1-6]|LI|BLOCKQUOTE|PRE|DT|DD|CAPTION)$/.test(t) || (t === 'DIV' && !n.querySelector('p,div,table,ul,ol,h1,h2,h3,h4,h5,h6'))) {
-          flush(); const p = document.createElement('p'); align(n, p);
+          flush(); const p = document.createElement('p'); align(n, p); copyFormat(n, p);
           if (/^H[1-6]$/.test(t)) { const b = document.createElement('b'); cleanInline(n, b); p.appendChild(b); } else cleanInline(n, p);
           // parágrafo vazio do Word: mantém só um respiro
           if (hasContent(p)) out.push(p); else if (out.length && out[out.length - 1].tagName === 'P' && !out[out.length - 1].dataset.vazio) { const v = document.createElement('p'); v.dataset.vazio = '1'; v.innerHTML = '&nbsp;'; out.push(v); }
@@ -136,6 +218,7 @@
   /* ---------- inserir / editar ---------- */
   function insertBlocks(els) {
     if (!els.length) return;
+    remember();
     const items = els.map(e => ({ id: nextId++, html: e.outerHTML }));
     let at = blocks.length;
     if (selId != null) { const i = blocks.findIndex(b => b.id === selId); if (i >= 0) at = i + 1; }
@@ -202,28 +285,34 @@
   $('#fImg').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (f) insertBlocks([await imageBlock(f)]); };
   $('#bTexto').onclick = () => { const p = document.createElement('p'); p.textContent = 'Novo texto'; insertBlocks([p]); openEdit(selId); };
   $('#bQuebra').onclick = () => { const d = document.createElement('div'); d.className = 'quebra'; insertBlocks([d]); };
-  $('#bLimpar').onclick = () => { if (blocks.length && confirm('Apagar todo o conteúdo desta folha?')) { blocks = []; selId = null; render(); save(); } };
-  $('#bPrint').onclick = () => { select(null); setTimeout(() => window.print(), 50); };
+  $('#bLimpar').onclick = () => { if (blocks.length && confirm('Apagar todo o conteúdo desta folha?')) { remember(); blocks = []; selId = null; render(); save(); } };
+  $('#bPrint').onclick = () => { seiPrint.mode('color'); select(null); setTimeout(() => window.print(), 50); };
+  $('#bPrintBW').onclick = () => { seiPrint.mode('bw'); select(null); setTimeout(() => window.print(), 50); };
 
-  function select(id) { selId = id; document.querySelectorAll('.col .on').forEach(e => e.classList.remove('on')); if (id != null) document.querySelectorAll(`.col [data-id="${id}"]`).forEach(e => e.classList.add('on')); $('#sel').hidden = id == null; }
-  const move = d => { const i = blocks.findIndex(b => b.id === selId); const j = i + d; if (i < 0 || j < 0 || j >= blocks.length) return; [blocks[i], blocks[j]] = [blocks[j], blocks[i]]; render(); save(); };
+  function select(id) { selId = id; document.querySelectorAll('.col .on').forEach(e => e.classList.remove('on')); if (id != null) document.querySelectorAll(`.col [data-id="${id}"]`).forEach(e => e.classList.add('on')); $('#sel').hidden = id == null; updateToolbar(); }
+  const move = d => { const i = blocks.findIndex(b => b.id === selId); const j = i + d; if (i < 0 || j < 0 || j >= blocks.length) return; remember(); [blocks[i], blocks[j]] = [blocks[j], blocks[i]]; render(); save(); };
   $('#sUp').onclick = () => move(-1);
   $('#sDown').onclick = () => move(1);
-  $('#sDel').onclick = () => { const i = blocks.findIndex(b => b.id === selId); if (i < 0) return; blocks.splice(i, 1); selId = blocks[i] ? blocks[i].id : (blocks[i - 1] ? blocks[i - 1].id : null); render(); save(); };
+  $('#sDel').onclick = () => { const i = blocks.findIndex(b => b.id === selId); if (i < 0) return; remember(); blocks.splice(i, 1); selId = blocks[i] ? blocks[i].id : (blocks[i - 1] ? blocks[i - 1].id : null); render(); save(); };
   $('#sEdit').onclick = () => openEdit(selId);
   document.addEventListener('keydown', e => {
-    if ($('#dlg').open || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    if ($('#dlg').open || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    if ((e.ctrlKey || e.metaKey) && ['z','y'].includes(e.key.toLowerCase())) { e.preventDefault(); historyStep(e.key.toLowerCase()==='y'||e.shiftKey); return; }
     if (selId != null && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); $('#sDel').onclick(); }
     if (selId != null && e.key === 'Escape') select(null);
   });
+  mainFormat = seiFormat.toolbar($('#formatToolbar'), {apply:formatBlock,undo:()=>historyStep(false),redo:()=>historyStep(true)});
+  updateToolbar();
+  const richFormat = seiFormat.editor($('#ed'), $('#dialogToolbar'));
   let editing = null;
   function openEdit(id) {
     const b = blocks.find(x => x.id === id); if (!b) return;
-    editing = id; $('#ed').innerHTML = b.html; $('#dlg').showModal(); setTimeout(() => $('#ed').focus(), 30);
+    editing = id; $('#ed').innerHTML = b.html; richFormat.reset(); $('#dlg').showModal(); setTimeout(() => $('#ed').focus(), 30);
   }
   $('#dlg').addEventListener('close', () => {
     if ($('#dlg').returnValue !== 'ok' || editing == null) { editing = null; return; }
     const i = blocks.findIndex(b => b.id === editing); editing = null; if (i < 0) return;
+    remember();
     const els = cleanBlocks($('#ed'));
     const items = els.map(e => ({ id: nextId++, html: e.outerHTML }));
     blocks.splice(i, 1, ...items); selId = items.length ? items[items.length - 1].id : null; render(); save();
@@ -357,7 +446,21 @@
   }
   pagesEl.addEventListener('click', () => select(null));
   let rt = null; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 200); });
-  addEventListener('beforeprint', () => document.querySelectorAll('.page').forEach(p => p.style.transform = 'none'));
+  addEventListener('beforeprint', () => {
+    pagesEl.querySelectorAll('.page').forEach((p, n) => {
+      p.style.transform = 'none';
+      p.querySelectorAll('.bw-header,.bw-editor-footer').forEach(el => el.remove());
+      if (!document.body.classList.contains('sei-print-bw')) return;
+      const h = seiPrint.header({...seiPrint.context(src), identificacao, conteudo, compact: n > 0});
+      const box = colBoxes(n === 0)[0];
+      Object.assign(h.style, {left:'5mm', top:'7.07mm', width:'200mm', height:cm(box.y - 0.707 - 0.15)});
+      p.appendChild(h);
+      const foot = document.createElement('div'); foot.className = 'bw-editor-footer';
+      const brand = document.createElement('span'); brand.textContent = 'SEI Incentivo · São Miguel do Guamá — PA';
+      const number = document.createElement('span'); number.textContent = 'Página ' + (n + 1);
+      foot.append(brand, number); p.appendChild(foot);
+    });
+  });
   addEventListener('afterprint', render);
 
   /* ---------- início ---------- */

@@ -1,0 +1,40 @@
+.bw-header,.bw-left,.bw-right,.bw-footer{display:none}
+@media print{
+ #offline,.offline-box{display:none!important}
+ body.sei-print-bw{background:#fff!important;color:#000!important}
+ .sei-print-bw .bw-header{display:block;position:absolute;z-index:4;background:#fff!important;color:#111!important;box-sizing:border-box;border-bottom:1pt solid #111;font:10pt/1.3 Arial,sans-serif}
+ .bw-heading{display:flex;gap:5mm;align-items:center}
+ .bw-brand{flex:0 0 auto;text-align:center;border-right:1pt solid #222;padding-right:5mm}
+ .bw-brand strong{display:block;font:900 30pt/.95 Arial,sans-serif;letter-spacing:-2px}
+ .bw-brand span{display:block;font:bold 7pt Arial,sans-serif;letter-spacing:1px;margin-top:2mm}
+ .bw-titles{flex:1;min-width:0}
+ .bw-header .bw-school{font-size:7.5pt;letter-spacing:.4px}
+ .bw-header .bw-titles h2{font:700 20pt/1.15 Arial,sans-serif!important;color:#111!important;margin:1mm 0!important;text-shadow:none!important;background:none!important}
+ .bw-identificacao{border:1pt solid #555;border-radius:2mm;padding:2mm 3mm;font-weight:700;max-width:44mm;overflow-wrap:anywhere}
+ .bw-fields{display:grid;grid-template-columns:1.1fr 1fr;gap:3mm 4mm;margin-top:5mm;font-size:8.5pt}
+ .sei-print-bw .bw-sheet{position:relative!important;width:var(--bw-width)!important;max-width:none!important;margin:0 auto!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:white!important;overflow:hidden!important}
+ .sei-print-bw .bw-sheet>.original-page{width:100%!important;height:auto!important;max-height:none!important;filter:grayscale(1) brightness(1.15) contrast(.95)}
+ .sei-print-bw .bw-sheet>.bw-header{left:0;top:0;width:100%;height:var(--bw-header-height);padding:5mm 6mm 3mm!important}
+ .sei-print-bw .bw-left,.sei-print-bw .bw-right,.sei-print-bw .bw-footer{display:flex;position:absolute;background:white;z-index:3}
+ .bw-left{left:0;top:0;bottom:0;width:var(--bw-side)}
+ .bw-right{right:0;top:0;bottom:0;width:var(--bw-side)}
+ .bw-footer{left:0;right:0;bottom:0;height:var(--bw-bottom);align-items:center;justify-content:space-between;padding:0 6mm;border-top:.5pt solid #777;font:7pt Arial,sans-serif;color:#222}
+ /* No editor, o texto e as tabelas continuam nativos, com fundo branco. */
+ .sei-print-bw #pages .frame,.sei-print-bw #pages .campo,.sei-print-bw #pages .auto-page-number{display:none!important}
+ .sei-print-bw #pages .page{background:#fff!important}
+ .sei-print-bw #pages .col{color:#000!important}
+ .sei-print-bw #pages .col img{filter:grayscale(1) brightness(1.1) contrast(.95)}
+ .sei-print-bw #pages .col th{background:#f3f3f3!important;color:#000!important}
+ .sei-print-bw #pages .column-divider{border-color:#777!important}
+ .sei-print-bw #pages .bw-header{padding:3mm 3mm 2mm!important}
+ .sei-print-bw #pages .bw-header.compact{padding:1mm 3mm!important}
+ .bw-header.compact .bw-brand strong{font-size:19pt}
+ .bw-header.compact .bw-brand span,.bw-header.compact .bw-school{display:none}
+ .bw-header.compact .bw-titles h2{font-size:13pt!important;margin:0!important}
+ .bw-header.compact .bw-titles{font-size:8pt}
+ .bw-header.compact .bw-identificacao{padding:1mm 2mm;font-size:8pt}
+ .sei-print-bw #pages .bw-editor-footer{display:flex;position:absolute;left:8mm;right:8mm;bottom:8mm;justify-content:space-between;border-top:.5pt solid #777;padding-top:2mm;font:7.5pt Arial,sans-serif;color:#222}
+}
+.bw-editor-footer{display:none}
+
+.actions .print-bw{background:#fff!important;color:#111!important;border:2px solid #555}
