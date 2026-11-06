@@ -25,7 +25,7 @@
  .sei-print-bw #pages .col{color:#000!important}
  .sei-print-bw #pages .col img{filter:grayscale(1) brightness(1.1) contrast(.95)}
  .sei-print-bw #pages .col th{background:#f3f3f3!important;color:#000!important}
- .sei-print-bw #pages .column-divider{border-color:#777!important}
+ .sei-print-bw #pages .column-divider{--divider-color:#777!important}
  .sei-print-bw #pages .bw-header{padding:3mm 3mm 2mm!important}
  .sei-print-bw #pages .bw-header.compact{padding:1mm 3mm!important}
  .bw-header.compact .bw-brand strong{font-size:19pt}

@@ -118,6 +118,21 @@ def update(path):
             z.writestr(name, data)
 
 
+def divider_graphic(name, x, y, width, height, color, oval=False):
+    scale = 200 / 1024 * 72 / 25.4
+    run = el('r')
+    pict = E.SubElement(run, f'{{{W}}}pict')
+    shape = E.SubElement(pict, f'{{{V}}}' + ('oval' if oval else 'rect'),
+                         id=name, fillcolor='#'+color, stroked='f')
+    left = 5 * 72 / 25.4 + x * scale
+    top = ((297 - 297 * 200 / 210) / 2) * 72 / 25.4 + y * scale
+    shape.set('style', f'position:absolute;margin-left:{left:.3f}pt;margin-top:{top:.3f}pt;'
+              f'width:{width*scale:.3f}pt;height:{height*scale:.3f}pt;'
+              'mso-position-horizontal-relative:page;mso-position-vertical-relative:page;'
+              'mso-wrap-style:none;z-index:251659264')
+    return run
+
+
 def main():
     count = 0
     for kind in ['word', 'word-conteudo']:
@@ -127,6 +142,7 @@ def main():
                 count += 1
     print(f'{count} modelos Word atualizados: página automática, título editável e divisória.')
     markers = 0
+    subject_colors = {}
     geometry = json.loads((ROOT / 'assets/montar/molduras.json').read_text())
     for kind in ['word', 'word-conteudo']:
         for path in sorted((ROOT / 'assets' / kind).rglob('*.docx')):
@@ -136,17 +152,31 @@ def main():
                 continue
             with ZipFile(path) as z:
                 entries = {n: z.read(n) for n in z.namelist()}
+            numbering = E.fromstring(entries['word/numbering.xml']) if 'word/numbering.xml' in entries else None
+            fills = numbering.xpath('//w:shd/@w:fill', namespaces=NS) if numbering is not None else []
+            color = subject_colors.setdefault(relative, next((v for v in fills if len(v)==6 and v.upper() not in ['FFFFFF','000000']), '087DCE'))
+            geo['dividerColor'] = '#'+color
+            document = E.fromstring(entries['word/document.xml'])
+            for cols in document.findall('.//w:sectPr/w:cols', NS):
+                cols.set(f'{{{W}}}sep', '0')
+            entries['word/document.xml'] = E.tostring(document, xml_declaration=True, encoding='UTF-8', standalone=True)
             for name in ['word/header1.xml', 'word/header2.xml']:
                 if name not in entries:
                     continue
                 header = E.fromstring(entries[name])
-                for old in header.xpath('.//v:rect[@id="SEICenterTag"]', namespaces=NS):
+                for old in header.xpath('.//*[@id and starts-with(@id,"SEICenter")]', namespaces=NS):
                     run = old.getparent().getparent()
                     run.getparent().remove(run)
                 top = geo['cut'] + .25 * 1024 / 21 if name.endswith('header1.xml') else 112 + .45 * 1024 / 21
                 bottom = 1448 - geo['bh'] - .35 * 1024 / 21
+                middle = (top + bottom) / 2
+                p = header.find('w:p', NS)
+                p.append(divider_graphic('SEICenterLineTop', 511.55, top, .9, middle-70-top, color))
+                p.append(divider_graphic('SEICenterLineBottom', 511.55, middle+70, .9, bottom-middle-70, color))
+                p.append(divider_graphic('SEICenterCapTop', 510.4, top-1.6, 3.2, 3.2, color, oval=True))
+                p.append(divider_graphic('SEICenterCapBottom', 510.4, bottom-1.6, 3.2, 3.2, color, oval=True))
                 marker = box('SEICenterTag', 503, (top + bottom) / 2 - 70, 18, 140,
-                             'Nº 1 EM APROVAÇÃO', 14, '063B8C', '#FFFFFF')
+                             'Nº 1 EM APROVAÇÃO', 12, 'FFFFFF', '#'+color)
                 # Identificação decorativa fixa, sem criar outro campo de revisão.
                 sdt = marker.find('.//w:sdt', NS)
                 parent = sdt.getparent()
@@ -154,13 +184,16 @@ def main():
                     parent.append(child)
                 parent.remove(sdt)
                 shape = marker.find('.//v:rect', NS)
+                shape.tag = f'{{{V}}}roundrect'
+                shape.set('arcsize', '50%')
                 content = marker.find('.//w:txbxContent', NS)
                 paragraph = content.find('w:p', NS)
                 content.remove(paragraph)
-                paragraph.find('w:pPr/w:spacing', NS).set(f'{{{W}}}line', '180')
+                paragraph.find('w:pPr/w:spacing', NS).set(f'{{{W}}}line', '140')
                 table = E.SubElement(content, f'{{{W}}}tbl')
                 table_pr = E.SubElement(table, f'{{{W}}}tblPr')
                 table_pr.append(el('tblW', w=199, type='dxa'))
+                table_pr.append(el('tblInd', w=-80, type='dxa'))
                 table_pr.append(el('tblLayout', type='fixed'))
                 margins = E.SubElement(table_pr, f'{{{W}}}tblCellMar')
                 for side in ['top','left','bottom','right']:
@@ -178,7 +211,7 @@ def main():
                 E.SubElement(tail, f'{{{W}}}pPr').append(el('spacing', before=0, after=0, line=1, lineRule='exact'))
                 content.append(tail)
                 shape.set('stroked', 't')
-                shape.set('strokecolor', '#0B2A5B')
+                shape.set('strokecolor', '#'+color)
                 shape.set('strokeweight', '0.5pt')
                 header.find('w:p', NS).append(marker)
                 entries[name] = E.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
@@ -186,6 +219,7 @@ def main():
                 for name, data in entries.items():
                     z.writestr(name, data)
             markers += 1
+    (ROOT / 'assets/montar/molduras.json').write_text(json.dumps(geometry, ensure_ascii=False, separators=(',', ':')))
     print(f'Divisória “Nº 1 EM APROVAÇÃO” aplicada em {markers} modelos.')
 
 

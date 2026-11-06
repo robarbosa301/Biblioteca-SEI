@@ -17,7 +17,7 @@ for kind in ['word', 'word-conteudo']:
                 doc = E.fromstring(z.read('word/document.xml'))
                 cols = doc.find('.//w:body/w:sectPr/w:cols', NS)
                 assert cols.get(f'{{{NS["w"]}}}num') == '2', path
-                assert cols.get(f'{{{NS["w"]}}}sep') == '1', path
+                assert cols.get(f'{{{NS["w"]}}}sep') == '0', path
                 for name in ['word/header1.xml', 'word/header2.xml']:
                     root = E.fromstring(z.read(name))
                     fields = root.xpath('.//v:rect[@id="SEIDynamicPage"]//w:fldSimple/@w:instr | .//v:rect[@id="SEIDynamicPage"]//w:instrText/text()', namespaces=NS)

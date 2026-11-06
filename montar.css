@@ -24,7 +24,11 @@ html,body{margin:0;background:var(--fundo);font-family:system-ui,-apple-system,S
 .campo::placeholder{color:#8a8a8a;font-weight:700}
 .identificacao{background:#041629;color:#fff;border:0;border-radius:3px;text-align:center;font:700 9pt Arial,sans-serif;padding:0 2px}
 .identificacao:focus{outline:2px solid #22b9ef}
-.column-divider{position:absolute;width:0;border-left:0.75pt solid #087dce;pointer-events:none}
+.column-divider{position:absolute;width:0;pointer-events:none;--divider-color:#087dce}
+.column-divider::before,.column-divider::after{content:"";position:absolute;left:-.25pt;width:.5pt;height:calc(50% - 13.67mm);background:var(--divider-color)}
+.column-divider::before{top:0}.column-divider::after{bottom:0}
+.divider-cap{position:absolute;left:0;width:.6mm;height:.6mm;border-radius:50%;background:var(--divider-color);transform:translate(-50%,-50%)}
+.divider-cap.start{top:0}.divider-cap.end{top:100%}
 .auto-page-number{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:3px;background:#fff;color:#063b8c;font:700 17pt Arial,sans-serif;pointer-events:none}
 /* conteúdo colado */
 .col>*{margin:0 0 4pt}
@@ -72,4 +76,4 @@ dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 
 #ed p{margin:0 0 4pt}#ed ul,#ed ol{padding-left:5mm}
 @media(max-width:700px){#formatToolbar{margin:8px 8px 0;padding:8px}.format-toolbar{gap:5px}.format-toolbar select{max-width:135px;font-size:13px}.format-toolbar label{font-size:11px}}
 
-.divider-mark{position:absolute;left:0;top:50%;transform:translate(-50%,-50%) rotate(180deg);writing-mode:vertical-rl;white-space:nowrap;background:#fff;color:#063b8c;border:.5pt solid #0b2a5b;border-radius:3px;padding:3pt 1pt;font:700 6pt Arial,sans-serif;letter-spacing:.2pt}
+.divider-mark{position:absolute;left:0;top:50%;transform:translate(-50%,-50%) rotate(180deg);writing-mode:vertical-rl;white-space:nowrap;display:flex;align-items:center;justify-content:center;width:3.515mm;height:27.344mm;box-sizing:border-box;background:var(--divider-color);color:#fff;border:.5pt solid var(--divider-color);border-radius:1.76mm;padding:1mm .3mm;font:700 6pt Arial,sans-serif;letter-spacing:.2pt}

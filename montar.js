@@ -337,7 +337,7 @@
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
     const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg);
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
-    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg');
+    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=3-estilo';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
     pg.appendChild(fr);
     if (n === 0) {
@@ -357,8 +357,10 @@
     {
       const box = colBoxes(n === 0)[0];
       const divider = document.createElement('div'); divider.className = 'column-divider'; divider.setAttribute('aria-hidden', 'true');
+      divider.style.setProperty('--divider-color', geo.dividerColor || '#087dce');
       Object.assign(divider.style, { left: '10.5cm', top: cm(box.y), height: cm(box.h) }); pg.appendChild(divider);
       const mark = document.createElement('span'); mark.className='divider-mark'; mark.textContent='Nº 1 EM APROVAÇÃO'; divider.appendChild(mark);
+      for (const position of ['start','end']) { const cap=document.createElement('span');cap.className='divider-cap '+position;divider.appendChild(cap); }
     }
     if (advanced) {
       const number = document.createElement('span'); number.className = 'auto-page-number';
@@ -470,7 +472,7 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=4')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=5')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');
