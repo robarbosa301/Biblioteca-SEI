@@ -93,7 +93,7 @@ def label_box(name, x, y, width, height, text, size, color, fill):
 
 def create(grade, segment):
     folder = f'{segment}/{grade}-ano'
-    label = f'{grade}ª série · ' + ('Convênio' if grade == 3 else 'Ensino Médio')
+    label = 'Convênio — 3ª série' if grade == 3 else f'{grade}ª série · Ensino Médio'
     footer = f'{grade}ª série · ' + ('Convênio' if grade == 3 else 'Médio')
     for kind in ['word', 'word-conteudo']:
         source = ROOT / f'assets/{kind}/pre-vestibular/espanhol.docx'

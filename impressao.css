@@ -38,3 +38,5 @@
 .bw-editor-footer{display:none}
 
 .actions .print-bw{background:#fff!important;color:#111!important;border:2px solid #555}
+
+@media print{.sei-print-bw .divider-mark{color:#111!important;border-color:#777!important;background:#fff!important}}

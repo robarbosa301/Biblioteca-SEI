@@ -16,7 +16,7 @@
     const subject = names[slug] || slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ');
     const year = (clean.match(/\/(\d+)-ano\//) || [])[1];
     const grade = clean.includes('/pre-vestibular/') ? 'Pré-vestibular' :
-      clean.includes('/convenio/') ? '3ª série · Convênio' :
+      clean.includes('/convenio/') ? 'Convênio — 3ª série' :
       clean.includes('/ensino-medio/') ? year + 'ª série · Ensino Médio' :
       year ? year + 'º ano · Ensino Fundamental' : 'SEI Incentivo';
     return {subject, grade};

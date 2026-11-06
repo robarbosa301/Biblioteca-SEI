@@ -6,9 +6,9 @@ window.seiHeaderConfig=(group,year,subject)=>{
  const n=parseInt(year,10);let grade,lines,size=48;
  if(group===0||group===1){grade=n+'º ANO';lines=['ENSINO','FUNDAMENTAL']}
  else if(group===2){grade=n+'ª SÉRIE';lines=['ENSINO','MÉDIO'];size=43}
- else if(group===3){grade='3ª SÉRIE';lines=['ENSINO MÉDIO','CONVÊNIO'];size=43}
+ else if(group===3){grade='CONVÊNIO';lines=['3ª SÉRIE','ENSINO MÉDIO'];size=43}
  else{grade='PRÉ';lines=['VESTIBULAR','PREPARAÇÃO'];size=48}
- return {grade,lines,size,subject:subject==='Artes'?'Arte':subject,color:colors[subject]||'0059D9',label:group===3?'3ª série (Convênio)':group===2?n+'ª série':year,stage:group<2?'Ensino Fundamental':group===4?'Pré-vestibular':'Ensino Médio'};
+ return {grade,lines,size,subject:subject==='Artes'?'Arte':subject,color:colors[subject]||'0059D9',label:group===3?'Convênio — 3ª série':group===2?n+'ª série':year,stage:group<2?'Ensino Fundamental':group===4?'Pré-vestibular':'Ensino Médio'};
 };
 window.seiHeaderMarkup=(group,year,subject)=>{
  const c=seiHeaderConfig(group,year,subject),lineSize=group===3?25:group===4?25:29;

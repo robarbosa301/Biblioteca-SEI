@@ -354,10 +354,13 @@
       }
     }
     const cols = colBoxes(n === 0).map(b => { const d = document.createElement('div'); d.className = 'col'; Object.assign(d.style, { left: cm(b.x), top: cm(b.y), width: cm(b.w), height: cm(b.h) }); pg.appendChild(d); return d; });
-    if (advanced) {
+    {
       const box = colBoxes(n === 0)[0];
       const divider = document.createElement('div'); divider.className = 'column-divider'; divider.setAttribute('aria-hidden', 'true');
       Object.assign(divider.style, { left: '10.5cm', top: cm(box.y), height: cm(box.h) }); pg.appendChild(divider);
+      const mark = document.createElement('span'); mark.className='divider-mark'; mark.textContent='1 EM APROVAÇÃO'; divider.appendChild(mark);
+    }
+    if (advanced) {
       const number = document.createElement('span'); number.className = 'auto-page-number';
       number.textContent = String(n + 1).padStart(2, '0'); number.setAttribute('aria-label', 'Página ' + (n + 1));
       const [px, py, pw, ph] = geo.page || [943, 1391, 50, 35];

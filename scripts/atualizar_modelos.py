@@ -5,6 +5,7 @@ Executado antes de publicar no Pages. As artes originais são preservadas.
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 from lxml import etree as E
+import json
 
 ROOT = Path(__file__).resolve().parents[1]
 W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
@@ -125,6 +126,67 @@ def main():
                 update(path)
                 count += 1
     print(f'{count} modelos Word atualizados: página automática, título editável e divisória.')
+    markers = 0
+    geometry = json.loads((ROOT / 'assets/montar/molduras.json').read_text())
+    for kind in ['word', 'word-conteudo']:
+        for path in sorted((ROOT / 'assets' / kind).rglob('*.docx')):
+            relative = path.relative_to(ROOT / 'assets' / kind).with_suffix('').as_posix()
+            geo = next((v for v in geometry.values() if v['f'] == relative), None)
+            if not geo:
+                continue
+            with ZipFile(path) as z:
+                entries = {n: z.read(n) for n in z.namelist()}
+            for name in ['word/header1.xml', 'word/header2.xml']:
+                if name not in entries:
+                    continue
+                header = E.fromstring(entries[name])
+                for old in header.xpath('.//v:rect[@id="SEICenterTag"]', namespaces=NS):
+                    run = old.getparent().getparent()
+                    run.getparent().remove(run)
+                top = geo['cut'] + .25 * 1024 / 21 if name.endswith('header1.xml') else 112 + .45 * 1024 / 21
+                bottom = 1448 - geo['bh'] - .35 * 1024 / 21
+                marker = box('SEICenterTag', 503, (top + bottom) / 2 - 70, 18, 140,
+                             '1 EM APROVAÇÃO', 14, '063B8C', '#FFFFFF')
+                # Identificação decorativa fixa, sem criar outro campo de revisão.
+                sdt = marker.find('.//w:sdt', NS)
+                parent = sdt.getparent()
+                for child in list(sdt.find('w:sdtContent', NS)):
+                    parent.append(child)
+                parent.remove(sdt)
+                shape = marker.find('.//v:rect', NS)
+                content = marker.find('.//w:txbxContent', NS)
+                paragraph = content.find('w:p', NS)
+                content.remove(paragraph)
+                paragraph.find('w:pPr/w:spacing', NS).set(f'{{{W}}}line', '180')
+                table = E.SubElement(content, f'{{{W}}}tbl')
+                table_pr = E.SubElement(table, f'{{{W}}}tblPr')
+                table_pr.append(el('tblW', w=199, type='dxa'))
+                table_pr.append(el('tblLayout', type='fixed'))
+                margins = E.SubElement(table_pr, f'{{{W}}}tblCellMar')
+                for side in ['top','left','bottom','right']:
+                    margins.append(el(side, w=0, type='dxa'))
+                E.SubElement(table, f'{{{W}}}tblGrid').append(el('gridCol', w=199))
+                row = E.SubElement(table, f'{{{W}}}tr')
+                E.SubElement(row, f'{{{W}}}trPr').append(el('trHeight', val=1550, hRule='exact'))
+                cell = E.SubElement(row, f'{{{W}}}tc')
+                cell_pr = E.SubElement(cell, f'{{{W}}}tcPr')
+                cell_pr.append(el('tcW', w=199, type='dxa'))
+                cell_pr.append(el('textDirection', val='btLr'))
+                cell_pr.append(el('vAlign', val='center'))
+                cell.append(paragraph)
+                tail = el('p')
+                E.SubElement(tail, f'{{{W}}}pPr').append(el('spacing', before=0, after=0, line=1, lineRule='exact'))
+                content.append(tail)
+                shape.set('stroked', 't')
+                shape.set('strokecolor', '#0B2A5B')
+                shape.set('strokeweight', '0.5pt')
+                header.find('w:p', NS).append(marker)
+                entries[name] = E.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
+            with ZipFile(path, 'w', ZIP_DEFLATED) as z:
+                for name, data in entries.items():
+                    z.writestr(name, data)
+            markers += 1
+    print(f'Divisória “1 EM APROVAÇÃO” aplicada em {markers} modelos.')
 
 
 if __name__ == '__main__':
