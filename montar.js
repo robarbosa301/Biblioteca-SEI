@@ -358,7 +358,7 @@
       const box = colBoxes(n === 0)[0];
       const divider = document.createElement('div'); divider.className = 'column-divider'; divider.setAttribute('aria-hidden', 'true');
       Object.assign(divider.style, { left: '10.5cm', top: cm(box.y), height: cm(box.h) }); pg.appendChild(divider);
-      const mark = document.createElement('span'); mark.className='divider-mark'; mark.textContent='1 EM APROVAÇÃO'; divider.appendChild(mark);
+      const mark = document.createElement('span'); mark.className='divider-mark'; mark.textContent='Nº 1 EM APROVAÇÃO'; divider.appendChild(mark);
     }
     if (advanced) {
       const number = document.createElement('span'); number.className = 'auto-page-number';

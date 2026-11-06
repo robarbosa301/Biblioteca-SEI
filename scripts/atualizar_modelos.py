@@ -146,7 +146,7 @@ def main():
                 top = geo['cut'] + .25 * 1024 / 21 if name.endswith('header1.xml') else 112 + .45 * 1024 / 21
                 bottom = 1448 - geo['bh'] - .35 * 1024 / 21
                 marker = box('SEICenterTag', 503, (top + bottom) / 2 - 70, 18, 140,
-                             '1 EM APROVAÇÃO', 14, '063B8C', '#FFFFFF')
+                             'Nº 1 EM APROVAÇÃO', 14, '063B8C', '#FFFFFF')
                 # Identificação decorativa fixa, sem criar outro campo de revisão.
                 sdt = marker.find('.//w:sdt', NS)
                 parent = sdt.getparent()
@@ -186,7 +186,7 @@ def main():
                 for name, data in entries.items():
                     z.writestr(name, data)
             markers += 1
-    print(f'Divisória “1 EM APROVAÇÃO” aplicada em {markers} modelos.')
+    print(f'Divisória “Nº 1 EM APROVAÇÃO” aplicada em {markers} modelos.')
 
 
 if __name__ == '__main__':
