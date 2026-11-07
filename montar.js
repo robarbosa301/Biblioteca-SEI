@@ -5,7 +5,7 @@
   const $ = s => document.querySelector(s);
   const pagesEl = $('#pages'), measure = $('#measure');
   const src = decodeURIComponent((location.hash.match(/f=([^&]+)/) || [])[1] || '');
-  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', identificacao = 'Revisão 01';
+  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
   const advanced = /assets\/(pre-vestibular|ensino-medio|convenio)\//.test(src);
   const KEY = 'sei-montar:' + src;
 
@@ -337,7 +337,7 @@
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
     const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg);
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
-    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=3-estilo';
+    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=4-ident';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
     pg.appendChild(fr);
     if (n === 0) {
@@ -345,12 +345,21 @@
       c.style.left = cm((geo.ul[1] * K + 0.05) * F + PSM); c.style.top = cm(OY + geo.ul[0] * K * F - 0.36); c.style.width = cm((geo.turma ? 2.6 : 3.4) * F); c.style.height = '0.34cm';
       c.oninput = () => { conteudo = c.value; save(); };
       pg.appendChild(c);
-      if (advanced) {
-        const label = document.createElement('input'); label.className = 'campo identificacao';
-        label.setAttribute('aria-label', 'Identificação da folha, por exemplo Aula 1 ou Revisão 01');
-        label.value = identificacao; label.maxLength = 32;
-        Object.assign(label.style, { left: cm(PSM + 833 * K * F), top: cm(OY + 260 * K * F), width: cm(151 * K * F), height: cm(49 * K * F) });
-        label.oninput = () => { identificacao = label.value; save(); }; pg.appendChild(label);
+      if (geo.idColor) {
+        // Identificação: [ícone] TIPO | NÚMERO — os dois editáveis, na fonte da arte
+        const box = (x0, y0, x1, y1) => ({ left: cm(PSM + x0 * K * F), top: cm(OY + y0 * K * F), width: cm((x1 - x0) * K * F), height: cm((y1 - y0) * K * F) });
+        const partes = (identificacao || '').trim().match(/^(.*?)\s*(\d+)?$/) || ['', identificacao, ''];
+        const tipo = document.createElement('input'); tipo.className = 'campo id-tipo'; tipo.maxLength = 14;
+        tipo.setAttribute('aria-label', 'Tipo da folha: Aula, Revisão, Atividade…'); tipo.value = partes[1] || '';
+        Object.assign(tipo.style, box(834, 264, 928, 302));
+        const sep = document.createElement('span'); sep.className = 'id-sep'; sep.style.background = '#' + geo.idColor;
+        Object.assign(sep.style, box(931.5, 264, 933.3, 303));
+        const num = document.createElement('input'); num.className = 'campo id-num'; num.maxLength = 3;
+        num.setAttribute('aria-label', 'Número da folha'); num.value = partes[2] || ''; num.style.color = '#' + geo.idColor;
+        Object.assign(num.style, box(937, 257, 991, 309));
+        const upd = () => { identificacao = (tipo.value.trim() + ' ' + num.value.trim()).trim(); save(); };
+        tipo.oninput = upd; num.oninput = upd;
+        pg.append(sep, tipo, num);
       }
     }
     const cols = colBoxes(n === 0).map(b => { const d = document.createElement('div'); d.className = 'col'; Object.assign(d.style, { left: cm(b.x), top: cm(b.y), width: cm(b.w), height: cm(b.h) }); pg.appendChild(d); return d; });
@@ -472,14 +481,14 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=5')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=6')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');
     $('#titulo').textContent = 'Montar folha · ' + nome.charAt(0).toUpperCase() + nome.slice(1);
     const back = sessionStorage.getItem('sei-voltar'); if (back) $('#voltar').href = back;
     const saved = await db.get(KEY);
-    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; identificacao = saved.identificacao ?? 'Revisão 01'; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
+    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
     render();
   })();
   window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; } };

@@ -23,9 +23,14 @@ for kind in ['word', 'word-conteudo']:
                     fields = root.xpath('.//v:rect[@id="SEIDynamicPage"]//w:fldSimple/@w:instr | .//v:rect[@id="SEIDynamicPage"]//w:instrText/text()', namespaces=NS)
                     assert len(fields) == 1 and 'PAGE' in fields[0], (path, name)
                     assert root.xpath('.//v:rect[@id="SEIDynamicPage"]//w:rPr[w:rFonts[@w:ascii="Arial"]][w:b][w:sz[@w:val="34"]]', namespaces=NS), (path, name)
-                    titles = root.xpath('.//w:sdt[w:sdtPr/w:tag[@w:val="sei-identificacao"]]', namespaces=NS)
-                    assert len(titles) == (1 if name.endswith('header1.xml') else 0), (path, name)
+                    # a identificação saiu do cabeçalho (onde não dava para clicar) para o corpo
+                    assert not root.xpath('.//w:sdt[w:sdtPr/w:tag[@w:val="sei-identificacao"]]', namespaces=NS), (path, name)
                     assert not root.xpath('.//w:sdtPr/w:lock', namespaces=NS), path
+                for tag in ['sei-tipo', 'sei-numero']:
+                    assert len(doc.xpath(f'.//w:body//w:sdt[w:sdtPr/w:tag[@w:val="{tag}"]]', namespaces=NS)) == 1, (path, tag)
+                fonts = E.fromstring(z.read('word/fontTable.xml'))
+                assert fonts.xpath('.//w:font[@w:name="Barlow Condensed SemiBold"]/w:embedRegular', namespaces=NS), path
+                assert fonts.xpath('.//w:font[@w:name="Poppins"]/w:embedBold', namespaces=NS), path
                 settings = E.fromstring(z.read('word/settings.xml'))
                 assert settings.find('w:updateFields', NS).get(f'{{{NS["w"]}}}val') == 'true', path
             count += 1

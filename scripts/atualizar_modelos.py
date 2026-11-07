@@ -100,11 +100,10 @@ def update(path):
             run = shape.getparent().getparent()
             run.getparent().remove(run)
         p = header.find('w:p', NS)
-        page_box = (949, 1397, 37, 32) if path.stem == 'espanhol' and 'pre-vestibular' not in path.parts else (943, 1391, 50, 35)
-        page_color = '9B1015' if path.stem == 'espanhol' and 'pre-vestibular' not in path.parts else '063B8C'
+        page_box = (943, 1391, 50, 35)
+        page_color = '9B1015' if path.stem == 'espanhol' else '063B8C'
         p.append(box('SEIDynamicPage', *page_box, '01', 34, page_color, '#FFFFFF', field=True))
-        if name.endswith('header1.xml'):
-            p.append(box('SEIDynamicTitle', 833, 260, 151, 49, 'Revisão 01', 18, 'FFFFFF', '#041629'))
+        # A identificação (Revisão | 01) agora fica no corpo: ver scripts/identificacao.py.
         entries[name] = E.tostring(header, xml_declaration=True, encoding='UTF-8', standalone=True)
     settings = E.fromstring(entries['word/settings.xml'])
     flag = settings.find('w:updateFields', NS)
@@ -141,6 +140,26 @@ def main():
                 update(path)
                 count += 1
     print(f'{count} modelos Word atualizados: página automática, título editável e divisória.')
+    from identificacao import aplicar_documento, embutir_fontes
+    geo_id = {v['f']: v for v in json.loads((ROOT / 'assets/montar/molduras.json').read_text()).values()}
+    feitos = 0
+    for kind in ['word', 'word-conteudo']:
+        for path in sorted((ROOT / 'assets' / kind).rglob('*.docx')):
+            rel = path.relative_to(ROOT / 'assets' / kind).with_suffix('').as_posix()
+            cor = geo_id.get(rel, {}).get('idColor')
+            if not cor:
+                continue
+            with ZipFile(path) as z:
+                entries = {n: z.read(n) for n in z.namelist()}
+            doc = E.fromstring(entries['word/document.xml'])
+            aplicar_documento(doc, cor, 'Atividades' if rel.startswith('fundamental') else 'Revisão')
+            entries['word/document.xml'] = E.tostring(doc, xml_declaration=True, encoding='UTF-8', standalone=True)
+            embutir_fontes(entries)
+            with ZipFile(path, 'w', ZIP_DEFLATED) as z:
+                for n, d in entries.items():
+                    z.writestr(n, d)
+            feitos += 1
+    print(f'{feitos} modelos com identificação editável (tipo e número).')
     markers = 0
     subject_colors = {}
     geometry = json.loads((ROOT / 'assets/montar/molduras.json').read_text())

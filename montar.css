@@ -22,8 +22,15 @@ html,body{margin:0;background:var(--fundo);font-family:system-ui,-apple-system,S
 #measure{position:absolute;left:-10000px;top:0;visibility:hidden}
 .campo{position:absolute;border:0;border-bottom:1px dashed #9aa;background:transparent;font:700 7.5pt Arial,sans-serif;color:#10121b;padding:0;outline:none}
 .campo::placeholder{color:#8a8a8a;font-weight:700}
-.identificacao{background:#041629;color:#fff;border:0;border-radius:3px;text-align:center;font:700 9pt Arial,sans-serif;padding:0 2px}
-.identificacao:focus{outline:2px solid #22b9ef}
+@font-face{font-family:'SEI Barlow';src:url(assets/fonts/BarlowCondensed-SemiBold.ttf) format('truetype');font-weight:600;font-display:block}
+@font-face{font-family:'SEI Poppins';src:url(assets/fonts/Poppins-Bold.ttf) format('truetype');font-weight:700;font-display:block}
+.page .id-tipo,.page .id-num{background:transparent;border:0;border-radius:3px;text-align:center;padding:0;outline:none}
+.page .id-tipo{color:#fff;font:600 12.5pt/1 'SEI Barlow','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.01em}
+.page .id-num{font:700 22pt/1 'SEI Poppins',Arial,sans-serif}
+.page .id-tipo:hover,.page .id-num:hover{background:rgba(255,255,255,.08)}
+.page .id-tipo:focus,.page .id-num:focus{background:rgba(255,255,255,.12);box-shadow:0 0 0 1px rgba(255,255,255,.5)}
+.page .id-sep{position:absolute}
+@media print{.page .id-tipo,.page .id-num{background:transparent!important;box-shadow:none!important}}
 .column-divider{position:absolute;width:0;pointer-events:none;--divider-color:#087dce}
 .column-divider::before,.column-divider::after{content:"";position:absolute;left:-.25pt;width:.5pt;height:calc(50% - 13.67mm);background:var(--divider-color)}
 .column-divider::before{top:0}.column-divider::after{bottom:0}
