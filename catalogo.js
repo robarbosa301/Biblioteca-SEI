@@ -1,7 +1,7 @@
 const seiPublishedPages={
-  "2|1º ano|Espanhol": "assets/ensino-medio/1-ano/espanhol.png?v=4-padrao",
-  "2|2º ano|Espanhol": "assets/ensino-medio/2-ano/espanhol.png?v=4-padrao",
-  "3|3º ano|Espanhol": "assets/convenio/3-ano/espanhol.png?v=4-padrao",
+  "2|1º ano|Espanhol": "assets/ensino-medio/1-ano/espanhol.png?v=5-nevoa",
+  "2|2º ano|Espanhol": "assets/ensino-medio/2-ano/espanhol.png?v=5-nevoa",
+  "3|3º ano|Espanhol": "assets/convenio/3-ano/espanhol.png?v=5-nevoa",
   "0|1º ano|Arte": "assets/fundamental-1/1-ano/arte.png?v=20",
   "0|1º ano|Ciências": "assets/fundamental-1/1-ano/ciencias.png?v=20",
   "0|1º ano|Educação Física": "assets/fundamental-1/1-ano/educacao-fisica.png?v=20",
