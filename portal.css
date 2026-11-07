@@ -107,8 +107,8 @@ footer .contatos .mp{background:#fff;font-size:12px}
 /* ===== Computador (≥1100px): layout próprio ===== */
 @media screen and (min-width:1100px){
  /* Início: arte do topo + etapas com as mesmas ilustrações do celular */
- .portal-home{max-width:1200px;margin:24px auto;padding:22px 24px 26px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;border-radius:22px;background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=3) center top/cover no-repeat;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35)}
- .portal-home .portal-art{grid-column:1/-1;content:url(assets/portal/cabecalho-largo.jpg?v=7);width:calc(100% + 48px);max-width:none;height:auto;aspect-ratio:2400/440;object-fit:cover;margin:-22px -24px 4px;border-radius:22px 22px 0 0}
+ .portal-home{max-width:1200px;margin:24px auto;padding:22px 24px 26px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;border-radius:22px;background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center top/cover no-repeat;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+ .portal-home .portal-art{grid-column:1/-1;content:url(assets/portal/cabecalho-largo.jpg?v=8);width:calc(100% + 48px);max-width:none;height:auto;aspect-ratio:2400/440;object-fit:cover;margin:-22px -24px 4px;border-radius:22px 22px 0 0}
  .portal-home::before{content:'';grid-column:1/-1;order:1;justify-self:center;width:min(100%,760px);aspect-ratio:724/104;background:url(assets/portal/titulo-materiais-claro.png?v=1) center/contain no-repeat,radial-gradient(closest-side,rgba(5,30,95,.92),rgba(5,30,95,.6) 60%,rgba(5,30,95,0));margin:6px 0 4px;padding:18px 0}
  .portal-home::after{content:none}
  .portal-home .portal-entry{order:2;position:relative;inset:auto;width:auto;height:auto;min-height:0;padding:0;border:0;border-radius:16px;grid-column:span 1;aspect-ratio:481/280;
@@ -128,7 +128,7 @@ footer .contatos .mp{background:#fff;font-size:12px}
 
  /* Cabeçalho das páginas internas: faixa compacta */
  body>header{max-width:1200px;margin:20px auto 0;border-radius:18px 18px 0 0;overflow:hidden;background:linear-gradient(90deg,#0a3a9c,#0b3fa8)}
- .portal-brand{aspect-ratio:2400/440;height:auto;display:block;background:url(assets/portal/cabecalho-largo.jpg?v=7) center/cover no-repeat}
+ .portal-brand{aspect-ratio:2400/440;height:auto;display:block;background:url(assets/portal/cabecalho-largo.jpg?v=8) center/cover no-repeat}
  .portal-brand img{display:none}
  .wrap{max-width:1200px;padding:20px 28px 28px}
  .portal-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
