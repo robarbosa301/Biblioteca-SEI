@@ -108,7 +108,7 @@ footer .contatos .mp{background:#fff;font-size:12px}
 @media screen and (min-width:1100px){
  /* Início: arte do topo + etapas com as mesmas ilustrações do celular */
  .portal-home{max-width:1200px;margin:24px auto;padding:22px 24px 26px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;border-radius:22px;background:#d9f2ff;overflow:hidden}
- .portal-home .portal-art{grid-column:1/-1;content:url(assets/portal/cabecalho-largo.jpg?v=5);width:calc(100% + 48px);max-width:none;height:auto;aspect-ratio:2400/440;object-fit:cover;margin:-22px -24px 4px;border-radius:22px 22px 0 0}
+ .portal-home .portal-art{grid-column:1/-1;content:url(assets/portal/cabecalho-largo.jpg?v=7);width:calc(100% + 48px);max-width:none;height:auto;aspect-ratio:2400/440;object-fit:cover;margin:-22px -24px 4px;border-radius:22px 22px 0 0}
  .portal-home::before{content:'Materiais da escola';grid-column:1/-1;order:1;text-align:center;font:900 30px/1.1 Arial,sans-serif;color:#0a2f7a;margin:6px 0 -6px}
  .portal-home::after{content:'Selecione a etapa de ensino';grid-column:1/-1;order:1;text-align:center;font:600 16px Arial,sans-serif;color:#244867;margin:-8px 0 2px}
  .portal-home .portal-entry{order:2;position:relative;inset:auto;width:auto;height:auto;min-height:0;padding:0;border:0;border-radius:16px;grid-column:span 1;aspect-ratio:481/280;
@@ -127,7 +127,7 @@ footer .contatos .mp{background:#fff;font-size:12px}
 
  /* Cabeçalho das páginas internas: faixa compacta */
  body>header{max-width:1200px;margin:20px auto 0;border-radius:18px 18px 0 0;overflow:hidden;background:linear-gradient(90deg,#0a3a9c,#0b3fa8)}
- .portal-brand{aspect-ratio:2400/440;height:auto;display:block;background:url(assets/portal/cabecalho-largo.jpg?v=5) center/cover no-repeat}
+ .portal-brand{aspect-ratio:2400/440;height:auto;display:block;background:url(assets/portal/cabecalho-largo.jpg?v=7) center/cover no-repeat}
  .portal-brand img{display:none}
  .wrap{max-width:1200px;padding:20px 28px 28px}
  .portal-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
