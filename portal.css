@@ -145,3 +145,10 @@ footer .contatos .mp{background:#fff;font-size:12px}
  .sheet-switcher,.nav-top{max-width:none}
  .offline-box{max-width:1200px}
 }
+/* Botão "Usar sem internet": só o botão, sem caixa branca */
+.offline-box{background:transparent!important;border:0!important;padding:4px 0!important;margin:14px auto 22px!important;box-shadow:none!important}
+.offline-box .ob{margin:0}
+.offline-box button{background:linear-gradient(180deg,#1a73e8,#0a3a9c)!important;color:#fff!important;border:1px solid #6fd3ff!important;border-radius:999px!important;padding:10px 20px!important;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.3),0 0 12px rgba(80,200,255,.25)}
+.offline-box button:hover{filter:brightness(1.12)}
+#obMsg{color:#dff3ff;font-size:13px;margin:6px 0 0;min-height:0}
+#obMsg:empty{display:none}
