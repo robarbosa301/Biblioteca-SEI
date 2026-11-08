@@ -201,3 +201,23 @@ footer .contatos .mp{background:#fff;font-size:12px}
  body.on-sheet .nav-faixa{background:linear-gradient(90deg,rgba(0,0,0,.55) 0,rgba(0,0,0,.25) 55%,rgba(0,0,0,.05)),var(--capa,none) center 40%/cover no-repeat!important;border-color:rgba(255,255,255,.45)}
  body.on-sheet .wrap .panel{background:rgba(0,0,0,.18)!important;border:1px solid rgba(255,255,255,.18)!important}
 }
+/* Painel de ações da folha (computador) */
+.pa-grupo{display:none}
+@media not screen and (min-width:1100px){.pa-ic,.pa-tx small{display:none}.pa-tx b{font-weight:inherit}}
+@media screen and (min-width:1100px){
+ .panel:has(> .sheet) > .actions{gap:6px!important;padding:18px 16px!important;border-radius:18px!important;background:rgba(255,255,255,.97)!important;border:0!important;box-shadow:0 10px 28px rgba(0,0,0,.3)!important}
+ .panel:has(> .sheet) > .actions::before{content:'O que deseja fazer?'!important;font:900 19px Arial,sans-serif!important;color:#0a2f7a!important;margin:0 0 2px!important}
+ .pa-grupo{display:block;margin:10px 2px 2px;font:800 11px Arial,sans-serif;letter-spacing:1.2px;text-transform:uppercase;color:#6a7f9e}
+ .panel:has(> .sheet) > .actions .pa-btn{display:flex!important;align-items:center;gap:12px;padding:9px 12px!important;border-radius:12px!important;text-align:left;
+   background:#f2f6fc!important;color:#0a2f7a!important;border:1px solid #dbe5f3!important;box-shadow:none!important;min-height:0!important;transition:background .15s,transform .15s,border-color .15s}
+ .panel:has(> .sheet) > .actions .pa-btn:hover{background:#e3edfb!important;border-color:#9fc2ee!important;transform:translateX(2px)}
+ .pa-ic{flex:0 0 38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:19px;background:#fff;border:1px solid #dbe5f3}
+ .pa-tx{display:flex;flex-direction:column;line-height:1.2}
+ .pa-tx b{font:800 15px Arial,sans-serif}
+ .pa-tx small{font:500 12.5px Arial,sans-serif;color:#5a6f8e}
+ .panel:has(> .sheet) > .actions .pa-btn.montar-site{background:linear-gradient(135deg,#1a73e8,#0a3a9c)!important;color:#fff!important;border:0!important;padding:12px!important;box-shadow:0 6px 16px rgba(10,58,156,.35)!important}
+ .pa-btn.montar-site .pa-ic{background:rgba(255,255,255,.18);border:0}
+ .pa-btn.montar-site .pa-tx small{color:#dbeaff}
+ .panel:has(> .sheet) > .actions .pa-btn.adjust-word{background:#eefaf1!important;border-color:#bfe6c9!important}
+ .panel:has(> .sheet) > .pa-dica{display:none!important}
+}
