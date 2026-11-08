@@ -506,7 +506,7 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=6')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=8')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');
@@ -515,6 +515,11 @@
     const saved = await db.get(KEY);
     if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
     render();
+    window.dispatchEvent(new CustomEvent('sei-montar-pronto', { detail: { src, geo } }));
   })();
-  window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; } };
+  window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; },
+    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, identificacao }; },
+    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
+    novaFolha() { remember(); blocks = []; conteudo = ''; selId = null; render(); persist(); },
+    get geo() { return geo; } };
 })();

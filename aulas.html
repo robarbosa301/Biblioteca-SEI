@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Minhas aulas · SEI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b2a5b">
+<link rel="stylesheet" href="aulas.css?v=1">
+</head>
+<body>
+<header class="no-print">
+  <a class="b" href="index.html">‹ Biblioteca</a>
+  <h1>📁 Minhas aulas</h1>
+  <label class="prof">Professor(a): <select id="prof"></select></label>
+</header>
+<nav class="abas no-print" role="tablist">
+  <button role="tab" data-aba="aulas" class="on">📚 Aulas</button>
+  <button role="tab" data-aba="diario">📝 Diário de aula</button>
+  <button role="tab" data-aba="painel">📊 Painel</button>
+</nav>
+<div class="filtros no-print">
+  <div class="periodo" role="group" aria-label="Período">
+    <button data-p="semana">Semana</button><button data-p="mes" class="on">Mês</button><button data-p="ano">Ano</button><button data-p="tudo">Tudo</button>
+  </div>
+  <div class="nav-per"><button id="ant" aria-label="Período anterior">‹</button><b id="perTxt"></b><button id="prox" aria-label="Próximo período">›</button></div>
+  <select id="fTurma" aria-label="Turma"><option value="">Todas as turmas</option></select>
+  <select id="fDisc" aria-label="Disciplina"><option value="">Todas as disciplinas</option></select>
+</div>
+<main>
+  <section id="aba-aulas"></section>
+  <section id="aba-diario" hidden></section>
+  <section id="aba-painel" hidden></section>
+</main>
+<footer class="no-print">
+  <p>As aulas ficam guardadas <b>neste aparelho</b>. Para não perder nem levar para outro aparelho, faça uma cópia:</p>
+  <button class="b" id="exp">⬇ Exportar cópia (arquivo)</button>
+  <label class="b">⬆ Importar cópia<input type="file" id="imp" accept=".json" hidden></label>
+  <p class="fonte">Habilidades: Dados da BNCC estruturados por bncc.dev (github.com/bncc-dev/bncc-dados), CC BY 4.0.</p>
+</footer>
+<script src="aulas-dados.js?v=1"></script>
+<script src="aulas.js?v=1"></script>
+<script src="offline.js?v=3"></script>
+</body>
+</html>

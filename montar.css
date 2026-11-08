@@ -85,3 +85,24 @@ dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 
 
 .divider-mark{position:absolute;left:0;top:50%;transform:translate(-50%,-50%) rotate(180deg);writing-mode:vertical-rl;white-space:nowrap;display:flex;align-items:center;justify-content:center;width:3.515mm;height:27.344mm;box-sizing:border-box;background:var(--divider-color);color:#fff;border:.5pt solid var(--divider-color);border-radius:1.76mm;padding:1mm .3mm;font:700 6pt Arial,sans-serif;letter-spacing:.2pt}
 .col .editando{outline:2px solid #22b9ef!important;outline-offset:2px;background:#f4fbff!important;cursor:text;white-space:pre-wrap}
+/* Salvar aula */
+.b.salvar{background:#c9f0d5}
+#dlgAula{width:min(760px,96vw)}
+.fa-corpo{display:flex;flex-direction:column;gap:10px;padding:14px;max-height:70vh;overflow:auto;font:14px system-ui,Arial,sans-serif;color:#0a2f7a}
+.fa-corpo label{display:flex;flex-direction:column;gap:4px;font-weight:700}
+.fa-corpo input,.fa-corpo textarea{font:400 15px system-ui,Arial,sans-serif;padding:8px 10px;border:1px solid #b9cce6;border-radius:8px;color:#10121b}
+.fa-l2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fa-info{margin:0;padding:6px 10px;background:#eef5ff;border-radius:8px;font-weight:700}
+.fa-bncc{border:1px solid #dbe5f3;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.fa-bncc small{font-weight:400;color:#5a6f8e}
+.fa-chips{display:flex;flex-wrap:wrap;gap:6px}.fa-chips:empty{display:none}
+.fa-chips button{border:0;border-radius:999px;background:#0a3a9c;color:#fff;padding:4px 10px;font:700 12px system-ui;cursor:pointer}
+.fa-lista{max-height:240px;overflow:auto;border:1px solid #e3eaf5;border-radius:8px}
+.fa-h{flex-direction:row!important;gap:8px!important;align-items:flex-start;padding:7px 9px;border-bottom:1px solid #eef2f8;font-weight:400!important;cursor:pointer;color:#1d2b40}
+.fa-h:hover{background:#f5f9ff}.fa-h input{margin-top:3px}
+.fa-h b{color:#0a3a9c}.fa-h i{display:block;font-size:12px;color:#6a7f9e;font-style:normal;margin-top:2px}
+.fa-vazio{padding:10px;color:#5a6f8e;margin:0}
+.fa-livre{font-weight:400!important}
+#faToast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#0b2a5b;color:#fff;padding:10px 12px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:94vw;font:14px system-ui,Arial,sans-serif}
+#faToast .b.ghost{color:#fff;border-color:rgba(255,255,255,.5)}
+@media (max-width:600px){.fa-l2{grid-template-columns:1fr}}
