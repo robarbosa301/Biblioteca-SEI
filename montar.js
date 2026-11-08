@@ -337,7 +337,7 @@
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
     const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg);
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
-    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=5-limpo';
+    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=6-ponto';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
     pg.appendChild(fr);
     if (n === 0) {

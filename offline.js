@@ -4,7 +4,7 @@
   navigator.serviceWorker.register('sw.js').catch(() => {});
   window.seiBaixarTudo = async function (onProgress) {
     const lista = await (await fetch('assets/offline-lista.json', { cache: 'no-store' })).json();
-    const c = await caches.open('sei-arquivos-v4'); let ok = 0, falha = 0;
+    const c = await caches.open('sei-arquivos-v5'); let ok = 0, falha = 0;
     const base = new URL('./', location.href);
     let i = 0;
     const worker = async () => {
