@@ -193,3 +193,11 @@ footer .contatos .mp{background:#fff;font-size:12px}
  body:not(.at-home) .portal-card.illustrated-cover{outline:2px solid rgba(120,220,255,.5);box-shadow:0 8px 22px rgba(0,8,40,.55)}
  body:not(.at-home) .portal-card.illustrated-cover:hover{outline-color:#8bf5ff}
 }
+/* Computador, página da folha: fundo na cor da folha com a ilustração da disciplina */
+@media screen and (min-width:1100px){
+ body.on-sheet .wrap{background:
+   linear-gradient(180deg,color-mix(in srgb,color-mix(in srgb,var(--cor,#0a3a9c) 62%,#020818) 80%,transparent),color-mix(in srgb,color-mix(in srgb,var(--cor,#0a3a9c) 45%,#020818) 92%,transparent) 70%),
+   var(--capa,none) center top/cover no-repeat,#0a3a9c!important}
+ body.on-sheet .nav-faixa{background:linear-gradient(90deg,rgba(0,0,0,.55) 0,rgba(0,0,0,.25) 55%,rgba(0,0,0,.05)),var(--capa,none) center 40%/cover no-repeat!important;border-color:rgba(255,255,255,.45)}
+ body.on-sheet .wrap .panel{background:rgba(0,0,0,.18)!important;border:1px solid rgba(255,255,255,.18)!important}
+}
