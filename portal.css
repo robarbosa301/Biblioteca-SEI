@@ -182,3 +182,14 @@ footer .contatos .mp{background:#fff;font-size:12px}
  .nav-faixa .fx-arr span{color:#fff}
  .nav-faixa .fx-crumbs button{box-shadow:none!important;min-height:0!important;background:rgba(255,255,255,.14)!important;color:#fff!important;border:1px solid rgba(140,220,255,.45)!important;padding:6px 14px!important}
 }
+/* Computador: páginas internas com o mesmo fundo azul da escola da tela de início */
+@media screen and (min-width:1100px){
+ body:not(.at-home) .wrap{background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center top/1200px auto repeat-y!important;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+ body:not(.at-home) .wrap #title{color:#fff!important;text-shadow:0 3px 10px rgba(0,0,0,.45)}
+ body:not(.at-home) .wrap .panel{background:rgba(3,20,70,.35)!important;border:1px solid rgba(140,220,255,.25)!important;box-shadow:none!important}
+ body:not(.at-home) .wrap .word-hint,body:not(.at-home) .wrap .adjust-msg{color:#dff3ff!important}
+ body:not(.at-home) .wrap .journey:not(.nav-b1){background:rgba(3,20,70,.55)!important;border:1px solid rgba(140,220,255,.35)!important;box-shadow:none!important}
+ body:not(.at-home) .wrap .subject-search{background:rgba(255,255,255,.95)}
+ body:not(.at-home) .portal-card.illustrated-cover{outline:2px solid rgba(120,220,255,.5);box-shadow:0 8px 22px rgba(0,8,40,.55)}
+ body:not(.at-home) .portal-card.illustrated-cover:hover{outline-color:#8bf5ff}
+}
