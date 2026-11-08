@@ -277,3 +277,18 @@ footer .contatos .mp{background:#fff;font-size:12px}
 @media screen and (max-width:1099px){.panel > .actions .pa-btn.print-bw{grid-column:1/-1}}
 @media screen and (min-width:700px) and (max-width:1099px){.panel > .actions{grid-template-columns:repeat(3,1fr)}.panel > .actions .pa-btn.print-bw,.panel > .actions .pa-btn.adjust-word{grid-column:auto}}
 .portal-home .series-home-label,.series-home-label{display:none!important}
+/* Celular e iPad: mesmo fundo do computador nas páginas internas */
+@media screen and (max-width:1099px){
+ body:not(.at-home) .wrap{background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center top/900px auto repeat-y!important;border:0!important}
+ body:not(.at-home) .wrap #title{color:#fff!important;text-shadow:0 3px 10px rgba(0,0,0,.45)}
+ body:not(.at-home) .wrap .journey:not(.nav-b1){background:rgba(3,20,70,.55)!important;border:1px solid rgba(140,220,255,.35)!important;box-shadow:none!important}
+ body:not(.at-home) .wrap .journey:not(.nav-b1) button{color:#fff}
+ body:not(.at-home) .wrap .panel{background:rgba(3,20,70,.3)!important;border:1px solid rgba(140,220,255,.22)!important;box-shadow:none!important}
+ body:not(.at-home) .portal-card.illustrated-cover{outline:2px solid rgba(120,220,255,.5);box-shadow:0 6px 16px rgba(0,8,40,.5)}
+ body.on-sheet .wrap{background:
+   linear-gradient(180deg,color-mix(in srgb,color-mix(in srgb,var(--cor,#0a3a9c) 62%,#020818) 80%,transparent),color-mix(in srgb,color-mix(in srgb,var(--cor,#0a3a9c) 45%,#020818) 92%,transparent) 70%),
+   var(--capa,none) center top/cover no-repeat,#0a3a9c!important}
+ body.on-sheet .wrap .panel{background:rgba(0,0,0,.18)!important;border:1px solid rgba(255,255,255,.18)!important}
+ body.on-sheet .nav-faixa{border-color:rgba(255,255,255,.45)}
+}
+@media screen and (max-width:1099px){body:not(.at-home) .wrap .journey:not(.nav-b1) button{background:rgba(255,255,255,.14)!important;color:#fff!important;border:1px solid rgba(140,220,255,.45)!important;box-shadow:none!important}}
