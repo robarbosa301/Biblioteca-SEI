@@ -61,7 +61,7 @@ function seiPainel(actions,hint){
  const box=document.createElement('div');box.className='pa-zoom';const menos=document.createElement('button');menos.textContent='−';menos.setAttribute('aria-label','Diminuir folha');
  const mais=document.createElement('button');mais.textContent='+';mais.setAttribute('aria-label','Aumentar folha');const val=document.createElement('span');
  const fit=document.createElement('button');fit.className='pa-fit';fit.textContent='Ajustar';fit.title='Voltar ao tamanho da coluna';
- const ap=()=>{sheet.style.setProperty('--zoom',z);sheet.classList.toggle('zoomed',z>1);val.textContent=Math.round(z*100)+'%';menos.disabled=z<=passos[0];mais.disabled=z>=passos[passos.length-1];try{localStorage.setItem('sei-zoom',z)}catch(e){}};
+ const ap=()=>{sheet.style.setProperty('--zoom',Math.max(1,z));sheet.style.setProperty('--larg',Math.min(1,z)*100+'%');sheet.classList.toggle('zoomed',z>1);val.textContent=Math.round(z*100)+'%';menos.disabled=z<=passos[0];mais.disabled=z>=passos[passos.length-1];try{localStorage.setItem('sei-zoom',z)}catch(e){}};
  menos.onclick=()=>{z=passos[Math.max(0,passos.indexOf(z)-1)];ap()};mais.onclick=()=>{z=passos[Math.min(passos.length-1,passos.indexOf(z)+1)];ap()};fit.onclick=()=>{z=1;ap()};
  box.append(menos,val,mais,fit);const h=document.createElement('p');h.className='pa-grupo';h.textContent='Tamanho da folha';actions.prepend(h,box);ap();
 }

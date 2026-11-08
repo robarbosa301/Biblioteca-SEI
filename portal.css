@@ -226,6 +226,7 @@ footer .contatos .mp{background:#fff;font-size:12px}
 .pa-zoom{display:none}
 @media screen and (min-width:1100px){
  .panel:has(> .sheet){grid-template-columns:minmax(0,1fr) 280px!important;gap:22px!important;padding:16px!important}
+ .panel:has(> .sheet) > .sheet{width:var(--larg,100%)!important;transition:width .2s}
  .panel:has(> .sheet) > .sheet .original-page{width:calc(var(--zoom,1)*100%)!important;max-width:none!important;height:auto!important;display:block}
  .panel:has(> .sheet) > .sheet.zoomed{max-height:calc(100vh - 40px);position:sticky;top:18px}
  .pa-zoom{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f2f6fc;border:1px solid #dbe5f3;border-radius:12px;padding:6px 8px}
