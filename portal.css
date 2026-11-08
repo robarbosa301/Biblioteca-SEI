@@ -152,3 +152,33 @@ footer .contatos .mp{background:#fff;font-size:12px}
 .offline-box button:hover{filter:brightness(1.12)}
 #obMsg{color:#dff3ff;font-size:13px;margin:6px 0 0;min-height:0}
 #obMsg:empty{display:none}
+/* Navegação da folha no computador: faixa com a capa da disciplina */
+.nav-faixa{display:none}
+@media screen and (min-width:1100px){
+ .journey.nav-b1{background:none!important;padding:0!important;box-shadow:none!important;border:0!important}
+ .journey.nav-b1 .nav-top,.journey.nav-b1 .sheet-switcher{display:none!important}
+ .nav-faixa{display:block;position:relative;border-radius:18px;padding:16px 22px 20px;min-height:190px;border:2px solid rgba(140,220,255,.5);box-shadow:0 10px 28px rgba(0,0,0,.28);
+  background:linear-gradient(90deg,rgba(3,20,70,.93) 0,rgba(3,20,70,.6) 55%,rgba(3,20,70,.25)),var(--capa,none) center 40%/cover no-repeat,#062a72}
+ .fx-crumbs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:#cfe8ff;font:700 15px Arial,sans-serif;margin:0 0 8px}
+ .fx-crumbs button{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(140,220,255,.45);border-radius:999px;padding:6px 14px;font:700 14px Arial,sans-serif;cursor:pointer}
+ .fx-crumbs button:hover{background:rgba(255,255,255,.26)}
+ .fx-crumbs b{color:#ffd34d}
+ .fx-row{display:grid;grid-template-columns:200px 1fr 200px;align-items:center;gap:10px}
+ .fx-t{text-align:center;color:#fff}
+ .fx-t small{font:800 15px Arial,sans-serif;letter-spacing:2px;color:#8bf5ff}
+ .fx-t h2{margin:4px 0 6px;font:900 64px/1 Arial,sans-serif;color:#fff;text-shadow:0 4px 14px rgba(0,0,0,.6)}
+ .fx-troca{position:relative;display:inline-block;font:600 15px Arial,sans-serif;color:#dff3ff;cursor:pointer}
+ .fx-troca u{color:#ffd34d;text-decoration:none;font-weight:800}
+ .fx-troca select{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+ .fx-arr{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:#fff;cursor:pointer;font:700 15px Arial,sans-serif}
+ .fx-arr span{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font:900 34px/1 Arial,sans-serif;background:rgba(255,255,255,.15);border:2px solid #8bf5ff;transition:transform .15s,background .15s}
+ .fx-arr:hover span{transform:scale(1.08);background:rgba(255,255,255,.28)}
+ .fx-arr:disabled{visibility:hidden}
+ .nav-b1 ~ #title{display:none}
+}
+@media screen and (min-width:1100px){
+ .nav-faixa .fx-arr{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;min-height:0!important;color:#fff!important;font:700 15px Arial,sans-serif!important}
+ .nav-faixa .fx-arr small{color:#fff;font:700 15px Arial,sans-serif;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+ .nav-faixa .fx-arr span{color:#fff}
+ .nav-faixa .fx-crumbs button{box-shadow:none!important;min-height:0!important;background:rgba(255,255,255,.14)!important;color:#fff!important;border:1px solid rgba(140,220,255,.45)!important;padding:6px 14px!important}
+}
