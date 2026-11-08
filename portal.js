@@ -56,6 +56,14 @@ function seiPainel(actions,hint){
  const by=t=>btns.find(b=>b.querySelector('b')&&b.querySelector('b').textContent===t);
  grupo('Ver e imprimir',[by('Ampliar folha')]);grupo('Criar a minha folha',[by('Montar folha no site')]);grupo('Baixar modelo Word',[by('Word — Questões')]);grupo('Já preencheu o Word?',[by('Ajustar Word preenchido')]);
  if(hint)hint.classList.add('pa-dica');
+ const sheet=actions.parentElement&&actions.parentElement.querySelector(':scope > .sheet');if(!sheet)return;
+ const passos=[0.7,0.8,0.9,1,1.15,1.3,1.5,1.75,2];let z=1;try{z=parseFloat(localStorage.getItem('sei-zoom'))||1}catch(e){}if(!passos.includes(z))z=1;
+ const box=document.createElement('div');box.className='pa-zoom';const menos=document.createElement('button');menos.textContent='−';menos.setAttribute('aria-label','Diminuir folha');
+ const mais=document.createElement('button');mais.textContent='+';mais.setAttribute('aria-label','Aumentar folha');const val=document.createElement('span');
+ const fit=document.createElement('button');fit.className='pa-fit';fit.textContent='Ajustar';fit.title='Voltar ao tamanho da coluna';
+ const ap=()=>{sheet.style.setProperty('--zoom',z);sheet.classList.toggle('zoomed',z>1);val.textContent=Math.round(z*100)+'%';menos.disabled=z<=passos[0];mais.disabled=z>=passos[passos.length-1];try{localStorage.setItem('sei-zoom',z)}catch(e){}};
+ menos.onclick=()=>{z=passos[Math.max(0,passos.indexOf(z)-1)];ap()};mais.onclick=()=>{z=passos[Math.min(passos.length-1,passos.indexOf(z)+1)];ap()};fit.onclick=()=>{z=1;ap()};
+ box.append(menos,val,mais,fit);const h=document.createElement('p');h.className='pa-grupo';h.textContent='Tamanho da folha';actions.prepend(h,box);ap();
 }
 let seiMolduras=null;fetch('assets/montar/molduras.json?v=7').then(r=>r.json()).then(j=>{seiMolduras=j;if(s!==null)seiTemaFolha()}).catch(()=>{});
 function seiTemaFolha(){const w=document.querySelector('main.wrap');if(!w||s===null)return;const cv=subjectCovers[s];w.style.setProperty('--capa',cv?'url('+coverRoot+'subject-'+cv+'.webp)':'none');

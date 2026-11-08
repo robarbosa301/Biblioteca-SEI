@@ -137,7 +137,7 @@ footer .contatos .mp{background:#fff;font-size:12px}
  /* Página da folha: folha à esquerda, ações numa barra lateral fixa à direita */
  .panel:has(> .sheet){display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:28px;align-items:start;padding:22px}
  .panel:has(> .sheet) > *{grid-column:2}
- .panel:has(> .sheet) > .sheet{grid-column:1;grid-row:1 / span 6;justify-self:center;width:min(100%,calc((100vh - 60px)/1.5));max-width:none;margin:0;box-shadow:0 8px 28px rgba(4,27,82,.22);border-radius:6px;overflow:hidden}
+ .panel:has(> .sheet) > .sheet{grid-column:1;grid-row:1 / span 8;justify-self:center;width:100%;max-width:none;margin:0;box-shadow:0 8px 28px rgba(4,27,82,.22);border-radius:6px;overflow:auto}
  .panel:has(> .sheet) > .actions{position:sticky;top:18px;display:flex;flex-direction:column;align-items:stretch;gap:9px;margin:0;padding:16px;border-radius:14px;background:#fff;border:1px solid #cfe0f5;box-shadow:0 4px 14px rgba(4,27,82,.08)}
  .panel:has(> .sheet) > .actions::before{content:'O que deseja fazer?';font:800 15px Arial,sans-serif;color:#0a2f7a;margin:0 0 4px}
  .panel:has(> .sheet) > .actions button{width:100%;margin:0;text-align:left;padding:11px 14px;font-size:14px;border-radius:10px}
@@ -221,3 +221,17 @@ footer .contatos .mp{background:#fff;font-size:12px}
  .panel:has(> .sheet) > .actions .pa-btn.adjust-word{background:#eefaf1!important;border-color:#bfe6c9!important}
  .panel:has(> .sheet) > .pa-dica{display:none!important}
 }
+
+/* Zoom da folha (computador) */
+.pa-zoom{display:none}
+@media screen and (min-width:1100px){
+ .panel:has(> .sheet){grid-template-columns:minmax(0,1fr) 280px!important;gap:22px!important;padding:16px!important}
+ .panel:has(> .sheet) > .sheet .original-page{width:calc(var(--zoom,1)*100%)!important;max-width:none!important;height:auto!important;display:block}
+ .panel:has(> .sheet) > .sheet.zoomed{max-height:calc(100vh - 40px);position:sticky;top:18px}
+ .pa-zoom{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#f2f6fc;border:1px solid #dbe5f3;border-radius:12px;padding:6px 8px}
+ .pa-zoom span{font:800 15px Arial,sans-serif;color:#0a2f7a;min-width:60px;text-align:center}
+ .panel:has(> .sheet) > .actions .pa-zoom button{width:40px!important;height:40px;padding:0!important;border-radius:50%!important;display:grid;place-items:center;font:900 22px/1 Arial,sans-serif!important;background:#0a3a9c!important;color:#fff!important;border:0!important;box-shadow:none!important;min-height:0!important}
+ .panel:has(> .sheet) > .actions .pa-zoom button:disabled{opacity:.35}
+ .panel:has(> .sheet) > .actions .pa-zoom .pa-fit{width:auto!important;border-radius:999px!important;padding:0 12px!important;font:700 13px Arial,sans-serif!important;background:#fff!important;color:#0a2f7a!important;border:1px solid #dbe5f3!important}
+}
+@media screen and (min-width:1100px){.journey.nav-b1{position:relative!important;top:auto!important}}
