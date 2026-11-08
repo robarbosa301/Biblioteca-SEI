@@ -1,5 +1,5 @@
 (()=>{
-const art='assets/portal/entrada-sei.png';
+const art='assets/portal/entrada-sei-v2.png?v=1';
 const oldRender=render;
 const header=document.querySelector('body>header');
 header.innerHTML='<a class="portal-brand" href="#" aria-label="Biblioteca Digital SEI — início"><img src="'+art+'" alt="SEI Incentivo. Aqui se faz educação com qualidade. Biblioteca Digital SEI."></a>';
