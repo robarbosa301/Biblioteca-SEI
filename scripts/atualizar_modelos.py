@@ -160,6 +160,18 @@ def main():
                     z.writestr(n, d)
             feitos += 1
     print(f'{feitos} modelos com identificação editável (tipo e número).')
+    from enter_word import aplicar as enter_aplicar
+    n_enter=0
+    for kind in ['word', 'word-conteudo']:
+        for path in sorted((ROOT / 'assets' / kind).rglob('*.docx')):
+            with ZipFile(path) as z:
+                entries = {n: z.read(n) for n in z.namelist()}
+            enter_aplicar(entries)
+            with ZipFile(path, 'w', ZIP_DEFLATED) as z:
+                for n, d in entries.items():
+                    z.writestr(n, d)
+            n_enter += 1
+    print(f'{n_enter} modelos com Enter amigável (linhas de espaço com estilo próprio).')
     markers = 0
     subject_colors = {}
     geometry = json.loads((ROOT / 'assets/montar/molduras.json').read_text())

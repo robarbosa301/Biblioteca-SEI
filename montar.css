@@ -84,3 +84,4 @@ dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 
 @media(max-width:700px){#formatToolbar{margin:8px 8px 0;padding:8px}.format-toolbar{gap:5px}.format-toolbar select{max-width:135px;font-size:13px}.format-toolbar label{font-size:11px}}
 
 .divider-mark{position:absolute;left:0;top:50%;transform:translate(-50%,-50%) rotate(180deg);writing-mode:vertical-rl;white-space:nowrap;display:flex;align-items:center;justify-content:center;width:3.515mm;height:27.344mm;box-sizing:border-box;background:var(--divider-color);color:#fff;border:.5pt solid var(--divider-color);border-radius:1.76mm;padding:1mm .3mm;font:700 6pt Arial,sans-serif;letter-spacing:.2pt}
+.col .editando{outline:2px solid #22b9ef!important;outline-offset:2px;background:#f4fbff!important;cursor:text;white-space:pre-wrap}

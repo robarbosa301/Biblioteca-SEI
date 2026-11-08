@@ -298,12 +298,36 @@
   document.addEventListener('keydown', e => {
     if ($('#dlg').open || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
     if ((e.ctrlKey || e.metaKey) && ['z','y'].includes(e.key.toLowerCase())) { e.preventDefault(); historyStep(e.key.toLowerCase()==='y'||e.shiftKey); return; }
+    if (inline) return;
     if (selId != null && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); $('#sDel').onclick(); }
     if (selId != null && e.key === 'Escape') select(null);
   });
   mainFormat = seiFormat.toolbar($('#formatToolbar'), {apply:formatBlock,undo:()=>historyStep(false),redo:()=>historyStep(true)});
   updateToolbar();
   const richFormat = seiFormat.editor($('#ed'), $('#dialogToolbar'));
+  let inline = null;
+  // Editar direto na folha: duplo clique no texto; Enter cria linha nova; clicar fora salva.
+  function editarNaFolha(el) {
+    const id = +el.dataset.id; if (!['P','UL','OL','DIV'].includes(el.tagName) || el.classList.contains('quebra')) { openEdit(id); return; }
+    if (document.querySelectorAll(`.col [data-id="${id}"]`).length > 1) { openEdit(id); return; }
+    if (inline) return;
+    const b = blocks.find(x => x.id === id); if (!b) return;
+    inline = { id, el }; select(null); el.classList.add('editando'); el.contentEditable = 'true'; el.focus();
+    const r = document.createRange(); r.selectNodeContents(el); r.collapse(false); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    const fim = () => {
+      if (!inline || inline.el !== el) return; inline = null; el.contentEditable = 'false'; el.classList.remove('editando');
+      const i = blocks.findIndex(x => x.id === id); if (i < 0) return;
+      const tmp = document.createElement('div'); tmp.innerHTML = el.innerHTML.replace(/<div>/g, '<p>').replace(/<\/div>/g, '</p>');
+      if (el.tagName === 'UL' || el.tagName === 'OL') { const w = document.createElement(el.tagName.toLowerCase()); w.innerHTML = el.innerHTML; tmp.replaceChildren(w); }
+      const els = cleanBlocks(tmp); if (!els.length) { remember(); blocks.splice(i, 1); render(); save(); return; }
+      if (el.tagName === 'P' && el.className) els.forEach(x => { if (x.tagName === 'P' && !x.className) x.className = el.className; });
+      remember(); const items = els.map(x => ({ id: nextId++, html: x.outerHTML }));
+      blocks.splice(i, 1, ...items); render(); save();
+    };
+    el.addEventListener('blur', fim, { once: true });
+    el.addEventListener('keydown', ev => { ev.stopPropagation(); if (ev.key === 'Escape') el.blur(); });
+    el.addEventListener('paste', ev => { ev.preventDefault(); ev.stopPropagation(); const t = ev.clipboardData.getData('text/plain'); document.execCommand('insertText', false, t); });
+  }
   let editing = null;
   function openEdit(id) {
     const b = blocks.find(x => x.id === id); if (!b) return;
@@ -457,6 +481,7 @@
     });
     if (!blocks.length) { const v = document.createElement('div'); v.className = 'vazio'; const b = colBoxes(true)[0]; Object.assign(v.style, { left: cm(b.x), top: cm(b.y), width: cm(21 - 2 * b.x) }); v.textContent = 'Cole aqui (Ctrl+V) o seu material, ou use “📄 Importar Word”.'; pages[0].pg.appendChild(v); }
     pagesEl.querySelectorAll('.col [data-id]').forEach(e => e.addEventListener('click', ev => { ev.stopPropagation(); select(+e.dataset.id); }));
+    pagesEl.querySelectorAll('.col [data-id]').forEach(e => e.addEventListener('dblclick', ev => { ev.stopPropagation(); editarNaFolha(e); }));
     select(blocks.some(b => b.id === selId) ? selId : null);
   }
   pagesEl.addEventListener('click', () => select(null));
