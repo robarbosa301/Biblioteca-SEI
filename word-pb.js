@@ -16,7 +16,7 @@
         const nome = 'word/' + m[1]; const f = zip.file(nome); if (!f) continue;
         const k = hex(await crypto.subtle.digest('SHA-1', await f.async('arraybuffer')));
         const alvo = mapa[k]; if (!alvo) continue;
-        const res = await fetch(alvo + '?v=5'); if (!res.ok) continue;
+        const res = await fetch(alvo + '?v=6'); if (!res.ok) continue;
         zip.file(nome, await res.arrayBuffer()); n++;
       }
     }
