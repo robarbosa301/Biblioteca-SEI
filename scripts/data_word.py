@@ -44,19 +44,23 @@ def _guardar_valor(entries):
     entries['[Content_Types].xml'] = _xml(ct)
 
 
-def _rpr(cor, fundo):
+# mesma fonte e tamanho do rótulo "Data:" da arte (1ª página: Barlow Condensed; 2ª: Inter)
+FONTE = {1: ('Barlow Condensed SemiBold', 10), 2: ('Inter SemiBold', 11)}
+
+
+def _rpr(cor, fundo, pagina=1):
+    nome, pt = FONTE[pagina]
     pr = w('rPr')
-    pr.append(w('rFonts', ascii='Arial', hAnsi='Arial', cs='Arial', eastAsia='Arial'))
-    pr.append(w('b'))
+    pr.append(w('rFonts', ascii=nome, hAnsi=nome, cs=nome, eastAsia=nome))
     pr.append(w('color', val=cor))
-    pr.append(w('sz', val=18))
-    pr.append(w('szCs', val=18))
+    pr.append(w('sz', val=pt * 2))
+    pr.append(w('szCs', val=pt * 2))
     if fundo:
         pr.append(w('shd', val='clear', color='auto', fill=fundo))
     return pr
 
 
-def _campo(ident, box, tag, cor, fundo):
+def _campo(ident, box, tag, cor, fundo, pagina):
     x0, y0, x1, y1 = box
     style, h = _pos(x0, y0, x1 - x0, y1 - y0)
     run = w('r')
@@ -70,17 +74,17 @@ def _campo(ident, box, tag, cor, fundo):
     pp = E.SubElement(p, f'{{{W}}}pPr')
     pp.append(w('spacing', before=0, after=0, line=round(h * 20), lineRule='exact'))
     pp.append(w('jc', val='center'))
-    pp.append(_rpr(cor, None))
+    pp.append(_rpr(cor, None, pagina))
     sdt = E.SubElement(p, f'{{{W}}}sdt')
     props = E.SubElement(sdt, f'{{{W}}}sdtPr')
-    props.append(_rpr(cor, fundo))
+    props.append(_rpr(cor, fundo, pagina))
     props.append(w('alias', val='Data (opcional): digite e ela aparece em todas as páginas'))
     props.append(w('tag', val=tag))
     props.append(w('dataBinding', prefixMappings=f"xmlns:ns0='{SEI}'", xpath='/ns0:sei[1]/ns0:data[1]', storeItemID=GUID))
     props.append(w('text'))
     body = E.SubElement(sdt, f'{{{W}}}sdtContent')
     r = E.SubElement(body, f'{{{W}}}r')
-    r.append(_rpr(cor, fundo))
+    r.append(_rpr(cor, fundo, pagina))
     t = E.SubElement(r, f'{{{W}}}t')
     t.set('{http://www.w3.org/XML/1998/namespace}space', 'preserve')
     t.text = ''
@@ -102,9 +106,9 @@ def aplicar(entries, geo):
         return False
     _guardar_valor(entries)
     doc = E.fromstring(entries['word/document.xml'])
-    _colocar(doc, 'SEIData1', _campo('SEIData1', geo['d1'], 'sei-data-1', '10121B', 'FFFFFF'), True)
+    _colocar(doc, 'SEIData1', _campo('SEIData1', geo['d1'], 'sei-data-1', geo.get('d1c', '#10121B').lstrip('#').upper(), 'FFFFFF', 1), True)
     entries['word/document.xml'] = _xml(doc)
     hdr = E.fromstring(entries['word/header2.xml'])
-    _colocar(hdr, 'SEIData2', _campo('SEIData2', geo['d2'], 'sei-data-2', 'FFFFFF', geo.get('d2bg', '#001234').lstrip('#').upper()), False)
+    _colocar(hdr, 'SEIData2', _campo('SEIData2', geo['d2'], 'sei-data-2', 'FFFFFF', geo.get('d2bg', '#001234').lstrip('#').upper(), 2), False)
     entries['word/header2.xml'] = _xml(hdr)
     return True

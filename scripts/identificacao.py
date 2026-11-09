@@ -23,6 +23,7 @@ NUMERO = (937, 257, 991, 309)
 FONTES = [  # (nome no Word, arquivo, negrito?)
     ('Barlow Condensed SemiBold', 'BarlowCondensed-SemiBold.ttf', False),
     ('Poppins', 'Poppins-Bold.ttf', True),
+    ('Inter SemiBold', 'Inter-SemiBold.ttf', False),  # data das páginas 2+
 ]
 PALAVRA_PT, NUMERO_PT = 12.5, 22
 

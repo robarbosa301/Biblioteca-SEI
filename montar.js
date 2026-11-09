@@ -390,6 +390,8 @@
       dt.value = data; dt.placeholder = 'dd/mm/aaaa'; dt.inputMode = 'numeric'; dt.maxLength = 10;
       dt.setAttribute('aria-label', 'Data (opcional: aparece em todas as folhas)'); dt.title = 'Data (opcional): digite uma vez e ela aparece em todas as folhas';
       Object.assign(dt.style, caixa(...dBox)); if (n > 0 && geo.d2bg) dt.style.setProperty('--fundo-data', geo.d2bg);
+      // mesma fonte, tamanho e cor do rótulo "Data:" da arte
+      dt.style.fontSize = cm((n === 0 ? 18.3 : 19.5) * K * F); if (n === 0 && geo.d1c) dt.style.color = geo.d1c;
       dt.oninput = () => {
         const dg = dt.value.replace(/\D/g, '').slice(0, 8);
         dt.value = dg.length > 4 ? dg.slice(0, 2) + '/' + dg.slice(2, 4) + '/' + dg.slice(4) : dg.length > 2 ? dg.slice(0, 2) + '/' + dg.slice(2) : dg;
@@ -528,7 +530,7 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=9')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=10')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');
