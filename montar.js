@@ -114,6 +114,7 @@
       if (n.nodeType !== 1) continue;
       const t = n.tagName.toUpperCase();
       if (DROP.has(t)) continue;
+      if (t === 'MATH') { const m = seiFormulas.limparMath(n); if (m) out.appendChild(m); continue; }
       if (t === 'IMG') { const im = img(n); if (im) out.appendChild(im); continue; }
       if (INLINE.has(t)) { const e = document.createElement(t === 'STRONG' ? 'b' : t === 'EM' ? 'i' : t.toLowerCase()); copyFormat(n, e, true); if (t !== 'BR') cleanInline(n, e); out.appendChild(e); continue; }
       if (t === 'SPAN' || t === 'FONT') {
@@ -146,7 +147,7 @@
     const m = a.match(/text-align\s*:\s*(center|right|justify)/) || a.match(/^(center|right|justify)/);
     if (m) e.className = 'sz-' + m[1];
   }
-  const hasContent = e => e.textContent.replace(/ /g, ' ').trim() || e.querySelector('img,table');
+  const hasContent = e => e.textContent.replace(/ /g, ' ').trim() || e.querySelector('img,table,math');
   function cleanTable(t) {
     const out = document.createElement('table'); copyFormat(t, out); const tb = document.createElement('tbody'); out.appendChild(tb);
     const rows = Array.from(t.querySelectorAll('tr')).filter(r => r.closest('table') === t);
@@ -192,6 +193,12 @@
           continue;
         }
         if (t === 'IMG') { const im = img(n); if (im) { cur = cur || document.createElement('p'); cur.appendChild(im); } continue; }
+        if (t === 'MATH') {
+          const m = seiFormulas.limparMath(n); if (!m) continue;
+          if (m.getAttribute('display') === 'block') { flush(); const p = document.createElement('p'); p.className = 'sz-center'; p.appendChild(m); out.push(p); }
+          else { cur = cur || document.createElement('p'); cur.appendChild(m); }
+          continue;
+        }
         if (t === 'HR') { flush(); continue; }
         if (INLINE.has(t) || UNWRAP.has(t)) {
           if (n.querySelector && n.querySelector('p,div,table,ul,ol,h1,h2,h3,h4,h5,h6')) { flush(); walk(n); }
@@ -206,7 +213,8 @@
     return out;
   }
   function htmlToBlocks(html) {
-    const d = new DOMParser().parseFromString(html, 'text/html');
+    const d = new DOMParser().parseFromString(seiFormulas.prepararHTML(html), 'text/html');
+    seiFormulas.prepararDOM(d.body); // fórmulas do Word e da web, letras gregas da fonte Symbol
     // Word: listas "MsoListParagraph" chegam como parágrafos com marcador — continuam como parágrafos
     return cleanBlocks(d.body);
   }
@@ -277,8 +285,9 @@
   $('#fWord').onchange = async e => {
     const f = e.target.files[0]; e.target.value = ''; if (!f) return;
     try {
-      const r = await mammoth.convertToHtml({ arrayBuffer: await f.arrayBuffer() }, { convertImage: mammoth.images.dataUri, ignoreEmptyParagraphs: false });
-      insertBlocks(htmlToBlocks(r.value));
+      const prep = await seiFormulas.prepararDocx(await f.arrayBuffer());
+      const r = await mammoth.convertToHtml({ arrayBuffer: prep.arrayBuffer }, { convertImage: mammoth.images.dataUri, ignoreEmptyParagraphs: false });
+      insertBlocks(htmlToBlocks(seiFormulas.devolverFormulas(r.value, prep.formulas)));
     } catch (err) { alert('Não consegui ler este arquivo do Word: ' + err.message); }
   };
   $('#bImg').onclick = () => $('#fImg').click();
@@ -407,7 +416,8 @@
   const fits = col => col.scrollHeight <= col.clientHeight + 0.5;
   function splitText(el, col) {
     // corta o parágrafo na última palavra que cabe; devolve [parte que fica, resto]
-    const texts = []; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let t, total = 0;
+    // fórmulas não se partem: o texto delas não conta como ponto de corte
+    const texts = []; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, { acceptNode: n => n.nodeType === 1 ? (n.localName === 'math' ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP) : NodeFilter.FILTER_ACCEPT }); let t, total = 0;
     while ((t = w.nextNode())) { texts.push([t, total]); total += t.nodeValue.length; }
     if (total < 2) return null;
     const at = k => { for (let i = texts.length - 1; i >= 0; i--) if (texts[i][1] <= k) return [texts[i][0], Math.min(k - texts[i][1], texts[i][0].nodeValue.length)]; return [texts[0][0], 0]; };
