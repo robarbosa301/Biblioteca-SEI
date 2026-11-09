@@ -300,7 +300,7 @@
   async function moldurasPB() {
     const fr = Array.from(pagesEl.querySelectorAll('.frame'));
     await Promise.all(fr.map(im => new Promise(ok => {
-      const pb = im.src.replace(/-p([12])\.jpg(\?[^#]*)?$/, '-p$1-pb.jpg?v=1');
+      const pb = im.src.replace(/-p([12])\.jpg(\?[^#]*)?$/, '-p$1-pb.jpg?v=5');
       if (pb === im.src) return ok();
       im.onload = im.onerror = () => ok(); im.src = pb;
     })));

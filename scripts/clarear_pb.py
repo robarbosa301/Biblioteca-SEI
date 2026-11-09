@@ -64,17 +64,6 @@ def clarear(src, dst, pagina=2):
         zonas = [((0, 0, int(255 * u), int(248 * u)), int(25 * u), 1.0), ((int(770 * u), int(20 * u), W, int(238 * u)), int(30 * u), 1.0)]
     for (x0, y0, x1, y1), perto, xm in zonas:
         prot[y0:y1, x0:x1] = np.maximum(prot[y0:y1, x0:x1], _objeto(im.crop((x0, y0, x1, y1)), perto, xm))
-    if pagina == 1:
-        # caixa escura da identificação (REVISÃO 01): o texto dela é branco, então fica escura
-        x0, y0, x1, y1 = int(740 * u), int(228 * u), int(1012 * u), int(335 * u)
-        esc = (a[y0:y1, x0:x1].max(2) < .35).astype(np.uint8)
-        n, l, st, _ = cv2.connectedComponentsWithStats(esc)
-        if n > 1:
-            i = 1 + int(np.argmax(st[1:, 4]))
-            bx, by, bw, bh = st[i, :4]
-            caixa = np.zeros((H, W), np.float32)
-            cv2.rectangle(caixa, (x0 + bx, y0 + by), (x0 + bx + bw - 1, y0 + by + bh - 1), 1, -1)
-            prot = np.maximum(prot, cv2.GaussianBlur(caixa, (0, 0), .8))
     # áreas brancas grandes (painel, caixa do número) e o que fica dentro delas
     wh = (a.min(2) > .88).astype(np.uint8)
     n, l, st, _ = cv2.connectedComponentsWithStats(wh)
@@ -97,12 +86,20 @@ def clarear(src, dst, pagina=2):
     d = l - lb
     claro_sobre_escuro = np.clip((d - .08) / .12, 0, 1) * np.clip((l - .3) / .12, 0, 1)
     escuro_sobre_claro = np.clip((-d - .06) / .12, 0, 1) * np.clip((lb - .5) / .15, 0, 1)
+    # só no cabeçalho (títulos sobre brilho claro); nas laterais e no rodapé, sombras e fotos desbotam
+    cab = np.zeros(l.shape, np.float32); cab[:int((345 if pagina == 1 else 128) / 1448 * H)] = 1
+    escuro_sobre_claro *= cv2.GaussianBlur(cab, (0, 0), 6 * u)
     fundo = 1 - np.maximum(claro_sobre_escuro, escuro_sobre_claro)
     novo = lab.copy()
     # fundo: desbotado (bem claro, pouca cor)
     lf = .80 + .18 * l
     # letras/desenhos claros sobre escuro: ficam escuros, na mesma cor (branco vira azul-escuro)
     ld = .20 + .30 * (1 - l)
+    # nas laterais (entre o cabeçalho e o rodapé) os desenhos do fundo ficam cinza-claro, não escuros
+    lado = np.zeros(l.shape, np.float32)
+    lado[int((345 if pagina == 1 else 128) / 1448 * H):int(.935 * H)] = 1
+    lado = cv2.GaussianBlur(lado, (0, 0), 6 * u)
+    ld = ld * (1 - lado) + (.68 + .1 * (1 - l)) * lado
     croma = np.hypot(lab[..., 1], lab[..., 2])
     neutro = np.clip((14 - croma) / 8, 0, 1)
     ae = lab[..., 1] * (1 - neutro) + 8 * neutro
@@ -118,6 +115,27 @@ def clarear(src, dst, pagina=2):
             novo[..., c] = novo[..., c] / np.maximum(soma, 1e-6)
     inv = np.clip(cv2.cvtColor(novo.astype(np.float32), cv2.COLOR_Lab2RGB), 0, 1)
     out = a * prot + inv * (1 - prot)
+    # Nenhuma área escura grande (mascote, logo, fotos, caixas): vira cinza médio, com o desenho.
+    # Só traços finos (letras, linhas) continuam escuros.
+    lo = cv2.cvtColor(out.astype(np.float32), cv2.COLOR_RGB2Lab)
+    lv = lo[..., 0] / 100
+    k = max(3, int(15 * u)) | 1
+    grande = cv2.morphologyEx((lv < .42).astype(np.uint8), cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+    grande = cv2.dilate(grande, np.ones((max(3, int(3 * u)),) * 2, np.uint8)).astype(np.float32)
+    grande = cv2.GaussianBlur(grande, (0, 0), 1.5 * u)
+    lo2 = lo.copy()
+    lo2[..., 0] = 100 * (.58 + .42 * lv)
+    lo2[..., 1] *= .6; lo2[..., 2] *= .6
+    # fora do cabeçalho: também sombras e frestas finas (bordas do painel), poupando letras e o número
+    k2 = max(3, int(7 * u)) | 1
+    fino = cv2.morphologyEx((lv < .42).astype(np.uint8), cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k2, k2))).astype(np.float32)
+    fino[:int((345 if pagina == 1 else 128) / 1448 * H)] = 0
+    fino *= (prot[..., 0] < .5)
+    fino = cv2.GaussianBlur(cv2.dilate(fino, np.ones((max(3, int(3 * u)),) * 2, np.uint8)), (0, 0), 1.5 * u)
+    grande = np.maximum(grande, fino)
+    w = grande[..., None]
+    lo = lo * (1 - w) + lo2 * w
+    out = np.clip(cv2.cvtColor(lo.astype(np.float32), cv2.COLOR_Lab2RGB), 0, 1)
     Image.fromarray((out * 255).clip(0, 255).astype(np.uint8)).save(dst, quality=95, subsampling=0)
 
 

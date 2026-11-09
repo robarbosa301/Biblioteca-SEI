@@ -16,9 +16,17 @@
         const nome = 'word/' + m[1]; const f = zip.file(nome); if (!f) continue;
         const k = hex(await crypto.subtle.digest('SHA-1', await f.async('arraybuffer')));
         const alvo = mapa[k]; if (!alvo) continue;
-        const res = await fetch(alvo + '?v=1'); if (!res.ok) continue;
+        const res = await fetch(alvo + '?v=5'); if (!res.ok) continue;
         zip.file(nome, await res.arrayBuffer()); n++;
       }
+    }
+    // Texto da caixa REVISÃO 01 (branco/colorido sobre a caixa escura): escuro, porque a caixa fica clara
+    const doc = zip.file('word/document.xml');
+    if (doc) {
+      const xml = await doc.async('string');
+      const novo = xml.replace(/<w:sdt>(?:(?!<\/w:sdt>)[\s\S])*?<w:tag w:val="sei-(?:tipo|numero)"\/>[\s\S]*?<\/w:sdt>/g,
+        m => m.replace(/<w:color w:val="[0-9A-Fa-f]{6}"\/>/g, '<w:color w:val="0B2A5B"/>'));
+      if (novo !== xml) zip.file('word/document.xml', novo);
     }
     return n;
   }
