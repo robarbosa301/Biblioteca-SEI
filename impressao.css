@@ -20,7 +20,7 @@
  .bw-right{right:0;top:0;bottom:0;width:var(--bw-side)}
  .bw-footer{left:0;right:0;bottom:0;height:var(--bw-bottom);align-items:center;justify-content:space-between;padding:0 6mm;border-top:.5pt solid #777;font:7pt Arial,sans-serif;color:#222}
  /* No editor, o texto e as tabelas continuam nativos, com fundo branco. */
- .sei-print-bw #pages .frame,.sei-print-bw #pages .campo,.sei-print-bw #pages .auto-page-number{display:none!important}
+ /* No editor, a moldura troca pela versão clara (-pb.jpg); o resto continua. */
  .sei-print-bw #pages .page{background:#fff!important}
  .sei-print-bw #pages .col{color:#000!important}
  .sei-print-bw #pages .col img{filter:grayscale(1) brightness(1.1) contrast(.95)}
@@ -33,7 +33,6 @@
  .bw-header.compact .bw-titles h2{font-size:13pt!important;margin:0!important}
  .bw-header.compact .bw-titles{font-size:8pt}
  .bw-header.compact .bw-identificacao{padding:1mm 2mm;font-size:8pt}
- .bw-header.compact .bw-fields{grid-template-columns:2.2fr 1fr;margin-top:1.5mm;font-size:9pt}
  .sei-print-bw #pages .bw-editor-footer{display:flex;position:absolute;left:8mm;right:8mm;bottom:8mm;justify-content:space-between;border-top:.5pt solid #777;padding-top:2mm;font:7.5pt Arial,sans-serif;color:#222}
 }
 .bw-editor-footer{display:none}

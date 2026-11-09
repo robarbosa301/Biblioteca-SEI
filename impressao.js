@@ -36,11 +36,6 @@
         text('span', 'Conteúdo: ' + (conteudo || '_______________________________________')),
         text('span', 'Data: ____ / ____ / ______'));
       h.append(fields);
-    } else {
-      // 2ª página em diante: espaço em branco para o nome, escrito à caneta
-      const fields = document.createElement('div'); fields.className = 'bw-fields';
-      fields.append(text('span', 'Aluno(a): _______________________________________________'), text('span', 'Data: ____ / ____ / ______'));
-      h.append(fields);
     }
     return h;
   }

@@ -159,6 +159,7 @@
     const stats = { recuos: 0, tabelas: 0, imagens: 0, flutuantes: 0, secoes: 0 };
     walk(body, columnWidth(body), stats);
     zip.file('word/document.xml', new XMLSerializer().serializeToString(dom));
+    if (window.seiWordPB && seiWordPB.ativo()) stats.pb = await seiWordPB.clarear(zip); // moldura clara para P&B
     const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression: 'DEFLATE' });
     return { blob, stats };
   }
@@ -181,6 +182,7 @@
         document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
         const tot = stats.recuos + stats.tabelas + stats.imagens + stats.flutuantes + stats.secoes;
         msg.textContent = tot ? `Pronto! Corrigidos: ${stats.recuos} recuo(s), ${stats.tabelas} tabela(s), ${stats.imagens + stats.flutuantes} imagem(ns)${stats.secoes ? ', ' + stats.secoes + ' quebra(s) de seção' : ''}. O arquivo ajustado foi baixado.` : 'Pronto! Nada precisava de ajuste. O arquivo foi baixado.';
+        if (stats.pb) msg.textContent += ' Moldura clara para impressão em preto e branco.';
       } catch (e) { msg.textContent = 'Não consegui ajustar: ' + e.message; }
       b.disabled = false;
     };

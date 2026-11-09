@@ -296,7 +296,16 @@
   $('#bQuebra').onclick = () => { const d = document.createElement('div'); d.className = 'quebra'; insertBlocks([d]); };
   $('#bLimpar').onclick = () => { if (blocks.length && confirm('Apagar todo o conteúdo desta folha?')) { remember(); blocks = []; selId = null; render(); save(); } };
   $('#bPrint').onclick = () => { seiPrint.mode('color'); select(null); setTimeout(() => window.print(), 50); };
-  $('#bPrintBW').onclick = () => { seiPrint.mode('bw'); select(null); setTimeout(() => window.print(), 50); };
+  // Preto e branco: mesma folha, com a moldura na versão clara (o fundo escuro gastaria tinta e esconderia a caneta)
+  async function moldurasPB() {
+    const fr = Array.from(pagesEl.querySelectorAll('.frame'));
+    await Promise.all(fr.map(im => new Promise(ok => {
+      const pb = im.src.replace(/-p([12])\.jpg(\?[^#]*)?$/, '-p$1-pb.jpg?v=1');
+      if (pb === im.src) return ok();
+      im.onload = im.onerror = () => ok(); im.src = pb;
+    })));
+  }
+  $('#bPrintBW').onclick = async () => { seiPrint.mode('bw'); select(null); await moldurasPB(); setTimeout(() => window.print(), 50); };
 
   function select(id) { selId = id; document.querySelectorAll('.col .on').forEach(e => e.classList.remove('on')); if (id != null) document.querySelectorAll(`.col [data-id="${id}"]`).forEach(e => e.classList.add('on')); $('#sel').hidden = id == null; updateToolbar(); }
   const move = d => { const i = blocks.findIndex(b => b.id === selId); const j = i + d; if (i < 0 || j < 0 || j >= blocks.length) return; remember(); [blocks[i], blocks[j]] = [blocks[j], blocks[i]]; render(); save(); };
@@ -370,7 +379,7 @@
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
     const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg);
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
-    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=' + (n === 0 ? '6-ponto' : '8-claro');
+    fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=6-ponto';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
     pg.appendChild(fr);
     if (n === 0) {
@@ -497,21 +506,9 @@
   pagesEl.addEventListener('click', () => select(null));
   let rt = null; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 200); });
   addEventListener('beforeprint', () => {
-    pagesEl.querySelectorAll('.page').forEach((p, n) => {
-      p.style.transform = 'none';
-      p.querySelectorAll('.bw-header,.bw-editor-footer').forEach(el => el.remove());
-      if (!document.body.classList.contains('sei-print-bw')) return;
-      const h = seiPrint.header({...seiPrint.context(src), identificacao, conteudo, compact: n > 0});
-      const box = colBoxes(n === 0)[0];
-      Object.assign(h.style, {left:'5mm', top:'7.07mm', width:'200mm', height:cm(box.y - 0.707 - 0.15)});
-      p.appendChild(h);
-      const foot = document.createElement('div'); foot.className = 'bw-editor-footer';
-      const brand = document.createElement('span'); brand.textContent = 'SEI Incentivo · São Miguel do Guamá — PA';
-      const number = document.createElement('span'); number.textContent = 'Página ' + (n + 1);
-      foot.append(brand, number); p.appendChild(foot);
-    });
+    pagesEl.querySelectorAll('.page').forEach(p => { p.style.transform = 'none'; });
   });
-  addEventListener('afterprint', render);
+  addEventListener('afterprint', () => { seiPrint.mode('color'); render(); });
 
   /* ---------- início ---------- */
   (async () => {

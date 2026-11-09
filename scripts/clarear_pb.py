@@ -1,10 +1,10 @@
-"""2ª página com moldura clara (boa para impressora preto e branco).
+"""Versão clara das folhas, só para a impressão em preto e branco (a colorida não muda).
 
-O fundo azul-escuro da moldura (faixa de cima, laterais e rodapé) vira azul bem claro,
+O fundo azul-escuro da moldura (cabeçalho, laterais e rodapé) vira azul bem claro,
 mantendo o desenho de fundo; textos brancos viram azul-escuro. Mascote, logo, o painel
 branco e a caixa do número da página ficam como estão.
 Precisa do modelo isnet.onnx (recorte do mascote e da logo): variável ISNET.
-Uso: ISNET=caminho/isnet.onnx python scripts/clarear_p2.py entrada.jpg saida.jpg
+Uso: ISNET=caminho/isnet.onnx python scripts/clarear_pb.py entrada.jpg saida.jpg [1|2]
 """
 import os
 import sys
@@ -53,13 +53,28 @@ def _objeto(crop, perto, xmax=1.0):
     return cv2.GaussianBlur(k.astype(np.float32), (0, 0), 1.0)
 
 
-def clarear(src, dst):
+def clarear(src, dst, pagina=2):
     im = Image.open(src).convert('RGB')
     a = np.array(im).astype(np.float32) / 255
     H, W = a.shape[:2]; u = W / 1024
     prot = np.zeros((H, W), np.float32)
-    for (x0, y0, x1, y1), perto, xm in [((0, 0, int(190 * u), int(122 * u)), int(25 * u), .62), ((int(840 * u), 0, W, int(122 * u)), int(30 * u), 1.0)]:
+    if pagina == 2:
+        zonas = [((0, 0, int(190 * u), int(122 * u)), int(25 * u), .62), ((int(840 * u), 0, W, int(122 * u)), int(30 * u), 1.0)]
+    else:
+        zonas = [((0, 0, int(255 * u), int(248 * u)), int(25 * u), 1.0), ((int(770 * u), int(20 * u), W, int(238 * u)), int(30 * u), 1.0)]
+    for (x0, y0, x1, y1), perto, xm in zonas:
         prot[y0:y1, x0:x1] = np.maximum(prot[y0:y1, x0:x1], _objeto(im.crop((x0, y0, x1, y1)), perto, xm))
+    if pagina == 1:
+        # caixa escura da identificação (REVISÃO 01): o texto dela é branco, então fica escura
+        x0, y0, x1, y1 = int(740 * u), int(228 * u), int(1012 * u), int(335 * u)
+        esc = (a[y0:y1, x0:x1].max(2) < .35).astype(np.uint8)
+        n, l, st, _ = cv2.connectedComponentsWithStats(esc)
+        if n > 1:
+            i = 1 + int(np.argmax(st[1:, 4]))
+            bx, by, bw, bh = st[i, :4]
+            caixa = np.zeros((H, W), np.float32)
+            cv2.rectangle(caixa, (x0 + bx, y0 + by), (x0 + bx + bw - 1, y0 + by + bh - 1), 1, -1)
+            prot = np.maximum(prot, cv2.GaussianBlur(caixa, (0, 0), .8))
     # áreas brancas grandes (painel, caixa do número) e o que fica dentro delas
     wh = (a.min(2) > .88).astype(np.uint8)
     n, l, st, _ = cv2.connectedComponentsWithStats(wh)
@@ -75,28 +90,36 @@ def clarear(src, dst):
             cheio = np.maximum(comp, 1 - ff)
             prot[y:y + h, x:x + w] = np.maximum(prot[y:y + h, x:x + w], cheio)
     prot = np.clip(prot, 0, 1)[..., None]
-    hls = cv2.cvtColor(a, cv2.COLOR_RGB2HLS)
-    L, S = hls[..., 1], hls[..., 2]
-    novo = hls.copy()
-    # fundo escuro → claro; tons médios (títulos coloridos) → escuros; branco → azul-escuro
-    novo[..., 1] = np.interp(L, [0, .25, .5, 1], [.95, .83, .34, .15])
-    neutro = S < .25
-    novo[..., 0] = np.where(neutro & (L > .5), 216, hls[..., 0])
-    novo[..., 2] = np.where(neutro & (L > .5), .75, np.where(L < .3, S * .55, S))
-    # título da disciplina (letra colorida na faixa de cima): sempre na cor dela, em tom escuro
-    y0, y1, x0, x1 = int(8 * u), int(60 * u), int(120 * u), int(845 * u)
-    reg = a[y0:y1, x0:x1]
-    fundo = np.median(reg.reshape(-1, 3), 0)
-    dist = np.linalg.norm(reg - fundo, axis=2)
-    sat = S[y0:y1, x0:x1]
-    tit = np.clip((dist - .12) / .15, 0, 1) * np.clip((sat - .2) / .15, 0, 1)
-    sub = novo[y0:y1, x0:x1]
-    sub[..., 1] = sub[..., 1] * (1 - tit) + .32 * tit
-    sub[..., 2] = sub[..., 2] * (1 - tit) + np.clip(sat * 1.1, 0, 1) * tit
-    inv = cv2.cvtColor(novo, cv2.COLOR_HLS2RGB)
+    # Trabalha na claridade percebida (Lab), que é o tom de cinza que sai na impressora.
+    lab = cv2.cvtColor(a, cv2.COLOR_RGB2Lab)
+    l = lab[..., 0] / 100
+    lb = cv2.GaussianBlur(l, (0, 0), 14 * u)  # claridade do entorno
+    d = l - lb
+    claro_sobre_escuro = np.clip((d - .08) / .12, 0, 1) * np.clip((l - .3) / .12, 0, 1)
+    escuro_sobre_claro = np.clip((-d - .06) / .12, 0, 1) * np.clip((lb - .5) / .15, 0, 1)
+    fundo = 1 - np.maximum(claro_sobre_escuro, escuro_sobre_claro)
+    novo = lab.copy()
+    # fundo: desbotado (bem claro, pouca cor)
+    lf = .80 + .18 * l
+    # letras/desenhos claros sobre escuro: ficam escuros, na mesma cor (branco vira azul-escuro)
+    ld = .20 + .30 * (1 - l)
+    croma = np.hypot(lab[..., 1], lab[..., 2])
+    neutro = np.clip((14 - croma) / 8, 0, 1)
+    ae = lab[..., 1] * (1 - neutro) + 8 * neutro
+    be = lab[..., 2] * (1 - neutro) - 32 * neutro
+    novo[..., 0] = 100 * (fundo * lf + claro_sobre_escuro * ld) + escuro_sobre_claro * lab[..., 0]
+    novo[..., 1] = fundo * lab[..., 1] * .3 + claro_sobre_escuro * ae + escuro_sobre_claro * lab[..., 1]
+    novo[..., 2] = fundo * lab[..., 2] * .3 + claro_sobre_escuro * be + escuro_sobre_claro * lab[..., 2]
+    soma = fundo + claro_sobre_escuro + escuro_sobre_claro
+    for c in range(3):
+        if c == 0:
+            novo[..., 0] = novo[..., 0] / np.maximum(soma, 1e-6)
+        else:
+            novo[..., c] = novo[..., c] / np.maximum(soma, 1e-6)
+    inv = np.clip(cv2.cvtColor(novo.astype(np.float32), cv2.COLOR_Lab2RGB), 0, 1)
     out = a * prot + inv * (1 - prot)
     Image.fromarray((out * 255).clip(0, 255).astype(np.uint8)).save(dst, quality=95, subsampling=0)
 
 
 if __name__ == '__main__':
-    clarear(sys.argv[1], sys.argv[2])
+    clarear(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 2)
