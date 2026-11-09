@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image
 
 # 1.0 = cinza normal; quanto menor, mais claro (o preto vira 1 - FORCA de cinza)
-FORCA = .40
+FORCA = .30
 
 
 def clarear(src, dst, pagina=None):
