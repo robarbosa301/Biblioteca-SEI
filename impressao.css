@@ -33,6 +33,7 @@
  .bw-header.compact .bw-titles h2{font-size:13pt!important;margin:0!important}
  .bw-header.compact .bw-titles{font-size:8pt}
  .bw-header.compact .bw-identificacao{padding:1mm 2mm;font-size:8pt}
+ .bw-header.compact .bw-fields{grid-template-columns:2.2fr 1fr;margin-top:1.5mm;font-size:9pt}
  .sei-print-bw #pages .bw-editor-footer{display:flex;position:absolute;left:8mm;right:8mm;bottom:8mm;justify-content:space-between;border-top:.5pt solid #777;padding-top:2mm;font:7.5pt Arial,sans-serif;color:#222}
 }
 .bw-editor-footer{display:none}
