@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const A = window.seiAulas, $ = s => document.querySelector(s), esc = A.esc;
-  let todas = [], per = 'mes', ref = new Date(), aba = 'aulas';
+  let todas = [], per = 'mes', ref = new Date(), aba = 'aulas', nav = { turma: null, disc: null };
   const fmt = d => d.split('-').reverse().join('/');
   const ymd = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 10); };
   const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -17,7 +17,7 @@
   const doProf = () => todas.filter(a => a.professor === $('#prof').value);
   function filtradas() {
     const [i, f] = intervalo(), t = $('#fTurma').value, d = $('#fDisc').value;
-    return doProf().filter(a => (a.data || '') >= i && (a.data || '') <= f && (!t || a.etapa + ' · ' + a.turma === t) && (!d || a.disciplina === d));
+    return doProf().filter(a => (a.data || '') >= i && (a.data || '') <= f && (!t || a.etapa + ' · ' + A.pasta(a) === t) && (!d || a.disciplina === d));
   }
   async function carregar() {
     todas = await A.todas();
@@ -28,7 +28,7 @@
   }
   function opcoes() {
     const l = doProf(); const tv = $('#fTurma').value, dv = $('#fDisc').value;
-    $('#fTurma').innerHTML = '<option value="">Todas as turmas</option>' + [...new Set(l.map(a => a.etapa + ' · ' + a.turma))].sort().map(x => `<option ${x === tv ? 'selected' : ''}>${esc(x)}</option>`).join('');
+    $('#fTurma').innerHTML = '<option value="">Todas as turmas</option>' + [...new Set(l.map(a => a.etapa + ' · ' + A.pasta(a)))].sort().map(x => `<option ${x === tv ? 'selected' : ''}>${esc(x)}</option>`).join('');
     $('#fDisc').innerHTML = '<option value="">Todas as disciplinas</option>' + [...new Set(l.map(a => a.disciplina))].sort().map(x => `<option ${x === dv ? 'selected' : ''}>${esc(x)}</option>`).join('');
   }
   function desenhar() {
@@ -36,20 +36,49 @@
     document.querySelectorAll('.periodo button').forEach(b => b.classList.toggle('on', b.dataset.p === per));
     document.querySelectorAll('.abas button').forEach(b => b.classList.toggle('on', b.dataset.aba === aba));
     ['aulas', 'diario', 'painel'].forEach(x => { $('#aba-' + x).hidden = x !== aba; });
+    // Aulas: navegação por pastas (todas as datas); período e filtros valem para Diário e Painel
+    document.querySelector('.filtros').classList.toggle('pastas', aba === 'aulas');
     const l = filtradas();
-    if (aba === 'aulas') abaAulas(l); else if (aba === 'diario') abaDiario(l); else abaPainel(l);
+    if (aba === 'aulas') abaAulas(); else if (aba === 'diario') abaDiario(l); else abaPainel(l);
   }
   const vazio = () => `<div class="vazio"><p>Nenhuma aula neste período.</p><p>Monte uma folha em “Montar folha no site” e toque em <b>💾 Salvar aula</b>.</p><a class="b main" href="index.html">Ir para a Biblioteca</a></div>`;
 
-  function abaAulas(l) {
-    if (!l.length) { $('#aba-aulas').innerHTML = vazio(); return; }
-    $('#aba-aulas').innerHTML = `<div class="cards">${l.map(a => `<article class="aula">
+  const ordemTurma = t => { const m = /^(\d+)/.exec(t); return (/ano/.test(t) ? 0 : /série/.test(t) ? 100 : 200) + (m ? +m[1] : 99); };
+  const pastaCard = (attr, icone, nome, sub, n) => `<button class="pasta" ${attr}><span class="pi">${icone}</span><span class="pt"><b>${esc(nome)}</b><small>${esc(sub)}</small></span><span class="pn">${n} aula${n === 1 ? '' : 's'}</span></button>`;
+  const cartao = a => `<article class="aula">
       <div class="topo"><b>${fmt(a.data)}</b><span class="tag">${esc(a.tipo || 'Aula')}</span></div>
-      <h3>${esc(a.disciplina)} <small>${esc(a.etapa)} · ${esc(a.turma)}</small></h3>
-      <p class="cont">${esc(a.conteudo || 'Sem conteúdo informado')}</p>
+      <h3>${esc(a.conteudo || 'Sem conteúdo informado')}</h3>
       ${(a.habilidades || []).length ? `<p class="hab">${a.habilidades.map(h => `<span>${h}</span>`).join('')}</p>` : ''}
+      ${a.diario ? `<p class="cont">${esc(a.diario)}</p>` : ''}
       <div class="acoes"><a class="b main" href="montar.html#f=${encodeURIComponent(a.src)}&aula=${a.id}">Abrir</a><button class="b" data-dup="${a.id}">Duplicar</button><button class="b ghost" data-del="${a.id}">Excluir</button></div>
-    </article>`).join('')}</div>`;
+    </article>`;
+  function abaAulas() {
+    const prof = $('#prof').value, l = doProf();
+    if (!l.length) { $('#aba-aulas').innerHTML = vazio(); return; }
+    const chaveT = a => a.etapa + '|' + A.pasta(a);
+    if (nav.turma && !l.some(a => chaveT(a) === nav.turma)) nav = { turma: null, disc: null };
+    if (nav.disc && !l.some(a => chaveT(a) === nav.turma && a.disciplina === nav.disc)) nav.disc = null;
+    const trilha = [`<button class="b ghost" data-nav="">📁 ${esc(prof)}</button>`];
+    let html = '';
+    if (!nav.turma) {
+      const g = {}; l.forEach(a => { (g[chaveT(a)] = g[chaveT(a)] || []).push(a); });
+      const ks = Object.keys(g).sort((x, y) => ordemTurma(x.split('|')[1]) - ordemTurma(y.split('|')[1]) || x.localeCompare(y));
+      html = `<p class="dica">Turmas de <b>${esc(prof)}</b>. Toque numa pasta para ver as aulas.</p><div class="pastas">${ks.map(k => { const a = g[k][0]; const ds = [...new Set(g[k].map(x => x.disciplina))].sort(); return pastaCard(`data-turma="${esc(k)}"`, '📁', A.pasta(a), a.etapa + ' · ' + ds.join(', '), g[k].length); }).join('')}</div>`;
+    } else {
+      const lt = l.filter(a => chaveT(a) === nav.turma), a0 = lt[0];
+      trilha.push(`<span>›</span><button class="b ghost" data-turma="${esc(nav.turma)}">${esc(A.pasta(a0))}</button>`);
+      const ds = [...new Set(lt.map(a => a.disciplina))].sort();
+      if (!nav.disc && ds.length === 1) nav.disc = ds[0];
+      if (!nav.disc) {
+        html = `<p class="dica">Disciplinas de <b>${esc(A.pasta(a0))}</b> (${esc(a0.etapa)}).</p><div class="pastas">${ds.map(d => pastaCard(`data-disc="${esc(d)}"`, '📂', d, A.pasta(a0), lt.filter(a => a.disciplina === d).length)).join('')}</div>`;
+      } else {
+        if (ds.length > 1) trilha.push(`<span>›</span><b class="tr-atual">${esc(nav.disc)}</b>`); else trilha[trilha.length - 1] += `<span>›</span><b class="tr-atual">${esc(nav.disc)}</b>`;
+        const la = lt.filter(a => a.disciplina === nav.disc);
+        const meses = {}; la.forEach(a => { const k = (a.data || '').slice(0, 7); (meses[k] = meses[k] || []).push(a); });
+        html = Object.keys(meses).sort().reverse().map(k => { const [y, m] = k.split('-'); return `<h4 class="mes">${MESES[+m - 1].replace(/^./, c => c.toUpperCase())} de ${y} <small>${meses[k].length} aula${meses[k].length === 1 ? '' : 's'}</small></h4><div class="cards">${meses[k].map(cartao).join('')}</div>`; }).join('');
+      }
+    }
+    $('#aba-aulas').innerHTML = `<nav class="trilha">${trilha.join('')}</nav>${html}`;
   }
   function abaDiario(l) {
     if (!l.length) { $('#aba-diario').innerHTML = vazio(); return; }
@@ -109,6 +138,8 @@
   document.addEventListener('click', async e => {
     const t = e.target;
     if (t.matches('.abas button')) { aba = t.dataset.aba; desenhar(); }
+    const pz = t.closest('[data-turma],[data-disc],[data-nav]');
+    if (pz) { if (pz.dataset.nav !== undefined) nav = { turma: null, disc: null }; else if (pz.dataset.turma !== undefined) nav = { turma: pz.dataset.turma, disc: null }; else nav.disc = pz.dataset.disc; abaAulas(); scrollTo(0, 0); }
     if (t.matches('.periodo button')) { per = t.dataset.p; ref = new Date(); desenhar(); }
     if (t.dataset.del && confirm('Excluir esta aula? Isso não pode ser desfeito.')) { await A.apagar(t.dataset.del); carregar(); }
     if (t.dataset.dup) { const a = await A.pegar(t.dataset.dup); const c = Object.assign(JSON.parse(JSON.stringify(a)), { id: A.novoId(), criada: Date.now(), data: A.hoje() }); await A.gravar(c); carregar(); }
@@ -117,7 +148,7 @@
     if (e.target.dataset.diario) { const a = await A.pegar(e.target.dataset.diario); a.diario = e.target.value; await A.gravar(a); const x = todas.find(y => y.id === a.id); if (x) x.diario = a.diario; }
   });
   $('#ant').onclick = () => mover(-1); $('#prox').onclick = () => mover(1);
-  $('#prof').onchange = () => { A.definirProfessor($('#prof').value); opcoes(); desenhar(); };
+  $('#prof').onchange = () => { A.definirProfessor($('#prof').value); nav = { turma: null, disc: null }; opcoes(); desenhar(); };
   $('#fTurma').onchange = $('#fDisc').onchange = desenhar;
   $('#exp').onclick = async () => baixar(JSON.stringify({ tipo: 'sei-aulas', versao: 1, exportado: new Date().toISOString(), aulas: await A.todas() }), `aulas-sei-${A.hoje()}.json`, 'application/json');
   $('#imp').onchange = async e => {

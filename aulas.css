@@ -60,3 +60,15 @@ summary{font-weight:700;cursor:pointer}details h4{margin:10px 0 4px;color:var(--
 details ul{margin:4px 0;padding-left:18px}details li{margin:3px 0;font-size:14px}.vezes{font:700 11px system-ui;background:#e4f6e9;color:#1c6b33;border-radius:6px;padding:1px 6px}
 @media (max-width:700px){.tiles{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}header h1{flex-basis:100%}.filtros select{flex:1 1 140px}}
 @media print{body{background:#fff}.no-print,footer{display:none!important}main{background:#fff;padding:0}.so-print{display:block}.tab{border:0}td textarea{border:0;resize:none}th{position:static}}
+/* pastas: professor › turma › disciplina */
+.filtros.pastas>.periodo,.filtros.pastas>.nav-per,.filtros.pastas>select{display:none}
+.filtros.pastas::before{content:'📁 Aulas organizadas em pastas: turma › disciplina';color:var(--tx2);font-weight:600}
+.trilha{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:12px}
+.trilha .b{padding:6px 10px}.trilha span{color:var(--tx2);font-weight:700}.tr-atual{color:var(--azul);padding:6px 4px}
+.pastas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.pasta{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:1px solid var(--bd);border-radius:14px;padding:14px;cursor:pointer;font:inherit;color:var(--tx);box-shadow:0 2px 8px rgba(4,27,82,.06)}
+.pasta:hover{border-color:var(--ac);background:#f5f9ff}
+.pasta .pi{font-size:34px;line-height:1}.pasta .pt{flex:1;min-width:0}.pasta .pt b{display:block;font-size:17px;color:var(--azul)}
+.pasta .pt small{display:block;color:var(--tx2);font-size:13px;margin-top:2px}
+.pasta .pn{font:700 12px system-ui;background:#eef5ff;color:var(--azul);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.mes{margin:16px 0 8px;color:var(--azul);font-size:15px}.mes small{color:var(--tx2);font-weight:600}

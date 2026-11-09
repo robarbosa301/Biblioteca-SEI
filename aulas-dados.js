@@ -53,6 +53,7 @@
   }
   const hoje = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
   const novoId = () => 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const pasta = a => (a.turma || '') + (a.classe ? ' ' + a.classe : '');  // ex.: 6º ano A
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  window.seiAulas = { todas, pegar, gravar, apagar, professorAtual, definirProfessor, professores, info, habilidades, carregarBNCC, hoje, novoId, esc, EF, EM };
+  window.seiAulas = { todas, pegar, gravar, apagar, professorAtual, definirProfessor, professores, info, habilidades, carregarBNCC, hoje, novoId, esc, pasta, EF, EM };
 })();

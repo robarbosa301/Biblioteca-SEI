@@ -17,6 +17,7 @@
       <label>Professor(a)<input id="faProf" list="faProfs" required placeholder="Seu nome"><datalist id="faProfs"></datalist></label>
       <div class="fa-l2"><label>Data da aula<input id="faData" type="date" required></label><label>Tipo<input id="faTipo" placeholder="Aula, Revisão, Atividade…"></label></div>
       <p class="fa-info" id="faInfo"></p>
+      <label>Turma <small>(opcional — ex.: A, B, Manhã; cria a pasta “<span id="faPastaEx"></span>”)</small><input id="faClasse" maxlength="20" placeholder="A, B, Manhã…" list="faClasses"><datalist id="faClasses"></datalist></label>
       <label>Conteúdo / tema da aula<input id="faCont" required placeholder="Ex.: Frações equivalentes"></label>
       <div class="fa-bncc"><b>Habilidades da BNCC trabalhadas</b> <small id="faBnccN"></small>
         <div id="faSel" class="fa-chips"></div>
@@ -54,6 +55,14 @@
     $('#faDiario').value = (aberta && aberta.diario) || '';
     $('#faLivre').value = (aberta && aberta.livre) || '';
     $('#faInfo').textContent = `${inf.etapa} · ${inf.turma} · ${inf.disciplina}`;
+    // turma: a da aula aberta, a escrita no cabeçalho (Fundamental) ou a última usada nesta série
+    const ultimas = (() => { try { return JSON.parse(localStorage.getItem('sei-classes') || '{}'); } catch (e) { return {}; } })();
+    const doCab = /^(?:\d+\s*[ºª°]?\s*(?:ano|série)?\s*)?([A-Za-z]|manh[ãa]|tarde|noite)$/i.exec((st.conteudo || '').trim());
+    $('#faClasse').value = (aberta && aberta.classe) || (doCab ? doCab[1].toUpperCase().replace(/^M.*/i, s => s[0].toUpperCase() + s.slice(1).toLowerCase()) : '') || ultimas[inf.turma] || '';
+    const todasA = await A.todas();
+    $('#faClasses').innerHTML = [...new Set(todasA.filter(x => x.turma === inf.turma && x.classe).map(x => x.classe))].map(c => `<option value="${esc(c)}">`).join('');
+    const ex = () => { $('#faPastaEx').textContent = inf.turma + ($('#faClasse').value.trim() ? ' ' + $('#faClasse').value.trim() : ''); };
+    $('#faClasse').oninput = ex; ex();
     sel = new Set((aberta && aberta.habilidades) || []);
     $('#faAtualizar').hidden = !aberta; $('#faNova').textContent = aberta ? 'Salvar como nova aula' : 'Salvar aula';
     $('#faBusca').value = ''; lista = []; desenharLista();
@@ -72,12 +81,13 @@
     const aula = Object.assign(base, {
       professor: prof, data: $('#faData').value || A.hoje(), tipo: $('#faTipo').value.trim(), conteudo: $('#faCont').value.trim(),
       habilidades: [...sel], livre: $('#faLivre').value.trim(), diario: $('#faDiario').value.trim(),
-      etapa: inf.etapa, turma: inf.turma, disciplina: inf.disciplina, src: st.src,
+      etapa: inf.etapa, turma: inf.turma, classe: $('#faClasse').value.trim(), disciplina: inf.disciplina, src: st.src,
       folha: { blocks: st.blocks, conteudo: st.conteudo, identificacao: st.identificacao }
     });
     await A.gravar(aula); aberta = aula;
+    try { const u = JSON.parse(localStorage.getItem('sei-classes') || '{}'); u[inf.turma] = aula.classe; localStorage.setItem('sei-classes', JSON.stringify(u)); } catch (e) {}
     const p = params(); p.set('aula', aula.id); history.replaceState(null, '', '#' + p.toString());
-    mostrarToast(`Aula salva na pasta de <b>${esc(prof)}</b>.`, true);
+    mostrarToast(`Aula salva em <b>${esc(prof)} › ${esc(A.pasta(aula))} › ${esc(aula.disciplina)}</b>.`, true);
   });
 
   function mostrarToast(html, comNova) {
