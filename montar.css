@@ -109,3 +109,10 @@ dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 
 /* fórmulas */
 .col math,#ed math{font-family:'Cambria Math','STIX Two Math','Latin Modern Math',math,serif;font-size:1.08em}
 .col math[display=block],#ed math[display=block]{margin:2pt 0}
+/* Data (opcional) no cabeçalho: cobre a linha só quando preenchida */
+.page .campo.data{text-align:center;font:700 9pt Arial,sans-serif;letter-spacing:.3px;border-bottom:1px dashed #9aa}
+.page .campo.data-p1:not(:placeholder-shown){background:#fff}
+.page .campo.data-p2{color:#fff;font-size:10pt}
+.page .campo.data-p2::placeholder{color:rgba(255,255,255,.55)}
+.page .campo.data-p2:not(:placeholder-shown){background:var(--fundo-data,#001234)}
+@media print{.page .campo.data{border:0}.sei-print-bw .page .campo.data-p2{color:#2d2d2d}.sei-print-bw .page .campo.data-p2:not(:placeholder-shown){background:#fafafa}}

@@ -16,9 +16,16 @@
         const nome = 'word/' + m[1]; const f = zip.file(nome); if (!f) continue;
         const k = hex(await crypto.subtle.digest('SHA-1', await f.async('arraybuffer')));
         const alvo = mapa[k]; if (!alvo) continue;
-        const res = await fetch(alvo + '?v=8'); if (!res.ok) continue;
+        const res = await fetch(alvo + '?v=10'); if (!res.ok) continue;
         zip.file(nome, await res.arrayBuffer()); n++;
       }
+    }
+    // Data das páginas 2+: escura sobre o quadro claro onde o aluno escreve
+    for (const h of zip.file(/^word\/header\d+\.xml$/)) {
+      const xml = await h.async('string');
+      const novo = xml.replace(/<w:sdt>(?:(?!<\/w:sdt>)[\s\S])*?<w:tag w:val="sei-data-2"\/>[\s\S]*?<\/w:sdt>/g,
+        m => m.replace(/<w:color w:val="FFFFFF"\/>/g, '<w:color w:val="2D2D2D"/>').replace(/w:fill="[0-9A-Fa-f]{6}"/g, 'w:fill="FAFAFA"'));
+      if (novo !== xml) zip.file(h.name, novo);
     }
     return n;
   }

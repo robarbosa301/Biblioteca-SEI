@@ -5,7 +5,7 @@
   const $ = s => document.querySelector(s);
   const pagesEl = $('#pages'), measure = $('#measure');
   const src = decodeURIComponent((location.hash.match(/f=([^&]+)/) || [])[1] || '');
-  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
+  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', data = '', identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
   const advanced = /assets\/(pre-vestibular|ensino-medio|convenio)\//.test(src);
   const KEY = 'sei-montar:' + src;
 
@@ -21,7 +21,7 @@
     };
   })();
   let saveT = null;
-  const persist = () => db.set(KEY, { blocks, conteudo, identificacao });
+  const persist = () => db.set(KEY, { blocks, conteudo, data, identificacao });
   const save = () => { clearTimeout(saveT); saveT = setTimeout(persist, 300); };
   addEventListener('pagehide', persist);
   let past = [], future = [];
@@ -300,7 +300,7 @@
   async function moldurasPB() {
     const fr = Array.from(pagesEl.querySelectorAll('.frame'));
     await Promise.all(fr.map(im => new Promise(ok => {
-      const pb = im.src.replace(/-p([12])\.jpg(\?[^#]*)?$/, '-p$1-pb.jpg?v=8');
+      const pb = im.src.replace(/-p([12])\.jpg(\?[^#]*)?$/, '-p$1-pb.jpg?v=9');
       if (pb === im.src) return ok();
       im.onload = im.onerror = () => ok(); im.src = pb;
     })));
@@ -382,6 +382,21 @@
     fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=6-ponto';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
     pg.appendChild(fr);
+    // Data (opcional): digitada uma vez, aparece em todas as folhas; vazia, fica a linha para o aluno
+    const caixa = (x0, y0, x1, y1) => ({ left: cm(PSM + x0 * K * F), top: cm(OY + y0 * K * F), width: cm((x1 - x0) * K * F), height: cm((y1 - y0) * K * F) });
+    const dBox = n === 0 ? geo.d1 : geo.d2;
+    if (dBox) {
+      const dt = document.createElement('input'); dt.className = 'campo data ' + (n === 0 ? 'data-p1' : 'data-p2');
+      dt.value = data; dt.placeholder = 'dd/mm/aaaa'; dt.inputMode = 'numeric'; dt.maxLength = 10;
+      dt.setAttribute('aria-label', 'Data (opcional: aparece em todas as folhas)'); dt.title = 'Data (opcional): digite uma vez e ela aparece em todas as folhas';
+      Object.assign(dt.style, caixa(...dBox)); if (n > 0 && geo.d2bg) dt.style.setProperty('--fundo-data', geo.d2bg);
+      dt.oninput = () => {
+        const dg = dt.value.replace(/\D/g, '').slice(0, 8);
+        dt.value = dg.length > 4 ? dg.slice(0, 2) + '/' + dg.slice(2, 4) + '/' + dg.slice(4) : dg.length > 2 ? dg.slice(0, 2) + '/' + dg.slice(2) : dg;
+        data = dt.value; pagesEl.querySelectorAll('.campo.data').forEach(o => { if (o !== dt) o.value = data; }); save();
+      };
+      pg.appendChild(dt);
+    }
     if (n === 0) {
       const c = document.createElement('input'); c.className = 'campo'; c.placeholder = geo.turma ? 'Digite a turma' : 'Digite o conteúdo'; c.value = conteudo;
       c.style.left = cm((geo.ul[1] * K + 0.05) * F + PSM); c.style.top = cm(OY + geo.ul[0] * K * F - 0.36); c.style.width = cm((geo.turma ? 2.6 : 3.4) * F); c.style.height = '0.34cm';
@@ -513,20 +528,20 @@
   /* ---------- início ---------- */
   (async () => {
     let mol = {};
-    try { mol = await (await fetch('assets/montar/molduras.json?v=8')).json(); } catch (e) {}
+    try { mol = await (await fetch('assets/montar/molduras.json?v=9')).json(); } catch (e) {}
     geo = mol[src];
     if (!geo) { pagesEl.innerHTML = '<p style="text-align:center;padding:40px">Abra esta ferramenta pelo botão “Montar folha no site” de uma disciplina.</p>'; return; }
     const parts = geo.f.split('/'); const nome = parts[parts.length - 1].replace(/-/g, ' ');
     $('#titulo').textContent = 'Montar folha · ' + nome.charAt(0).toUpperCase() + nome.slice(1);
     const back = sessionStorage.getItem('sei-voltar'); if (back) $('#voltar').href = back;
     const saved = await db.get(KEY);
-    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
+    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; data = saved.data || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
     render();
     window.dispatchEvent(new CustomEvent('sei-montar-pronto', { detail: { src, geo } }));
   })();
   window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; },
-    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, identificacao }; },
-    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
+    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, data, identificacao }; },
+    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; data = st.data || ''; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
     novaFolha() { remember(); blocks = []; conteudo = ''; selId = null; render(); persist(); },
     get geo() { return geo; } };
 })();

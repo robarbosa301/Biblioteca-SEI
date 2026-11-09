@@ -160,6 +160,19 @@ def main():
                     z.writestr(n, d)
             feitos += 1
     print(f'{feitos} modelos com identificação editável (tipo e número).')
+    from data_word import aplicar as data_aplicar
+    n_data = 0
+    for kind in ['word', 'word-conteudo']:
+        for path in sorted((ROOT / 'assets' / kind).rglob('*.docx')):
+            rel = path.relative_to(ROOT / 'assets' / kind).with_suffix('').as_posix()
+            with ZipFile(path) as z:
+                entries = {n: z.read(n) for n in z.namelist()}
+            if data_aplicar(entries, geo_id.get(rel, {})):
+                with ZipFile(path, 'w', ZIP_DEFLATED) as z:
+                    for n, d in entries.items():
+                        z.writestr(n, d)
+                n_data += 1
+    print(f'{n_data} modelos com data opcional (1ª página → todas as páginas).')
     from enter_word import aplicar as enter_aplicar
     n_enter=0
     for kind in ['word', 'word-conteudo']:
