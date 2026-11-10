@@ -41,7 +41,7 @@
     const l = filtradas();
     if (aba === 'aulas') abaAulas(); else if (aba === 'diario') abaDiario(l); else abaPainel(l);
   }
-  const vazio = () => `<div class="vazio"><p>Nenhuma aula neste período.</p><p>Monte uma folha em “Montar folha no site” e toque em <b>💾 Salvar aula</b>.</p><a class="b main" href="index.html">Ir para a Biblioteca</a></div>`;
+  const vazio = () => `<div class="vazio"><p>Nenhuma aula de <b>${esc($('#prof').value)}</b> ${aba === 'aulas' ? 'ainda' : 'neste período'}.</p><p>Monte uma folha em “Montar folha no site” e toque em <b>💾 Salvar aula</b>.</p><a class="b main" href="index.html">Ir para a Biblioteca</a></div>`;
 
   const ordemTurma = t => { const m = /^(\d+)/.exec(t); return (/ano/.test(t) ? 0 : /série/.test(t) ? 100 : 200) + (m ? +m[1] : 99); };
   const pastaCard = (attr, icone, nome, sub, n) => `<button class="pasta" ${attr}><span class="pi">${icone}</span><span class="pt"><b>${esc(nome)}</b><small>${esc(sub)}</small></span><span class="pn">${n} aula${n === 1 ? '' : 's'}</span></button>`;
@@ -54,6 +54,7 @@
     </article>`;
   function abaAulas() {
     const prof = $('#prof').value, l = doProf();
+    if (!prof) { $('#aba-aulas').innerHTML = `<div class="vazio"><p>Comece cadastrando o nome do professor.</p><button class="b main" onclick="document.getElementById('novoProf').click()">➕ Novo professor</button></div>`; return; }
     if (!l.length) { $('#aba-aulas').innerHTML = vazio(); return; }
     const chaveT = a => a.etapa + '|' + A.pasta(a);
     if (nav.turma && !l.some(a => chaveT(a) === nav.turma)) nav = { turma: null, disc: null };
@@ -147,6 +148,11 @@
   document.addEventListener('change', async e => {
     if (e.target.dataset.diario) { const a = await A.pegar(e.target.dataset.diario); a.diario = e.target.value; await A.gravar(a); const x = todas.find(y => y.id === a.id); if (x) x.diario = a.diario; }
   });
+  $('#novoProf').onclick = () => {
+    const n = (prompt('Nome do professor(a):') || '').trim().replace(/\s+/g, ' ');
+    if (!n) return;
+    A.definirProfessor(n); nav = { turma: null, disc: null }; carregar();
+  };
   $('#ant').onclick = () => mover(-1); $('#prox').onclick = () => mover(1);
   $('#prof').onchange = () => { A.definirProfessor($('#prof').value); nav = { turma: null, disc: null }; opcoes(); desenhar(); };
   $('#fTurma').onchange = $('#fDisc').onchange = desenhar;
