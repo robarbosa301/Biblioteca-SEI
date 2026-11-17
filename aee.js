@@ -12,8 +12,8 @@
   /* ---------- armazenamento ---------- */
   let dbp = null;
   const abrir = () => dbp || (dbp = new Promise((res, rej) => {
-    const r = indexedDB.open('sei-aee', 1);
-    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('alunos', { keyPath: 'id' }); for (const n of ['atend', 'pei']) d.createObjectStore(n, { keyPath: 'id' }).createIndex('aluno', 'aluno'); };
+    const r = indexedDB.open('sei-aee', 2);
+    r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains('alunos')) d.createObjectStore('alunos', { keyPath: 'id' }); for (const n of ['atend', 'pei', 'parecer']) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: 'id' }).createIndex('aluno', 'aluno'); };
     r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
   }));
   const tx = (st, modo, fn) => abrir().then(d => new Promise((res, rej) => { const t = d.transaction(st, modo); const o = fn(t.objectStore(st)); t.oncomplete = () => res(o && o.result !== undefined ? o.result : o); t.onerror = () => rej(t.error); }));
@@ -59,10 +59,10 @@
       p.innerHTML = `<div class="vazio"><h2>🤝 Atendimento Educacional Especializado</h2><p>Cadastre cada aluno atendido pelo AEE com as necessidades e o jeito como aprende melhor. Depois, registre os atendimentos, monte o Plano Educacional Individualizado (PEI) e crie atividades adaptadas no padrão da escola.</p><button class="b main" onclick="document.getElementById('novoAluno').click()">➕ Cadastrar aluno</button></div>`;
       return;
     }
-    const abas = [['perfil', '👤 Perfil'], ['atend', '🗂️ Atendimentos'], ['pei', '🎯 PEI'], ['ativ', '✏️ Atividade adaptada']];
+    const abas = [['perfil', '👤 Perfil'], ['atend', '🗂️ Atendimentos'], ['pei', '🎯 PEI'], ['parecer', '📄 Parecer'], ['ativ', '✏️ Atividade adaptada']];
     p.innerHTML = `<div class="topo-al"><h2>${esc(atual.nome)}</h2><small>${esc([atual.serie, atual.classe, atual.turno].filter(Boolean).join(' · '))}</small></div>
       <nav class="abas-al">${abas.map(([k, n]) => `<button data-aba="${k}" class="${aba === k ? 'on' : ''}">${n}</button>`).join('')}</nav><section id="cont"></section>`;
-    ({ perfil, atend, pei, ativ })[aba]();
+    ({ perfil, atend, pei, parecer, ativ })[aba]();
   }
 
   // Perfil
@@ -92,7 +92,7 @@
     };
     const del = $('#delAluno'); if (del) del.onclick = async () => {
       if (!confirm(`Excluir ${atual.nome} e todos os atendimentos e PEIs dele? Isso não pode ser desfeito.`)) return;
-      for (const st of ['atend', 'pei']) for (const x of (await todos(st)).filter(x => x.aluno === atual.id)) await apagar(st, x.id);
+      for (const st of ['atend', 'pei', 'parecer']) for (const x of (await todos(st)).filter(x => x.aluno === atual.id)) await apagar(st, x.id);
       await apagar('alunos', atual.id); atual = null; aba = 'perfil'; carregar();
     };
   }
@@ -170,6 +170,51 @@
     };
   }
 
+  // Parecer neuropsicopedagógico: capa da escola + texto do parecer
+  const SEC_PAR = [['motivo', 'Motivo do encaminhamento', 'Quem encaminhou e por quê'], ['historico', 'Histórico e informações relevantes', 'Desenvolvimento, saúde, família, vida escolar'],
+    ['instrumentos', 'Procedimentos e instrumentos utilizados', 'Entrevista, observação, testes, provas, atividades'], ['cognitivo', 'Aspectos cognitivos', 'Atenção, memória, raciocínio, funções executivas'],
+    ['linguagem', 'Linguagem, leitura e escrita', ''], ['matematica', 'Raciocínio lógico-matemático', ''], ['motor', 'Aspectos psicomotores', ''],
+    ['socio', 'Aspectos socioemocionais e comportamentais', ''], ['conclusao', 'Conclusão / síntese', ''], ['escola', 'Orientações à escola e aos professores', ''],
+    ['familia', 'Orientações à família', ''], ['encaminha', 'Encaminhamentos', 'Ex.: fonoaudiologia, psicologia, neuropediatria']];
+  const PROF_PAR = { nome: 'Sâmea Thaíse F. Cunha', cargo: 'Neuropsicopedagoga' };
+  async function parecer() {
+    if (edit && edit.tipo === 'parecer') return formParecer(edit.obj);
+    const l = (await todos('parecer')).filter(x => x.aluno === atual.id).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+    $('#cont').innerHTML = `<p class="dica">Parecer com a capa da escola. Aluno, turma e ano escolar entram na capa automaticamente.</p>
+      <div class="acoes"><button class="b main" id="novoPar">➕ Novo parecer</button></div>
+      ${l.length ? `<div class="cards">${l.map(x => `<article class="aula"><div class="topo"><b>${fmt(x.data)}</b><span class="tag">Parecer</span></div><h3>${esc((x.conclusao || x.motivo || 'Parecer neuropsicopedagógico').slice(0, 120))}</h3>
+        <div class="acoes"><button class="b main" data-imp="parecer" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="parecer" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="parecer" data-id="${x.id}">⬇ PDF</button><button class="b" data-edpar="${x.id}">✏️ Editar</button><button class="b ghost" data-delpar="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
+    $('#novoPar').onclick = () => { edit = { tipo: 'parecer', obj: { data: hoje(), turma: [atual.serie, atual.classe].filter(Boolean).join(' ').replace(/ \(Médio\)/, ''), turno: atual.turno, ano: String(new Date().getFullYear()) } }; parecer(); };
+  }
+  function formParecer(x) {
+    $('#cont').innerHTML = `<form id="fPar" class="ficha"><h3>${x.id ? 'Editar' : 'Novo'} parecer neuropsicopedagógico</h3>
+      <div class="g3">${campo('Turma (capa)', inp('rTurma', x.turma, 'Ex.: 3º ano B'))}${campo('Ano escolar (capa)', inp('rAno', x.ano))}${campo('Data do parecer', inp('rData', x.data, '', 'date'))}</div>
+      ${SEC_PAR.map(([k, n, ph]) => campo(n, txt('r_' + k, x[k], ph, k === 'conclusao' ? 5 : 3), 'full')).join('')}
+      <div class="acoes"><button class="b main" type="submit">💾 Salvar parecer</button><button class="b ghost" type="button" id="cancPar">Cancelar</button></div></form>`;
+    $('#cancPar').onclick = () => { edit = null; parecer(); };
+    $('#fPar').onsubmit = async e => {
+      e.preventDefault();
+      const o = Object.assign(x.id ? x : { id: novoId(), aluno: atual.id, criado: Date.now() }, { turma: val('rTurma').trim(), ano: val('rAno').trim(), data: val('rData') || hoje() });
+      SEC_PAR.forEach(([k]) => { o[k] = val('r_' + k).trim(); });
+      await gravar('parecer', o); edit = null; aviso('Parecer salvo.'); parecer();
+    };
+  }
+  // capa: a arte da escola com os campos escritos por cima (vira uma imagem só, para PDF e Word)
+  async function capaParecer(a, x) {
+    const im = await new Promise((ok, er) => { const i = new Image(); i.onload = () => ok(i); i.onerror = er; i.src = 'assets/docs/capa-parecer.jpg'; });
+    const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+    const k = c.width / 905; if (document.fonts && document.fonts.load) { try { await document.fonts.load('800 30px "SEI Rubik"'); } catch (e) {} }
+    const escreve = (t, x0, x1, y) => { if (!t) return; let sz = 27; g.font = `800 ${sz * k}px "SEI Rubik", Arial, sans-serif`; while (g.measureText(t).width > (x1 - x0) * k && sz > 14) { sz--; g.font = `800 ${sz * k}px "SEI Rubik", Arial, sans-serif`; } g.fillStyle = '#0b2a5b'; g.textBaseline = 'alphabetic'; g.fillText(t, (x0 + 6) * k, (y - 6) * k); };
+    escreve(a.nome, 362, 828, 731); escreve(x.turma, 322, 828, 800); escreve(x.ano, 440, 825, 870);
+    return c.toDataURL('image/jpeg', 0.92);
+  }
+  async function docParecer(a, x) {
+    const capa = await capaParecer(a, x);
+    const corpo = SEC_PAR.filter(([k]) => x[k]).map(([k, n]) => bloco(n, x[k])).join('');
+    return `<div class="doc-pag par-capa"><img src="${capa}" width="620" alt="Capa do parecer"></div><div class="doc-pag">${cab('PARECER NEUROPSICOPEDAGÓGICO')}${idAluno(a)}<table class="doc-id"><tr><th>Turma</th><td>${esc(x.turma)}</td></tr><tr><th>Data do parecer</th><td>${fmt(x.data)}</td></tr></table>${corpo}
+      <p class="doc-fim">São Miguel do Guamá — PA, ${fmt(x.data)}.</p><div class="doc-ass um"><div><span></span><b>${PROF_PAR.nome}</b><br>${PROF_PAR.cargo}</div></div></div>`;
+  }
+
   // Atividade adaptada (Montar folha em uma coluna, letra grande)
   let mol = null;
   async function ativ() {
@@ -217,10 +262,11 @@
     if (tipo === 'atend') return docAtend(atual, (await todos('atend')).find(x => x.id === id));
     if (tipo === 'atend-todos') return (await todos('atend')).filter(x => x.aluno === atual.id).sort((a, b) => (a.data || '').localeCompare(b.data || '')).map(x => docAtend(atual, x)).join('');
     if (tipo === 'pei') return docPei(atual, (await todos('pei')).find(x => x.id === id));
+    if (tipo === 'parecer') return docParecer(atual, (await todos('parecer')).find(x => x.id === id));
     return '';
   }
   async function baixarAee(fmt, tipo, id) {
-    const h = await montarDoc(tipo, id); const nome = ({ perfil: 'Ficha do aluno', atend: 'Ficha de atendimento', pei: 'PEI', 'atend-todos': 'Atendimentos' })[tipo] + ' - ' + atual.nome;
+    const h = await montarDoc(tipo, id); const nome = ({ perfil: 'Ficha do aluno', atend: 'Ficha de atendimento', pei: 'PEI', parecer: 'Parecer neuropsicopedagógico', 'atend-todos': 'Atendimentos' })[tipo] + ' - ' + atual.nome;
     return fmt === 'pdf' ? seiBaixar.pdf(h, nome) : seiBaixar.word(h, nome);
   }
   async function imprimir(tipo, id) {
@@ -229,6 +275,7 @@
     if (tipo === 'atend') h = docAtend(atual, (await todos('atend')).find(x => x.id === id));
     if (tipo === 'atend-todos') h = (await todos('atend')).filter(x => x.aluno === atual.id).sort((a, b) => (a.data || '').localeCompare(b.data || '')).map(x => docAtend(atual, x)).join('');
     if (tipo === 'pei') h = docPei(atual, (await todos('pei')).find(x => x.id === id));
+    if (tipo === 'parecer') h = await docParecer(atual, (await todos('parecer')).find(x => x.id === id));
     $('#imprimir').innerHTML = h;
     await Promise.all([...document.querySelectorAll('#imprimir img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
     window.print();
@@ -248,14 +295,16 @@
     if (t.dataset.edpei) { edit = { tipo: 'pei', obj: (await todos('pei')).find(x => x.id === t.dataset.edpei) }; pei(); }
     if (t.dataset.duppei) { const o = JSON.parse(JSON.stringify((await todos('pei')).find(x => x.id === t.dataset.duppei))); delete o.id; o.revisao = ''; edit = { tipo: 'pei', obj: o }; pei(); }
     if (t.dataset.delpei && confirm('Excluir este PEI?')) { await apagar('pei', t.dataset.delpei); pei(); }
+    if (t.dataset.edpar) { edit = { tipo: 'parecer', obj: (await todos('parecer')).find(x => x.id === t.dataset.edpar) }; parecer(); }
+    if (t.dataset.delpar && confirm('Excluir este parecer?')) { await apagar('parecer', t.dataset.delpar); parecer(); }
   });
   $('#novoAluno').onclick = () => { atual = { necessidades: [], aprende: [] }; aba = 'perfil'; edit = null; lista(); $('#painel').innerHTML = `<div class="topo-al"><h2>Novo aluno</h2></div><section id="cont"></section>`; perfil(); setTimeout(() => $('#pNome').focus(), 50); };
   $('#busca').oninput = lista;
   const baixar = (txt, nome) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.download = nome; document.body.append(a); a.click(); a.remove(); };
-  $('#exp').onclick = async () => baixar(JSON.stringify({ tipo: 'sei-aee', versao: 1, exportado: new Date().toISOString(), alunos: await todos('alunos'), atend: await todos('atend'), pei: await todos('pei') }), `aee-sei-${hoje()}.json`);
+  $('#exp').onclick = async () => baixar(JSON.stringify({ tipo: 'sei-aee', versao: 1, exportado: new Date().toISOString(), alunos: await todos('alunos'), atend: await todos('atend'), pei: await todos('pei'), parecer: await todos('parecer') }), `aee-sei-${hoje()}.json`);
   $('#imp').onchange = async e => {
     const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-    try { const j = JSON.parse(await f.text()); if (j.tipo !== 'sei-aee') throw 0; for (const st of ['alunos', 'atend', 'pei']) for (const o of j[st] || []) await gravar(st, o); alert(`${(j.alunos || []).length} aluno(s) importado(s).`); carregar(); }
+    try { const j = JSON.parse(await f.text()); if (j.tipo !== 'sei-aee') throw 0; for (const st of ['alunos', 'atend', 'pei', 'parecer']) for (const o of j[st] || []) await gravar(st, o); alert(`${(j.alunos || []).length} aluno(s) importado(s).`); carregar(); }
     catch (err) { alert('Este arquivo não é uma cópia do AEE da Biblioteca SEI.'); }
   };
   carregar();

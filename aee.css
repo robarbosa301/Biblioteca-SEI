@@ -47,7 +47,7 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 
 /* ===== Documentos com a cara do Incentivo ===== */
 @font-face{font-family:'SEI Rubik';src:url(assets/fonts/Rubik-ExtraBold.ttf) format('truetype');font-weight:800;font-display:block}
-.sei-cab{position:relative;display:flex;align-items:center;gap:4mm;height:25mm;margin-top:7mm;padding:0 5mm 0 47mm;border-radius:4mm 4mm 0 0;background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center 30%/cover;color:#fff;border-bottom:1.2mm solid #29c5f8}
+.sei-cab{position:relative;display:flex;align-items:center;gap:4mm;height:25mm;margin-top:10mm;padding:0 5mm 0 47mm;border-radius:4mm 4mm 0 0;background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center 30%/cover;color:#fff;border-bottom:1.2mm solid #29c5f8}
 .sei-masc{position:absolute;left:2mm;bottom:0;height:33mm;filter:drop-shadow(0 1mm 1.2mm rgba(0,0,0,.35))}
 .sei-cab-tx{display:flex;flex-direction:column;gap:1mm;min-width:0}
 .sei-cab-tx small{color:#8bf5ff;font:700 7.5pt Arial,sans-serif;letter-spacing:.5px;text-transform:uppercase;line-height:1.25}.sei-cab-tx small i{display:block;font-style:normal;color:#fff;opacity:.9}
@@ -64,3 +64,6 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 #imprimir .doc-aviso h2{font:800 18pt 'SEI Rubik',Arial,sans-serif;color:#0a3a9c}
 #imprimir .doc-2 .sei-cab{height:19mm;margin-top:5mm;padding-left:37mm}#imprimir .doc-2 .sei-masc{height:25mm}#imprimir .doc-2 .sei-logo{height:16mm}#imprimir .doc-2 .sei-cab-tx strong{font-size:15pt}#imprimir .doc-2 .sei-fita{margin-bottom:3mm}
 #imprimir .cal-m h5{background:#0a3a9c;color:#fff;border-radius:1.5mm;padding:.6mm 0}
+/* Parecer: capa da escola ocupando a página */
+.par-capa{text-align:center;page-break-after:always;break-after:page}
+.par-capa img{width:180mm;height:auto;display:block;margin:0 auto}
