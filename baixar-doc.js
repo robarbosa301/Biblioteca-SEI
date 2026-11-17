@@ -9,26 +9,38 @@
   function aviso(t) { let a = document.getElementById('aeeAviso'); if (!a) { a = document.createElement('div'); a.id = 'aeeAviso'; a.className = 'no-print'; document.body.append(a); } a.textContent = t; a.hidden = false; clearTimeout(aviso.t); aviso.t = setTimeout(() => { a.hidden = true; }, 3000); }
 
   /* ---------- PDF ---------- */
+  // PDF com a moldura da escola em todas as páginas (fundo, borda, rodapé com QR Code)
+  const MARG = { t: 13, l: 14, r: 14, b: 31 };
+  const imgCarrega = src => new Promise((ok, er) => { const i = new Image(); i.onload = () => ok(i); i.onerror = er; i.src = src; });
   async function pdf(html, nome) {
     aviso('⏳ Gerando o PDF…');
     if (!window.html2pdf) await carregar('assets/vendor/html2pdf.bundle.min.js');
-    const fora = document.createElement('div'); Object.assign(fora.style, { position: 'fixed', left: '-10000px', top: '0', width: '190mm' });
-    const caixa = document.createElement('div'); caixa.id = 'imprimir'; caixa.className = 'sei-pdf';
-    Object.assign(caixa.style, { width: '190mm', background: '#fff', display: 'block' });
-    caixa.innerHTML = html; fora.append(caixa);
-    const antigo = document.getElementById('imprimir'); if (antigo) antigo.id = 'imprimir-tela';
-    document.body.append(fora);
+    const fora = document.createElement('div'); Object.assign(fora.style, { position: 'fixed', left: '-10000px', top: '0', width: (210 - MARG.l - MARG.r) + 'mm' });
+    const caixa = document.createElement('div'); caixa.className = 'sei-pdf';
+    Object.assign(caixa.style, { width: (210 - MARG.l - MARG.r) + 'mm', background: 'transparent', display: 'block' });
+    caixa.innerHTML = html; fora.append(caixa); document.body.append(fora);
     try {
       await espera(caixa); if (document.fonts && document.fonts.ready) await document.fonts.ready;
-      await html2pdf().set({
-        margin: [10, 10, 10, 10], filename: nomeArq(nome) + '.pdf',
-        image: { type: 'jpeg', quality: 0.96 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['.doc-b', '.sei-cab', '.sei-rod', '.doc-ass', 'tr', '.cal-m'] }
-      }).from(caixa).save();
+      const opt = { margin: [MARG.t, MARG.l, MARG.b, MARG.r], html2canvas: { scale: 2, useCORS: true, backgroundColor: null }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['.doc-b', '.sei-cab', '.doc-ass', 'tr', '.cal-m', '.doc-aviso'] } };
+      const canvas = await html2pdf().set(opt).from(caixa).toContainer().then(function () { this.prop.container.style.background = 'transparent'; if (this.prop.overlay) this.prop.overlay.style.background = 'transparent'; }).toCanvas().get('canvas');
+      const base = await html2pdf().set({ jsPDF: opt.jsPDF }).from('<div></div>').toPdf().get('pdf');
+      const doc = base; // já vem com uma página A4 em branco
+      const moldura = await imgCarrega('assets/docs/moldura-doc.jpg?v=1');
+      const larg = 210 - MARG.l - MARG.r, alt = 297 - MARG.t - MARG.b, pxmm = canvas.width / larg, pagPx = Math.floor(alt * pxmm);
+      const n = Math.max(1, Math.ceil((canvas.height - 2) / pagPx));
+      for (let p = 0; p < n; p++) {
+        if (p) doc.addPage();
+        doc.addImage(moldura, 'JPEG', 0, 0, 210, 297, 'moldura', 'FAST');
+        const h = Math.min(pagPx, canvas.height - p * pagPx); if (h <= 0) break;
+        const c = document.createElement('canvas'); c.width = canvas.width; c.height = h;
+        c.getContext('2d').drawImage(canvas, 0, p * pagPx, canvas.width, h, 0, 0, canvas.width, h);
+        doc.addImage(c.toDataURL('image/png'), 'PNG', MARG.l, MARG.t, larg, h / pxmm, undefined, 'FAST');
+      }
+      doc.save(nomeArq(nome) + '.pdf');
       aviso('✅ PDF baixado.');
     } catch (e) { alert('Não consegui gerar o PDF: ' + (e && e.message || e)); }
-    fora.remove(); if (antigo) antigo.id = 'imprimir';
+    fora.remove();
   }
 
   /* ---------- Word ---------- */
@@ -39,7 +51,7 @@
     d.querySelectorAll('.sei-cab').forEach(c => {
       const masc = c.querySelector('.sei-masc'), logo = c.querySelector('.sei-logo'), sm = c.querySelector('small'), st = c.querySelector('strong');
       const t = document.createElement('table'); t.className = 'w-cab'; t.setAttribute('width', '100%'); t.setAttribute('cellpadding', '6');
-      t.innerHTML = `<tr><td width="18%" class="w-azul" valign="bottom"><img src="${masc.getAttribute('src')}" width="104"></td><td class="w-azul" valign="middle"><p class="w-sm">${sm.innerHTML.replace(/<i>/, '<br>').replace('</i>', '')}</p><p class="${st.textContent.length > 16 ? 'w-tit-p' : 'w-tit'}">${st.innerHTML}</p></td><td width="22%" class="w-azul" align="right" valign="middle"><img src="${logo.getAttribute('src')}" width="120"></td></tr>`;
+      t.innerHTML = `<tr><td width="18%" class="w-azul" valign="bottom"><img src="${masc.getAttribute('src')}" width="96"></td><td class="w-azul" valign="middle"><p class="w-sm">${sm.innerHTML.replace(/<i>/, '<br>').replace('</i>', '')}</p><p class="${st.textContent.length > 16 ? 'w-tit-p' : 'w-tit'}">${st.innerHTML}</p></td><td width="22%" class="w-azul" align="right" valign="middle"><img src="${logo.getAttribute('src')}" width="112"></td></tr>`;
       c.replaceWith(t);
     });
     d.querySelectorAll('.sei-fita').forEach(f => { const p = document.createElement('p'); p.className = 'w-fita'; p.innerHTML = f.innerHTML; f.replaceWith(p); });
@@ -111,7 +123,7 @@
       flush(); return out;
     }
     function tabela(t, r0) {
-      const cls = [...t.classList]; const cfg = Object.assign({ borda: '999999' }, ...cls.map(c => T[c] || {}));
+      const cls = [...t.classList]; const cfg = Object.assign({ borda: null }, ...cls.map(c => T[c] || {}));
       if (t.closest('.cal-m')) Object.assign(cfg, { borda: null, sz: 7, jc: 'center' });
       const rows = [...t.querySelectorAll(':scope > tbody > tr, :scope > thead > tr, :scope > tr')];
       const ncols = Math.max(1, ...rows.map(tr => [...tr.children].reduce((s, c) => s + (+c.getAttribute('colspan') || 1), 0)));

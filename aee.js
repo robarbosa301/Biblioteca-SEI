@@ -232,8 +232,8 @@
   }
 
   /* ---------- impressão no formato da escola ---------- */
-  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-joinha.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>ATENDIMENTO EDUCACIONAL ESPECIALIZADO</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">★ Nº 1 EM APROVAÇÃO ★ AQUI SE FAZ EDUCAÇÃO COM QUALIDADE ★</div>`;
-  const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div>`;
+  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-prancheta.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>ATENDIMENTO EDUCACIONAL ESPECIALIZADO</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">AQUI SE FAZ EDUCAÇÃO COM QUALIDADE</div>`;
+  const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span><span class="rod-qr"><img src="assets/docs/qr-whatsapp.png" width="62" alt="QR Code do WhatsApp da escola"><br>Fale com a escola</span></div>`;
   const linha = (r, v) => `<tr><th>${r}</th><td>${v || '&nbsp;'}</td></tr>`;
   const bloco = (t, v, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${v ? br(v) : '&nbsp;'}</div></div>`;
   const idAluno = a => `<table class="doc-id">${linha('Aluno(a)', esc(a.nome))}${linha('Série / turma / turno', esc([a.serie, a.classe, a.turno].filter(Boolean).join(' · ')))}${linha('Data de nascimento', fmt(a.nascimento))}${linha('Necessidades', esc(necTxt(a)))}</table>`;

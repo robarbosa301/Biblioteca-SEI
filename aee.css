@@ -71,3 +71,40 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 .par-corpo{position:relative}
 .par-corpo>*{position:relative;z-index:1}
 .par-corpo>.par-agua{position:absolute;z-index:0;left:50%;top:95mm;width:175mm;transform:translateX(-50%);opacity:.32;pointer-events:none}
+
+/* ===== Visual 2: cabeçalho da escola em arte + moldura com rodapé e QR Code ===== */
+#imprimir .sei-cab,.sei-pdf .sei-cab{display:block;height:auto;aspect-ratio:2400/560;margin:0;padding:0;border:0;border-radius:3.5mm;overflow:hidden;background:#0a3a9c url(assets/docs/cab-doc.jpg?v=1) center/100% 100% no-repeat}
+#imprimir .sei-masc,#imprimir .sei-logo,.sei-pdf .sei-masc,.sei-pdf .sei-logo{display:none}
+#imprimir .sei-cab-tx,.sei-pdf .sei-cab-tx{position:absolute;left:23.5%;right:21.8%;top:22%;bottom:28%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.8mm}
+#imprimir .sei-cab-tx small,.sei-pdf .sei-cab-tx small{font-size:6.6pt;letter-spacing:.6px;color:#9ff0ff}
+#imprimir .sei-cab-tx small i,.sei-pdf .sei-cab-tx small i{color:#fff;opacity:.95}
+#imprimir .sei-cab-tx strong,.sei-pdf .sei-cab-tx strong{font-size:17pt;line-height:1.05}
+#imprimir .sei-fita,.sei-pdf .sei-fita{margin:1.8mm auto 4.5mm;width:74%;border-radius:999px;padding:1mm;font-size:7pt;letter-spacing:1.6px;background:linear-gradient(90deg,#0b2a5b,#0a3a9c,#0b2a5b);color:#ffd34d}
+#imprimir .sei-rod,.sei-pdf .sei-rod{display:none}
+#imprimir .doc-2 .sei-cab,.sei-pdf .doc-2 .sei-cab{height:auto;margin-top:0;padding:0}
+#imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:120mm}
+#imprimir .doc-2 .sei-cab-tx strong,.sei-pdf .doc-2 .sei-cab-tx strong{font-size:15pt}
+#imprimir .doc-id,#imprimir .doc-obj,#imprimir .doc-bol,#imprimir .doc-hor,.sei-pdf .doc-id,.sei-pdf .doc-obj,.sei-pdf .doc-bol,.sei-pdf .doc-hor{background:rgba(255,255,255,.82)}
+#imprimir .doc-t,.sei-pdf .doc-t{background:rgba(255,255,255,.78)}
+#imprimir .par-corpo>.par-agua,.sei-pdf .par-corpo>.par-agua{display:none}
+@media print{
+ @page{size:A4;margin:0}
+ body::before{content:'';position:fixed;left:0;top:0;width:210mm;height:297mm;background:url(assets/docs/moldura-doc.jpg?v=1) 0 0/210mm 297mm no-repeat;z-index:-1}
+ #imprimir{padding:13mm 14mm 31mm 14mm;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+ #imprimir .doc-pag{-webkit-box-decoration-break:clone;box-decoration-break:clone}
+ body{background:transparent!important}
+ .par-capa img{width:170mm}
+}
+.sei-pdf .par-capa img{width:168mm}
+
+/* mesmas regras no PDF baixado */
+.sei-pdf .doc-b h4{display:inline-block;background:#0b2a5b;color:#fff;padding:1mm 3mm;border-radius:2mm 2mm 0 0;margin:0;font-size:8.5pt}
+.sei-pdf .doc-b .doc-t{border-color:#0b2a5b;border-width:.8pt;border-radius:0 2mm 2mm 2mm}
+.sei-pdf .doc-id th,.sei-pdf .doc-obj th{background:#e8f1ff!important;color:#0b2a5b}
+.sei-pdf .doc-id,.sei-pdf .doc-obj{border-left:1.4mm solid #29c5f8}
+.sei-pdf .doc-bol th,.sei-pdf .doc-hor th{background:#0a3a9c!important;color:#fff!important}
+.sei-pdf .doc-hor tr.iv td{background:#ffe17a!important;color:#0b2a5b}
+.sei-pdf .doc-aviso h2{font:800 18pt 'SEI Rubik',Arial,sans-serif;color:#0a3a9c}
+.sei-pdf .doc-2 .sei-cab{height:19mm;margin-top:5mm;padding-left:37mm}#imprimir .doc-2 .sei-masc{height:25mm}#imprimir .doc-2 .sei-logo{height:16mm}#imprimir .doc-2 .sei-cab-tx strong{font-size:15pt}#imprimir .doc-2 .sei-fita{margin-bottom:3mm}
+.sei-pdf .cal-m h5{background:#0a3a9c;color:#fff;border-radius:1.5mm;padding:.6mm 0}
+.sei-rod .rod-qr{display:none}

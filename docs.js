@@ -193,8 +193,8 @@
 
   /* ---------- impressão ---------- */
   const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
-  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-joinha.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">★ Nº 1 EM APROVAÇÃO ★ AQUI SE FAZ EDUCAÇÃO COM QUALIDADE ★</div>`;
-  const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div>`;
+  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-prancheta.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">AQUI SE FAZ EDUCAÇÃO COM QUALIDADE</div>`;
+  const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span><span class="rod-qr"><img src="assets/docs/qr-whatsapp.png" width="62" alt="QR Code do WhatsApp da escola"><br>Fale com a escola</span></div>`;
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
   function diasDe(e) { const out = []; if (!e.de) return out; const a = new Date(e.de + 'T12:00'), b = new Date((e.ate || e.de) + 'T12:00'); for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) out.push(d.toISOString().slice(0, 10)); return out; }
