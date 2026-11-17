@@ -45,3 +45,7 @@ table.grade td.hr{min-width:90px}table.grade td.hr input{width:72px}table.grade 
 .etapa .et-n{position:absolute;left:10px;bottom:10px;font:700 12px system-ui;background:rgba(3,30,90,.85);color:#fff;border-radius:999px;padding:3px 10px}
 @media (min-width:900px){.etapas{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}.etapa.larga{grid-column:2/4}}
 .tiles-doc.segs .tile-doc{padding:18px}.tiles-doc.segs .ti{font-size:42px}
+.etapa.simples{background:linear-gradient(140deg,#1a73e8,#0a2a7a);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:14px 18px;color:#fff;text-align:left;gap:2px}
+.etapa.simples .es-i{font-size:38px;line-height:1}.etapa.simples b{font:800 22px system-ui,Arial;letter-spacing:-.3px}.etapa.simples small{color:#9ff0ff;font-weight:700}
+.etapa.simples .et-n{left:auto;right:10px}
+@media (max-width:899px){.etapa.simples{grid-column:1/-1;aspect-ratio:983/230;flex-direction:row;align-items:center;gap:14px}.etapa.simples small{margin-left:auto}}

@@ -25,6 +25,7 @@
   /* ---------- turmas e disciplinas (da própria Biblioteca) ---------- */
   // etapas (mesmos cartões da página inicial)
   const ETAPAS = {
+    ei: { nome: 'Educação Infantil', simples: '🧸', desc: 'Maternal, Pré I e Pré II', turmas: ['Maternal', 'Pré I', 'Pré II'] },
     f1: { nome: 'Fundamental I', pos: '3.77% 55.4%', turmas: ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano'] },
     f2: { nome: 'Fundamental II', pos: '96.2% 55.4%', turmas: ['6º ano', '7º ano', '8º ano', '9º ano'] },
     em: { nome: 'Ensino Médio', pos: '3.77% 79%', turmas: ['1ª série (Médio)', '2ª série (Médio)'] },
@@ -33,7 +34,8 @@
   };
   // Secretaria dividida por segmento
   const SEGS = {
-    ai: { nome: 'Anos Iniciais', icone: '🧸', desc: '1º ao 5º ano', turmas: ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano'] },
+    ei: { nome: 'Educação Infantil', icone: '🧸', desc: 'Maternal, Pré I e Pré II', turmas: ['Maternal', 'Pré I', 'Pré II'] },
+    ai: { nome: 'Anos Iniciais', icone: '✏️', desc: '1º ao 5º ano', turmas: ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano'] },
     ef: { nome: 'Ensino Fundamental', icone: '📘', desc: '6º ao 9º ano', turmas: ['6º ano', '7º ano', '8º ano', '9º ano'] },
     em: { nome: 'Ensino Médio', icone: '🔬', desc: '1ª e 2ª série e Convênio (3ª série)', turmas: ['1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)'] },
     pv: { nome: 'Pré-vestibular', icone: '🎓', desc: 'Turmas do pré-vestibular', turmas: ['Pré-vestibular'] }
@@ -43,9 +45,11 @@
   const doSeg = d => SETOR !== 'secretaria' || !seg || d.seg === seg;
   const etapaDe = t => Object.keys(ETAPAS).find(k => ETAPAS[k].turmas.includes(t));
   let etapa = null;
-  const TURMAS = ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano', '6º ano', '7º ano', '8º ano', '9º ano', '1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)', 'Pré-vestibular'];
+  const TURMAS = ['Maternal', 'Pré I', 'Pré II', '1º ano', '2º ano', '3º ano', '4º ano', '5º ano', '6º ano', '7º ano', '8º ano', '9º ano', '1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)', 'Pré-vestibular'];
   let mol = null;
+  const CAMPOS_EI = ['O eu, o outro e o nós', 'Corpo, gestos e movimentos', 'Traços, sons, cores e formas', 'Escuta, fala, pensamento e imaginação', 'Espaços, tempos, quantidades, relações e transformações'];
   async function disciplinas(turma) {
+    if (['Maternal', 'Pré I', 'Pré II'].includes(turma)) return CAMPOS_EI;
     if (!mol) { try { mol = await (await fetch('assets/montar/molduras.json?v=10')).json(); } catch (e) { mol = {}; } }
     const A = window.seiAulas; const alvo = (turma || '').replace(/ \(.*\)$/, '');
     return [...new Set(Object.keys(mol).map(s => A.info(s)).filter(i => i.turma === alvo || (alvo === 'Pré-vestibular' && i.turma === 'Pré-vestibular')).map(i => i.disciplina))].sort((a, b) => a.localeCompare(b, 'pt'));
@@ -236,7 +240,7 @@
     if (unico) tipo = meus()[0][0];
     if (tipo === 'horario' && SETOR === 'horarios' && !etapa) {
       const n = k => lista.filter(d => d.tipo === 'horario' && etapaDe(d.turma) === k).length;
-      p.innerHTML = `<p class="dica">Escolha a etapa para ver os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
+      p.innerHTML = `<p class="dica">Escolha a etapa para ver os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => e.simples ? `<button class="etapa simples" data-et="${k}" aria-label="${e.nome}"><span class="es-i">${e.simples}</span><b>${e.nome}</b><small>${e.desc}</small>${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>` : `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
       return;
     }
     if (SETOR === 'secretaria' && !seg) {
