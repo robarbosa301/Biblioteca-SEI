@@ -1,0 +1,39 @@
+#docs{margin-top:14px;border-radius:14px}
+.tiles-doc{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.tile-doc{display:flex;flex-direction:column;gap:4px;text-align:left;background:#fff;border:1px solid var(--bd);border-radius:14px;padding:14px;cursor:pointer;font:inherit;color:var(--tx);text-decoration:none;box-shadow:0 2px 8px rgba(4,27,82,.06)}
+.tile-doc:hover{border-color:var(--ac);background:#f5f9ff}
+.tile-doc .ti{font-size:32px;line-height:1}.tile-doc b{font-size:17px;color:var(--azul)}.tile-doc small{color:var(--tx2)}
+.tile-doc em{font-style:normal;font:700 12px system-ui;color:var(--azul);background:#eef5ff;border-radius:999px;padding:2px 9px;align-self:flex-start;margin-top:4px}
+.ficha .full{grid-column:1/-1}
+.ev{display:grid;grid-template-columns:150px 150px 170px 1fr 40px;gap:6px;margin-bottom:6px}
+.ev input,.ev select{font:400 14px system-ui;padding:7px;border:1px solid #b9cce6;border-radius:8px}
+table.notas{min-width:720px}table.notas input{width:58px;font:14px system-ui;padding:5px;border:1px solid #b9cce6;border-radius:6px;text-align:center}
+table.notas .md{font-weight:700;text-align:center}
+table.grade{min-width:820px}table.grade td{min-width:130px}table.grade select,table.grade input{width:100%;font:13px system-ui;padding:5px;border:1px solid #b9cce6;border-radius:6px;margin-bottom:3px}
+table.grade td.hr{min-width:90px}table.grade td.hr input{width:72px}table.grade td.iv{text-align:center;font-weight:700;color:var(--tx2);background:#f3f6fb}
+@media (max-width:700px){.ev{grid-template-columns:1fr 1fr}.ev .ev-desc{grid-column:1/-1}}
+
+/* impressão dos documentos */
+.doc-num{display:flex;justify-content:space-between;gap:6mm;margin:0 0 4mm}
+.doc-dest{margin:2mm 0 5mm;font-weight:700}
+.doc-corpo{text-align:justify;margin:4mm 0;line-height:1.55;min-height:40mm}
+.doc-corpo.grande{font-size:12.5pt;min-height:0}
+.doc-ass.um{grid-template-columns:1fr;justify-items:center}.doc-ass.um div{width:80mm}
+.doc-aviso h2{text-align:center;font-size:17pt;color:#0b2a5b;margin:2mm 0 5mm}
+.doc-para{font-weight:700;font-size:12pt}.doc-fim{margin-top:6mm}
+.doc-2 .doc-aviso{height:128mm;overflow:hidden}.doc-2 .doc-ass{margin-top:6mm}
+.doc-corte{border:0;border-top:1pt dashed #888;margin:3mm 0}
+.cal{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm}
+.cal-m h5{margin:0 0 1mm;text-align:center;font-size:8.5pt;color:#0b2a5b}
+.cal-m table{width:100%;border-collapse:collapse;min-width:0}.cal-m th,.cal-m td{font-size:7.5pt;text-align:center;padding:.5mm;border:0;position:static;background:none;color:#222}
+.cal-m th{color:#0b2a5b;font-weight:700}.cal-m td.fds{color:#999}.cal-m td.ini{outline:1.2pt solid #0b2a5b;font-weight:700}
+.cal-m td[style]{border-radius:1mm;font-weight:700}
+.cal-leg{display:flex;flex-wrap:wrap;gap:2mm 5mm;margin:4mm 0 2mm;font-size:8.5pt}.cal-leg i,.cal-ev i{display:inline-block;width:3mm;height:3mm;border-radius:.8mm;margin-right:1.5mm;vertical-align:middle}
+.cal-leg i.ini{outline:1.2pt solid #0b2a5b}
+.cal-res{font-size:9.5pt;margin:2mm 0 3mm}
+.cal-ev th{width:38mm}
+.doc-bol,.doc-hor{width:100%;border-collapse:collapse;min-width:0;margin-bottom:3mm}
+.doc-bol th,.doc-bol td,.doc-hor th,.doc-hor td{border:.6pt solid #777;padding:1.5mm;font-size:9.5pt;text-align:center;position:static;background:none}
+.doc-bol th,.doc-hor th{background:#eef2f8!important;color:#0b2a5b}.doc-bol td:first-child{text-align:left}
+.doc-hor td{height:13mm;vertical-align:middle}.doc-hor td small{display:block;font-size:8pt;color:#444}.doc-hor td.hr{font-weight:700;width:22mm}
+.doc-hor tr.iv td{height:auto;background:#f3f3f3!important;font-weight:700;letter-spacing:1px}
