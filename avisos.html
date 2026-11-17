@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Avisos · SEI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b2a5b">
+<link rel="stylesheet" href="aulas.css?v=3-aval">
+<link rel="stylesheet" href="aee.css?v=1">
+<link rel="stylesheet" href="docs.css?v=2">
+</head>
+<body data-setor="avisos">
+<header class="no-print">
+  <a class="b" href="index.html">‹ Biblioteca</a>
+  <h1>📢 Avisos <small>Comunicados e convocações</small></h1>
+  <a class="b" href="aulas.html">📁 Minhas aulas</a>
+</header>
+<main id="docs" class="no-print"></main>
+<footer class="no-print">
+  <p>Os documentos ficam guardados <b>neste aparelho</b>. Para não perder nem levar para outro aparelho, faça uma cópia:</p>
+  <button class="b" id="exp">⬇ Exportar cópia (arquivo)</button>
+  <label class="b">⬆ Importar cópia<input type="file" id="imp" accept=".json" hidden></label>
+</footer>
+<div id="imprimir" class="so-print"></div>
+<script src="aulas-dados.js?v=2"></script>
+<script src="docs.js?v=3"></script>
+<script src="offline.js?v=3"></script>
+</body>
+</html>

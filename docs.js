@@ -23,6 +23,16 @@
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
 
   /* ---------- turmas e disciplinas (da própria Biblioteca) ---------- */
+  // etapas (mesmos cartões da página inicial)
+  const ETAPAS = {
+    f1: { nome: 'Fundamental I', pos: '3.77% 55.4%', turmas: ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano'] },
+    f2: { nome: 'Fundamental II', pos: '96.2% 55.4%', turmas: ['6º ano', '7º ano', '8º ano', '9º ano'] },
+    em: { nome: 'Ensino Médio', pos: '3.77% 79%', turmas: ['1ª série (Médio)', '2ª série (Médio)'] },
+    cv: { nome: 'Convênio', pos: '96.2% 79%', turmas: ['3ª série (Convênio)'] },
+    pv: { nome: 'Pré-vestibular', pos: '50% 95.5%', largo: true, turmas: ['Pré-vestibular'] }
+  };
+  const etapaDe = t => Object.keys(ETAPAS).find(k => ETAPAS[k].turmas.includes(t));
+  let etapa = null;
   const TURMAS = ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano', '6º ano', '7º ano', '8º ano', '9º ano', '1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)', 'Pré-vestibular'];
   let mol = null;
   async function disciplinas(turma) {
@@ -67,7 +77,7 @@
         <div class="doc-dest">${br(d.dest)}</div><p><b>Assunto:</b> ${esc(d.assunto)}</p><div class="doc-corpo">${br(d.texto)}</div><p>${esc(d.fecho)}</p>${assina(d.assinante, d.cargo)}`
     },
     aviso: {
-      nome: 'Aviso / Comunicado', icone: '📢', desc: 'Para pais, alunos ou professores', setores: ['secretaria', 'coordenacao'],
+      nome: 'Aviso / Comunicado', icone: '📢', desc: 'Para pais, alunos ou professores', setores: ['secretaria', 'coordenacao', 'avisos'],
       titulo: d => d.titulo || 'Aviso',
       novo: () => ({ data: hoje(), publico: 'Senhores pais e responsáveis' }),
       form: d => `<div class="g2">${lab('Título', inp('titulo', d.titulo, 'Ex.: Reunião de pais'))}${lab('Data', inp('data', d.data, '', 'date'))}</div>
@@ -77,7 +87,7 @@
       doc: d => { const um = `<div class="doc-aviso">${cab('COMUNICADO')}<h2>${esc(d.titulo)}</h2><p class="doc-para">${esc(d.publico)},</p><div class="doc-corpo grande">${br(d.texto)}</div><p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.<br><b>${esc(d.assinante)}</b></p></div>`; return d.copias === '2' ? `<div class="doc-2">${um}<hr class="doc-corte">${um}</div>` : um; }
     },
     calendario: {
-      nome: 'Calendário escolar', icone: '📅', desc: 'Ano letivo, feriados, avaliações', setores: ['secretaria', 'coordenacao'],
+      nome: 'Calendário escolar', icone: '📅', desc: 'Ano letivo, feriados, avaliações', setores: ['secretaria', 'coordenacao', 'calendario'],
       titulo: d => 'Calendário escolar ' + (d.ano || ''),
       novo: () => { const y = new Date().getFullYear(); return { ano: String(y), inicio: y + '-02-03', fim: y + '-12-12', eventos: [] }; },
       form: d => `<div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
@@ -101,10 +111,10 @@
       doc: d => docBoletim(d)
     },
     horario: {
-      nome: 'Horário de aula', icone: '🕒', desc: 'Grade semanal de cada turma', setores: ['secretaria', 'coordenacao'],
+      nome: 'Horário de aula', icone: '🕒', desc: 'Grade semanal de cada turma', setores: ['secretaria', 'coordenacao', 'horarios'],
       titulo: d => `Horário — ${d.turma || ''}${d.classe ? ' ' + d.classe : ''}${d.turno ? ' (' + d.turno + ')' : ''}`,
       novo: () => ({ turma: '6º ano', turno: 'Manhã', dias: 'Segunda a sexta', aulas: [['07:00', '07:50'], ['07:50', '08:40'], ['08:40', '09:30'], ['INTERVALO', ''], ['09:50', '10:40'], ['10:40', '11:30']], grade: {} }),
-      form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, TURMAS))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
+      form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, etapa ? ETAPAS[etapa].turmas : TURMAS))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
         <div class="g2">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}</div>
         <p class="dica">Em cada horário, escolha a disciplina e escreva o professor. Para o intervalo, escreva <b>INTERVALO</b> no início.</p>
         <div class="tab"><table class="grade" id="grade"></table></div><button type="button" class="b" id="maisAula">➕ Mais um horário</button>`,
@@ -144,7 +154,7 @@
         <p class="doc-fim">Declaro estar ciente do registro acima.</p><div class="doc-ass"><div><span></span>Coordenação</div><div><span></span>${esc(d.resp || 'Responsável pelo aluno')}</div><div><span></span>Aluno(a)</div></div>`
     },
     convocacao: {
-      nome: 'Convocação de responsáveis', icone: '📩', desc: 'Chamar os pais à escola', setores: ['coordenacao', 'secretaria'],
+      nome: 'Convocação de responsáveis', icone: '📩', desc: 'Chamar os pais à escola', setores: ['coordenacao', 'secretaria', 'avisos'],
       titulo: d => `Convocação — ${d.aluno || ''}`,
       novo: () => ({ data: hoje(), turma: '6º ano' }),
       form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, TURMAS))}${lab('Letra / turno', inp('classe', d.classe))}</div>
@@ -168,7 +178,7 @@
   const linhaEv = e => `<div class="ev"><input type="date" class="ev-de" value="${esc(e.de || '')}"><input type="date" class="ev-ate" value="${esc(e.ate || '')}" title="Até (opcional)"><select class="ev-tipo">${TIPOS_EV.map(t => `<option ${e.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select><input class="ev-desc" placeholder="Descrição" value="${esc(e.desc || '')}"><button type="button" class="b ghost ev-x" title="Tirar">✕</button></div>`;
 
   /* ---------- impressão ---------- */
-  const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica' }[SETOR];
+  const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
   const cab = titulo => `<div class="doc-cab"><img src="assets/portal/icone-192.png" alt=""><div><b>SISTEMA DE ENSINO INCENTIVO</b><span>${NOME_SETOR}</span><small>${CIDADE}</small></div><em>${esc(titulo)}</em></div>`;
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
@@ -212,18 +222,26 @@
   function tela() {
     const p = $('#docs');
     if (edit) return formulario();
+    const unico = meus().length === 1;
+    if (unico) tipo = meus()[0][0];
+    if (tipo === 'horario' && SETOR === 'horarios' && !etapa) {
+      const n = k => lista.filter(d => d.tipo === 'horario' && etapaDe(d.turma) === k).length;
+      p.innerHTML = `<p class="dica">Escolha a etapa para ver os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
+      return;
+    }
     if (!tipo) {
       p.innerHTML = `<div class="tiles-doc">${meus().map(([k, t]) => { const n = lista.filter(d => d.tipo === k).length; return `<button class="tile-doc" data-t="${k}"><span class="ti">${t.icone}</span><b>${t.nome}</b><small>${t.desc}</small><em>${n ? n + ' salvo' + (n > 1 ? 's' : '') : 'novo'}</em></button>`; }).join('')}
         ${SETOR === 'coordenacao' ? `<a class="tile-doc" href="aulas.html"><span class="ti">🗒️</span><b>Controle das avaliações</b><small>Em “Minhas aulas”, aba Avaliações: 4 avaliações e 2 recuperações por turma</small><em>abrir</em></a><a class="tile-doc" href="aee.html"><span class="ti">🤝</span><b>AEE</b><small>Alunos atendidos, fichas e PEI</small><em>abrir</em></a>` : ''}</div>`;
       return;
     }
-    const t = TIPOS[tipo]; const l = lista.filter(d => d.tipo === tipo).sort((a, b) => (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
-    p.innerHTML = `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc({ secretaria: 'Secretaria', coordenacao: 'Coordenação' }[SETOR])}</button><span>›</span><b class="tr-atual">${t.icone} ${t.nome}</b></nav>
+    const t = TIPOS[tipo]; const ordT = d => TURMAS.indexOf(d.turma) * 100 + ((d.classe || ' ').charCodeAt(0) % 100); const l = lista.filter(d => d.tipo === tipo && (!etapa || etapaDe(d.turma) === etapa)).sort((a, b) => tipo === 'horario' ? ordT(a) - ordT(b) : (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
+    const voltaTxt = etapa ? 'Etapas' : unico ? '' : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos' }[SETOR];
+    p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
       <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button></div>
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
         <div class="acoes"><button class="b main" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">Editar</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
         : `<p class="dica">Nenhum documento ainda. Toque em “Novo” para começar.</p>`}`;
-    $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, t.novo(lista)); tela(); };
+    $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, t.novo(lista)); if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
   }
   async function formulario() {
     const t = TIPOS[edit.tipo];
@@ -245,7 +263,8 @@
   document.addEventListener('click', async e => {
     const b = e.target.closest('button,a'); if (!b) return;
     if (b.dataset.t) { tipo = b.dataset.t; edit = null; tela(); scrollTo(0, 0); }
-    if (b.dataset.volta) { if (b.dataset.volta === '1') tipo = null; edit = null; tela(); }
+    if (b.dataset.et) { etapa = b.dataset.et; tela(); scrollTo(0, 0); }
+    if (b.dataset.volta) { if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
     if (b.dataset.ed) { edit = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.ed))); tela(); }
     if (b.dataset.dup) { const o = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.dup))); delete o.id; o.data = hoje(); if (o.numero) o.numero = proxNum(lista, o.tipo, hoje().slice(0, 4)); edit = o; tela(); }

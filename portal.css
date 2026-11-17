@@ -308,5 +308,6 @@ footer .contatos .mp{background:#fff;font-size:12px}
 .home-extra .extra-card:hover,.home-extra .extra-card:focus-visible{transform:translateY(-4px);outline-color:#8bf5ff;box-shadow:0 14px 30px rgba(0,8,40,.6),0 0 26px rgba(90,210,255,.55)}
 @media screen and (min-width:1100px){
  .portal-home .home-extra{order:3;grid-column:1/-1;background:none;padding:0;gap:18px}
- .portal-home .home-extra .extra-card{width:calc((100% - 54px)/4);border-radius:16px}
+ .portal-home .home-extra{justify-self:center;width:calc(75% - 4.5px)}
+ .portal-home .home-extra .extra-card{width:calc((100% - 36px)/3);border-radius:16px}
 }

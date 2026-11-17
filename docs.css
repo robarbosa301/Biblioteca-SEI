@@ -37,3 +37,10 @@ table.grade td.hr{min-width:90px}table.grade td.hr input{width:72px}table.grade 
 .doc-bol th,.doc-hor th{background:#eef2f8!important;color:#0b2a5b}.doc-bol td:first-child{text-align:left}
 .doc-hor td{height:13mm;vertical-align:middle}.doc-hor td small{display:block;font-size:8pt;color:#444}.doc-hor td.hr{font-weight:700;width:22mm}
 .doc-hor tr.iv td{height:auto;background:#f3f3f3!important;font-weight:700;letter-spacing:1px}
+/* Horários: escolha da etapa com os mesmos cartões da página inicial */
+.etapas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:820px}
+.etapa{position:relative;aspect-ratio:481/280;border:0;border-radius:14px;cursor:pointer;background:#0a3a9c url(assets/portal/entrada-sei-v2.png?v=1) no-repeat;background-size:212.8% auto;outline:2px solid rgba(120,220,255,.55);box-shadow:0 6px 18px rgba(0,8,40,.35);transition:transform .18s}
+.etapa:hover{transform:translateY(-3px);outline-color:#8bf5ff}
+.etapa.larga{grid-column:1/-1;aspect-ratio:983/190;background-size:104.2% auto}
+.etapa .et-n{position:absolute;left:10px;bottom:10px;font:700 12px system-ui;background:rgba(3,30,90,.85);color:#fff;border-radius:999px;padding:3px 10px}
+@media (min-width:900px){.etapas{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}.etapa.larga{grid-column:2/4}}
