@@ -311,3 +311,17 @@ footer .contatos .mp{background:#fff;font-size:12px}
  .portal-home .home-extra{justify-self:center;width:calc(75% - 4.5px)}
  .portal-home .home-extra .extra-card{width:calc((100% - 36px)/3);border-radius:16px}
 }
+/* Início em pastas: Ensino abre as etapas */
+.ensino-voltar{display:none}
+body.at-home:not(.home-ensino) .portal-home .portal-entry,body.at-home:not(.home-ensino) .portal-home .mascot-motion,body.at-home:not(.home-ensino) .portal-home .brand-shimmer{display:none!important}
+body.at-home.home-ensino .portal-home .home-extra{display:none!important}
+body.at-home.home-ensino .ensino-voltar{display:inline-flex;position:absolute;z-index:6;top:10px;left:10px;font:700 14px system-ui,Arial,sans-serif;color:#fff;background:rgba(3,30,90,.85);border:1px solid rgba(140,220,255,.6);border-radius:999px;padding:8px 14px;cursor:pointer}
+@media screen and (max-width:1099px){
+ body.at-home:not(.home-ensino) .portal-home .portal-art{aspect-ratio:1024/553;object-fit:cover;object-position:top}
+}
+@media screen and (min-width:1100px){
+ body.at-home:not(.home-ensino) .portal-home::before{display:none}
+ body.at-home.home-ensino .ensino-voltar{position:static;order:1;grid-column:1/-1;justify-self:start;margin:-6px 0 -10px}
+ body.at-home:not(.home-ensino) .portal-home .home-extra{order:2;width:100%;padding:6px 0 4px}
+ body.at-home:not(.home-ensino) .portal-home .home-extra .extra-card{width:calc((100% - 54px)/4)}
+}

@@ -44,3 +44,4 @@ table.grade td.hr{min-width:90px}table.grade td.hr input{width:72px}table.grade 
 .etapa.larga{grid-column:1/-1;aspect-ratio:983/190;background-size:104.2% auto}
 .etapa .et-n{position:absolute;left:10px;bottom:10px;font:700 12px system-ui;background:rgba(3,30,90,.85);color:#fff;border-radius:999px;padding:3px 10px}
 @media (min-width:900px){.etapas{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}.etapa.larga{grid-column:2/4}}
+.tiles-doc.segs .tile-doc{padding:18px}.tiles-doc.segs .ti{font-size:42px}

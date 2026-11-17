@@ -31,6 +31,16 @@
     cv: { nome: 'Convênio', pos: '96.2% 79%', turmas: ['3ª série (Convênio)'] },
     pv: { nome: 'Pré-vestibular', pos: '50% 95.5%', largo: true, turmas: ['Pré-vestibular'] }
   };
+  // Secretaria dividida por segmento
+  const SEGS = {
+    ai: { nome: 'Anos Iniciais', icone: '🧸', desc: '1º ao 5º ano', turmas: ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano'] },
+    ef: { nome: 'Ensino Fundamental', icone: '📘', desc: '6º ao 9º ano', turmas: ['6º ano', '7º ano', '8º ano', '9º ano'] },
+    em: { nome: 'Ensino Médio', icone: '🔬', desc: '1ª e 2ª série e Convênio (3ª série)', turmas: ['1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)'] },
+    pv: { nome: 'Pré-vestibular', icone: '🎓', desc: 'Turmas do pré-vestibular', turmas: ['Pré-vestibular'] }
+  };
+  let seg = null, segDoc = null;
+  const turmasAtuais = () => (edit && edit.seg && SEGS[edit.seg]) ? SEGS[edit.seg].turmas : etapa ? ETAPAS[etapa].turmas : TURMAS;
+  const doSeg = d => SETOR !== 'secretaria' || !seg || d.seg === seg;
   const etapaDe = t => Object.keys(ETAPAS).find(k => ETAPAS[k].turmas.includes(t));
   let etapa = null;
   const TURMAS = ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano', '6º ano', '7º ano', '8º ano', '9º ano', '1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)', 'Pré-vestibular'];
@@ -87,7 +97,7 @@
       doc: d => { const um = `<div class="doc-aviso">${cab('COMUNICADO')}<h2>${esc(d.titulo)}</h2><p class="doc-para">${esc(d.publico)},</p><div class="doc-corpo grande">${br(d.texto)}</div><p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.<br><b>${esc(d.assinante)}</b></p></div>`; return d.copias === '2' ? `<div class="doc-2">${um}<hr class="doc-corte">${um}</div>` : um; }
     },
     calendario: {
-      nome: 'Calendário escolar', icone: '📅', desc: 'Ano letivo, feriados, avaliações', setores: ['secretaria', 'coordenacao', 'calendario'],
+      nome: 'Calendário escolar', icone: '🗓️', desc: 'Ano letivo, feriados, avaliações', setores: ['secretaria', 'coordenacao', 'calendario'],
       titulo: d => 'Calendário escolar ' + (d.ano || ''),
       novo: () => { const y = new Date().getFullYear(); return { ano: String(y), inicio: y + '-02-03', fim: y + '-12-12', eventos: [] }; },
       form: d => `<div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
@@ -102,7 +112,7 @@
       nome: 'Boletim', icone: '📊', desc: 'Notas das 4 avaliações e recuperações', setores: ['secretaria'],
       titulo: d => `Boletim — ${d.aluno || ''} (${d.turma || ''})`,
       novo: () => ({ ano: String(new Date().getFullYear()), turma: '6º ano', notas: {} }),
-      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, TURMAS))}${lab('Letra / turno', inp('classe', d.classe, 'A, B, Manhã'))}</div>
+      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra / turno', inp('classe', d.classe, 'A, B, Manhã'))}</div>
         <div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Média para aprovação', inp('minima', d.minima || '6,0'))}${lab('Data de emissão', inp('data', d.data || hoje(), '', 'date'))}</div>
         <h4>Notas</h4><div class="tab"><table class="notas" id="notas"></table></div>${lab('Observações', txt('obs', d.obs, '', 2), 1)}`,
       campos: ['aluno', 'turma', 'classe', 'ano', 'minima', 'data', 'obs'],
@@ -114,7 +124,7 @@
       nome: 'Horário de aula', icone: '🕒', desc: 'Grade semanal de cada turma', setores: ['secretaria', 'coordenacao', 'horarios'],
       titulo: d => `Horário — ${d.turma || ''}${d.classe ? ' ' + d.classe : ''}${d.turno ? ' (' + d.turno + ')' : ''}`,
       novo: () => ({ turma: '6º ano', turno: 'Manhã', dias: 'Segunda a sexta', aulas: [['07:00', '07:50'], ['07:50', '08:40'], ['08:40', '09:30'], ['INTERVALO', ''], ['09:50', '10:40'], ['10:40', '11:30']], grade: {} }),
-      form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, etapa ? ETAPAS[etapa].turmas : TURMAS))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
+      form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
         <div class="g2">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}</div>
         <p class="dica">Em cada horário, escolha a disciplina e escreva o professor. Para o intervalo, escreva <b>INTERVALO</b> no início.</p>
         <div class="tab"><table class="grade" id="grade"></table></div><button type="button" class="b" id="maisAula">➕ Mais um horário</button>`,
@@ -145,7 +155,7 @@
       nome: 'Registro de ocorrência', icone: '⚠️', desc: 'Fatos com alunos, providências e ciência', setores: ['coordenacao'],
       titulo: d => `Ocorrência — ${d.aluno || ''} (${fmt(d.data)})`,
       novo: () => ({ data: hoje(), turma: '6º ano' }),
-      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, TURMAS))}${lab('Letra / turno', inp('classe', d.classe))}</div>
+      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra / turno', inp('classe', d.classe))}</div>
         <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Horário', inp('hora', d.hora, '', 'time'))}${lab('Registrado por', inp('quem', d.quem))}</div>
         ${lab('O que aconteceu', txt('texto', d.texto, '', 7), 1)}${lab('Providências tomadas', txt('prov', d.prov, '', 4), 1)}${lab('Responsável pelo aluno', inp('resp', d.resp), 1)}`,
       campos: ['aluno', 'turma', 'classe', 'data', 'hora', 'quem', 'texto', 'prov', 'resp'],
@@ -157,7 +167,7 @@
       nome: 'Convocação de responsáveis', icone: '📩', desc: 'Chamar os pais à escola', setores: ['coordenacao', 'secretaria', 'avisos'],
       titulo: d => `Convocação — ${d.aluno || ''}`,
       novo: () => ({ data: hoje(), turma: '6º ano' }),
-      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, TURMAS))}${lab('Letra / turno', inp('classe', d.classe))}</div>
+      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra / turno', inp('classe', d.classe))}</div>
         <div class="g3">${lab('Comparecer no dia', inp('dia', d.dia, '', 'date'))}${lab('Horário', inp('hora', d.hora, '', 'time'))}${lab('Procurar por', inp('com', d.com, 'Ex.: Coordenação pedagógica'))}</div>
         ${lab('Motivo', txt('texto', d.texto, '', 4), 1)}<div class="g2">${lab('Data do documento', inp('data', d.data, '', 'date'))}${lab('Cópias por folha', sel('copias', d.copias || '2', ['1', '2']))}</div>`,
       campos: ['aluno', 'turma', 'classe', 'dia', 'hora', 'com', 'texto', 'data', 'copias'],
@@ -179,7 +189,7 @@
 
   /* ---------- impressão ---------- */
   const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
-  const cab = titulo => `<div class="doc-cab"><img src="assets/portal/icone-192.png" alt=""><div><b>SISTEMA DE ENSINO INCENTIVO</b><span>${NOME_SETOR}</span><small>${CIDADE}</small></div><em>${esc(titulo)}</em></div>`;
+  const cab = titulo => `<div class="doc-cab"><img src="assets/portal/icone-192.png" alt=""><div><b>SISTEMA DE ENSINO INCENTIVO</b><span>${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</span><small>${CIDADE}</small></div><em>${esc(titulo)}</em></div>`;
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
   function diasDe(e) { const out = []; if (!e.de) return out; const a = new Date(e.de + 'T12:00'), b = new Date((e.ate || e.de) + 'T12:00'); for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) out.push(d.toISOString().slice(0, 10)); return out; }
@@ -229,19 +239,23 @@
       p.innerHTML = `<p class="dica">Escolha a etapa para ver os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
       return;
     }
+    if (SETOR === 'secretaria' && !seg) {
+      p.innerHTML = `<p class="dica">Escolha o segmento. Cada um tem os seus documentos.</p><div class="tiles-doc segs">${Object.entries(SEGS).map(([k, g]) => { const n = lista.filter(d => d.seg === k).length; return `<button class="tile-doc seg" data-seg="${k}"><span class="ti">${g.icone}</span><b>${g.nome}</b><small>${g.desc}</small><em>${n ? n + ' documento' + (n > 1 ? 's' : '') : 'abrir'}</em></button>`; }).join('')}</div>`;
+      return;
+    }
     if (!tipo) {
-      p.innerHTML = `<div class="tiles-doc">${meus().map(([k, t]) => { const n = lista.filter(d => d.tipo === k).length; return `<button class="tile-doc" data-t="${k}"><span class="ti">${t.icone}</span><b>${t.nome}</b><small>${t.desc}</small><em>${n ? n + ' salvo' + (n > 1 ? 's' : '') : 'novo'}</em></button>`; }).join('')}
+      p.innerHTML = `${seg ? `<nav class="trilha"><button class="b ghost" data-volta="seg">‹ Secretaria</button><span>›</span><b class="tr-atual">${SEGS[seg].icone} ${SEGS[seg].nome}</b></nav>` : ''}<div class="tiles-doc">${meus().map(([k, t]) => { const n = lista.filter(d => d.tipo === k && doSeg(d)).length; return `<button class="tile-doc" data-t="${k}"><span class="ti">${t.icone}</span><b>${t.nome}</b><small>${t.desc}</small><em>${n ? n + ' salvo' + (n > 1 ? 's' : '') : 'novo'}</em></button>`; }).join('')}
         ${SETOR === 'coordenacao' ? `<a class="tile-doc" href="aulas.html"><span class="ti">🗒️</span><b>Controle das avaliações</b><small>Em “Minhas aulas”, aba Avaliações: 4 avaliações e 2 recuperações por turma</small><em>abrir</em></a><a class="tile-doc" href="aee.html"><span class="ti">🤝</span><b>AEE</b><small>Alunos atendidos, fichas e PEI</small><em>abrir</em></a>` : ''}</div>`;
       return;
     }
-    const t = TIPOS[tipo]; const ordT = d => TURMAS.indexOf(d.turma) * 100 + ((d.classe || ' ').charCodeAt(0) % 100); const l = lista.filter(d => d.tipo === tipo && (!etapa || etapaDe(d.turma) === etapa)).sort((a, b) => tipo === 'horario' ? ordT(a) - ordT(b) : (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
-    const voltaTxt = etapa ? 'Etapas' : unico ? '' : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos' }[SETOR];
+    const t = TIPOS[tipo]; const ordT = d => TURMAS.indexOf(d.turma) * 100 + ((d.classe || ' ').charCodeAt(0) % 100); const l = lista.filter(d => d.tipo === tipo && doSeg(d) && (!etapa || etapaDe(d.turma) === etapa)).sort((a, b) => tipo === 'horario' ? ordT(a) - ordT(b) : (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
+    const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos' }[SETOR];
     p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
       <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button></div>
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
         <div class="acoes"><button class="b main" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">Editar</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
         : `<p class="dica">Nenhum documento ainda. Toque em “Novo” para começar.</p>`}`;
-    $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, t.novo(lista)); if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
+    $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
   }
   async function formulario() {
     const t = TIPOS[edit.tipo];
@@ -253,7 +267,7 @@
     $('#salvaImp').onclick = async () => imprimir(await salvar());
   }
   async function imprimir(d) {
-    const t = TIPOS[d.tipo]; document.body.dataset.doc = d.tipo;
+    const t = TIPOS[d.tipo]; segDoc = d.seg || null; document.body.dataset.doc = d.tipo;
     $('#imprimir').innerHTML = t.doc(d);
     const im = $('#imprimir img'); if (im && !im.complete) await new Promise(r => { im.onload = im.onerror = r; });
     window.print();
@@ -264,10 +278,11 @@
     const b = e.target.closest('button,a'); if (!b) return;
     if (b.dataset.t) { tipo = b.dataset.t; edit = null; tela(); scrollTo(0, 0); }
     if (b.dataset.et) { etapa = b.dataset.et; tela(); scrollTo(0, 0); }
-    if (b.dataset.volta) { if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
+    if (b.dataset.seg) { seg = b.dataset.seg; tipo = null; tela(); scrollTo(0, 0); }
+    if (b.dataset.volta) { if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
     if (b.dataset.ed) { edit = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.ed))); tela(); }
-    if (b.dataset.dup) { const o = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.dup))); delete o.id; o.data = hoje(); if (o.numero) o.numero = proxNum(lista, o.tipo, hoje().slice(0, 4)); edit = o; tela(); }
+    if (b.dataset.dup) { const o = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.dup))); delete o.id; o.data = hoje(); if (o.numero) o.numero = proxNum(lista.filter(doSeg), o.tipo, hoje().slice(0, 4)); edit = o; tela(); }
     if (b.dataset.del && confirm('Excluir este documento?')) { await apagar(b.dataset.del); carregar(); }
   });
   const baixar = (x, nome) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([x], { type: 'application/json' })); a.download = nome; document.body.append(a); a.click(); a.remove(); };
