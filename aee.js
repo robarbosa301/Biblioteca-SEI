@@ -211,7 +211,7 @@
   async function docParecer(a, x) {
     const capa = await capaParecer(a, x);
     const corpo = SEC_PAR.filter(([k]) => x[k]).map(([k, n]) => bloco(n, x[k])).join('');
-    return `<div class="doc-pag par-capa"><img src="${capa}" width="620" alt="Capa do parecer"></div><div class="doc-pag">${cab('PARECER NEUROPSICOPEDAGÓGICO')}${idAluno(a)}<table class="doc-id"><tr><th>Turma</th><td>${esc(x.turma)}</td></tr><tr><th>Data do parecer</th><td>${fmt(x.data)}</td></tr></table>${corpo}
+    return `<div class="doc-pag par-capa"><img src="${capa}" width="620" alt="Capa do parecer"></div><div class="doc-pag par-corpo"><img class="par-agua" src="assets/docs/marca-dagua.jpg" alt="">${cab('PARECER NEUROPSICOPEDAGÓGICO')}${idAluno(a)}<table class="doc-id"><tr><th>Turma</th><td>${esc(x.turma)}</td></tr><tr><th>Data do parecer</th><td>${fmt(x.data)}</td></tr></table>${corpo}
       <p class="doc-fim">São Miguel do Guamá — PA, ${fmt(x.data)}.</p><div class="doc-ass um"><div><span></span><b>${PROF_PAR.nome}</b><br>${PROF_PAR.cargo}</div></div></div>`;
   }
 

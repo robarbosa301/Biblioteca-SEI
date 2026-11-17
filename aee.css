@@ -67,3 +67,7 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 /* Parecer: capa da escola ocupando a página */
 .par-capa{text-align:center;page-break-after:always;break-after:page}
 .par-capa img{width:180mm;height:auto;display:block;margin:0 auto}
+/* marca-d'água do parecer, atrás do texto */
+.par-corpo{position:relative}
+.par-corpo>*{position:relative;z-index:1}
+.par-corpo>.par-agua{position:absolute;z-index:0;left:50%;top:95mm;width:175mm;transform:translateX(-50%);opacity:.32;pointer-events:none}

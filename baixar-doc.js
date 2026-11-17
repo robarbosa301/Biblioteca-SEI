@@ -35,6 +35,7 @@
   // O Word não entende flex/grid: troca as partes de layout por tabelas
   function paraWord(html) {
     const d = document.createElement('div'); d.innerHTML = html;
+    d.querySelectorAll('.par-agua').forEach(x => x.remove()); // o Word não põe imagem atrás do texto
     d.querySelectorAll('.sei-cab').forEach(c => {
       const masc = c.querySelector('.sei-masc'), logo = c.querySelector('.sei-logo'), sm = c.querySelector('small'), st = c.querySelector('strong');
       const t = document.createElement('table'); t.className = 'w-cab'; t.setAttribute('width', '100%'); t.setAttribute('cellpadding', '6');
