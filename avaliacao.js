@@ -23,6 +23,13 @@
     const b = document.createElement('button'); b.className = 'b'; b.id = 'bAvaliacao'; b.textContent = '📝 Avaliação';
     b.title = 'Transformar esta folha em prova: 1ª a 4ª Avaliação ou 1ª/2ª Recuperação';
     bar.insertBefore(b, document.getElementById('bTexto'));
+    // folha adaptada (AEE): uma coluna, letra grande
+    const ad = document.createElement('button'); ad.className = 'b adapt'; ad.id = 'bAdaptada'; ad.textContent = '🔠 Folha adaptada';
+    ad.title = 'AEE: uma coluna só, letra grande e mais espaço entre as linhas';
+    const marca = () => ad.setAttribute('aria-pressed', window.seiMontar.adaptada ? 'true' : 'false');
+    ad.onclick = () => { window.seiMontar.definir({ adaptada: !window.seiMontar.adaptada }); marca(); };
+    bar.insertBefore(ad, document.getElementById('bTexto'));
+    window.addEventListener('sei-montar-pronto', marca); setTimeout(marca, 800);
     const dlg = document.createElement('dialog'); dlg.id = 'dlgAval'; dlg.className = 'no-print';
     dlg.innerHTML = `<form method="dialog" class="fa">
       <div class="dh">📝 Folha de avaliação <small>4 avaliações e 2 recuperações no ano</small></div>

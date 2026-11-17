@@ -5,7 +5,7 @@
   const $ = s => document.querySelector(s);
   const pagesEl = $('#pages'), measure = $('#measure');
   const src = decodeURIComponent((location.hash.match(/f=([^&]+)/) || [])[1] || '');
-  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', data = '', avaliacao = '', identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
+  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', data = '', avaliacao = '', adaptada = /(?:^|&)adaptada=1/.test(location.hash.slice(1)), identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
   const advanced = /assets\/(pre-vestibular|ensino-medio|convenio)\//.test(src);
   const KEY = 'sei-montar:' + src;
 
@@ -21,7 +21,7 @@
     };
   })();
   let saveT = null;
-  const persist = () => db.set(KEY, { blocks, conteudo, data, identificacao, avaliacao });
+  const persist = () => db.set(KEY, { blocks, conteudo, data, identificacao, avaliacao, adaptada });
   const save = () => { clearTimeout(saveT); saveT = setTimeout(persist, 300); };
   addEventListener('pagehide', persist);
   let past = [], future = [];
@@ -373,11 +373,13 @@
     const top = first ? OY + (geo.cut * K + 0.25) * F : OY + (CH * K + 0.45) * F;
     const bot = OY + (geo.bh * K + 0.35) * F;
     const H = 29.7 - top - bot;
+    // folha adaptada (AEE): uma coluna só, da largura das duas
+    if (adaptada) return [{ x: L, y: top, w: 2 * W + gap, h: H }];
     return [{ x: L, y: top, w: W, h: H }, { x: L + W + gap, y: top, w: W, h: H }];
   }
   function makePage(n) {
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
-    const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg); if (geo.dividerColor) pg.style.setProperty('--divider-prova', geo.dividerColor);
+    const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg); if (geo.dividerColor) pg.style.setProperty('--divider-prova', geo.dividerColor); if (adaptada) pg.classList.add('adaptada');
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
     fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=6-ponto';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
@@ -423,7 +425,7 @@
       }
     }
     const cols = colBoxes(n === 0).map(b => { const d = document.createElement('div'); d.className = 'col'; Object.assign(d.style, { left: cm(b.x), top: cm(b.y), width: cm(b.w), height: cm(b.h) }); pg.appendChild(d); return d; });
-    {
+    if (!adaptada) {
       const box = colBoxes(n === 0)[0];
       const divider = document.createElement('div'); divider.className = 'column-divider'; divider.setAttribute('aria-hidden', 'true');
       divider.style.setProperty('--divider-color', geo.dividerColor || '#087dce');
@@ -483,7 +485,7 @@
     const page = i => { while (pages.length <= i) { const p = makePage(pages.length); measure.appendChild(p.wrap); pages.push(p); } return pages[i]; };
     page(0);
     const col = () => page(pi).cols[ci];
-    const advance = () => { ci++; if (ci > 1) { ci = 0; pi++; } };
+    const advance = () => { ci++; if (ci >= page(pi).cols.length) { ci = 0; pi++; } };
     // espera as imagens para medir certo
     const tmp = document.createElement('div'); tmp.innerHTML = blocks.map(b => b.html).join('');
     await Promise.all(Array.from(tmp.querySelectorAll('img')).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
@@ -538,16 +540,17 @@
     $('#titulo').textContent = 'Montar folha · ' + nome.charAt(0).toUpperCase() + nome.slice(1);
     const back = sessionStorage.getItem('sei-voltar'); if (back) $('#voltar').href = back;
     const saved = await db.get(KEY);
-    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; data = saved.data || ''; avaliacao = saved.avaliacao || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
+    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; data = saved.data || ''; avaliacao = saved.avaliacao || ''; adaptada = adaptada || !!saved.adaptada; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
     render();
     window.dispatchEvent(new CustomEvent('sei-montar-pronto', { detail: { src, geo } }));
   })();
   window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; },
-    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, data, identificacao, avaliacao }; },
-    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; data = st.data || ''; avaliacao = st.avaliacao || ''; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
+    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, data, identificacao, avaliacao, adaptada }; },
+    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; data = st.data || ''; avaliacao = st.avaliacao || ''; adaptada = !!st.adaptada; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
     novaFolha() { remember(); blocks = []; conteudo = ''; avaliacao = ''; selId = null; render(); persist(); },
     // avaliação: tipo da folha (ex.: "1ª Avaliação") e identificação do cabeçalho
-    definir(o) { if ('identificacao' in o) identificacao = o.identificacao; if ('avaliacao' in o) avaliacao = o.avaliacao; render(); persist(); },
+    definir(o) { if ('identificacao' in o) identificacao = o.identificacao; if ('avaliacao' in o) avaliacao = o.avaliacao; if ('adaptada' in o) adaptada = !!o.adaptada; render(); persist(); },
+    get adaptada() { return adaptada; },
     inserirNoInicio(els) { remember(); const items = els.map(e => ({ id: nextId++, html: e.outerHTML })); blocks.unshift(...items); selId = items[0].id; render(); save(); },
     removerBloco(id) { const i = blocks.findIndex(b => b.id === id); if (i >= 0) { remember(); blocks.splice(i, 1); render(); save(); } },
     get geo() { return geo; } };

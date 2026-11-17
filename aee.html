@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEE · SEI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b2a5b">
+<link rel="stylesheet" href="aulas.css?v=3-aval">
+<link rel="stylesheet" href="aee.css?v=1">
+</head>
+<body>
+<header class="no-print">
+  <a class="b" href="index.html">‹ Biblioteca</a>
+  <h1>🤝 AEE <small>Atendimento Educacional Especializado</small></h1>
+  <a class="b" href="aulas.html">📁 Minhas aulas</a>
+</header>
+<div class="aee no-print">
+  <aside class="lista">
+    <button class="b main" id="novoAluno">➕ Novo aluno</button>
+    <input type="search" id="busca" placeholder="Buscar aluno">
+    <div id="alunos"></div>
+    <p class="privado">🔒 Os dados dos alunos ficam <b>só neste aparelho</b>. Não ficam na internet.</p>
+  </aside>
+  <main id="painel"></main>
+</div>
+<footer class="no-print">
+  <p>Para não perder nem levar para outro aparelho, faça uma cópia (guarde em local seguro: são dados de alunos):</p>
+  <button class="b" id="exp">⬇ Exportar cópia (arquivo)</button>
+  <label class="b">⬆ Importar cópia<input type="file" id="imp" accept=".json" hidden></label>
+</footer>
+<div id="imprimir" class="so-print"></div>
+<script src="aulas-dados.js?v=2"></script>
+<script src="aee.js?v=1"></script>
+<script src="offline.js?v=3"></script>
+</body>
+</html>

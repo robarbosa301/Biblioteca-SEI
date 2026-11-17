@@ -1,0 +1,46 @@
+header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
+.aee{max-width:1100px;margin:14px auto 0;display:grid;grid-template-columns:260px 1fr;gap:12px;padding:0 16px}
+.lista{background:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;align-self:start;position:sticky;top:76px}
+.lista input{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:9px}
+.al{display:block;width:100%;text-align:left;border:1px solid var(--bd);background:#fff;border-radius:10px;padding:8px 10px;cursor:pointer;font:inherit;color:var(--tx)}
+.al b{display:block;color:var(--azul)}.al small{color:var(--tx2)}.al.on{border-color:var(--ac);background:#eef5ff}
+.privado{font-size:12px;color:var(--tx2);margin:4px 0 0}
+#painel{background:#f4f8fd;border-radius:14px;padding:16px;min-height:60vh;margin:0;max-width:none;width:auto;min-width:0}
+.topo-al h2{margin:0;color:var(--azul)}.topo-al small{color:var(--tx2);font-weight:600}
+.abas-al{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.abas-al button{font:700 14px system-ui,Arial;border:1px solid var(--bd);border-radius:999px;padding:8px 14px;background:#fff;color:var(--azul);cursor:pointer}
+.abas-al button.on{background:var(--azul);color:#fff;border-color:var(--azul)}
+.ficha{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.ficha h3{margin:0;color:var(--azul)}.ficha h4{margin:6px 0 -4px;color:var(--azul)}
+.ficha label{display:flex;flex-direction:column;gap:4px;font-weight:700;color:var(--azul);font-size:14px}
+.ficha input,.ficha select,.ficha textarea{font:400 15px system-ui,Arial,sans-serif;padding:8px 10px;border:1px solid #b9cce6;border-radius:8px;color:var(--tx);width:100%}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.chips label{flex-direction:row;font-weight:500;color:var(--tx);cursor:pointer}
+.chips input{position:absolute;opacity:0;width:auto}
+.chips span{border:1px solid var(--bd);border-radius:999px;padding:5px 11px;font-size:13px;background:#fff}
+.chips input:checked+span{background:var(--azul);color:#fff;border-color:var(--azul)}
+.chips input:focus-visible+span{outline:2px solid var(--ac)}
+.lembra{margin:0;padding:8px 10px;background:#fff8e1;border-radius:9px}
+.vazio h2{color:var(--azul)}
+#aeeAviso{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0b2a5b;color:#fff;padding:10px 16px;border-radius:12px;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+@media (max-width:800px){.aee{grid-template-columns:1fr}.lista{position:static}.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+
+/* documento impresso (formato da escola) */
+#imprimir{font:10.5pt/1.35 Arial,sans-serif;color:#111}
+.doc-pag{break-after:page}.doc-pag:last-child{break-after:auto}
+.doc-cab{display:flex;align-items:center;gap:4mm;border-bottom:1.5pt solid #0b2a5b;padding-bottom:3mm;margin-bottom:4mm}
+.doc-cab img{width:20mm;height:20mm;border-radius:3mm}
+.doc-cab div{flex:1;display:flex;flex-direction:column}.doc-cab b{font-size:13pt;color:#0b2a5b;letter-spacing:.3px}
+.doc-cab span{font-weight:700;font-size:11pt}.doc-cab small{font-size:8.5pt;color:#444}
+.doc-cab em{font-style:normal;font-weight:800;font-size:11pt;color:#0b2a5b;border:1.2pt solid #0b2a5b;border-radius:2mm;padding:2mm 3mm;text-align:center;max-width:62mm}
+.doc-id,.doc-obj{width:100%;border-collapse:collapse;margin-bottom:3mm;min-width:0}
+.doc-id th,.doc-id td,.doc-obj th,.doc-obj td{border:.6pt solid #777;padding:1.5mm 2mm;font-size:10pt;text-align:left;vertical-align:top;background:none;position:static}
+.doc-id th{width:42mm;background:#eef2f8!important;color:#0b2a5b}.doc-obj th{width:48mm;background:#eef2f8!important;color:#0b2a5b}
+.doc-b{margin-bottom:3mm;break-inside:avoid}.doc-b h4{margin:0 0 1mm;font-size:10pt;color:#0b2a5b;text-transform:uppercase;letter-spacing:.3px}
+.doc-t{border:.6pt solid #777;border-radius:1.5mm;padding:2mm;min-height:10mm}.doc-t.alto{min-height:24mm}
+.doc-op{display:flex;flex-wrap:wrap;gap:2mm 6mm}
+.doc-rev{font-size:9.5pt;color:#333}
+.doc-ass{display:grid;grid-template-columns:1fr 1fr;gap:12mm 10mm;margin-top:12mm;break-inside:avoid}
+.doc-ass div{text-align:center;font-size:9pt}.doc-ass span{display:block;border-top:.8pt solid #111;margin-bottom:1mm}
+@media print{@page{size:A4;margin:12mm}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.aee,header{display:none!important}}
