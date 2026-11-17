@@ -193,7 +193,8 @@
 
   /* ---------- impressão ---------- */
   const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
-  const cab = titulo => `<div class="doc-cab"><img src="assets/portal/icone-192.png" alt=""><div><b>SISTEMA DE ENSINO INCENTIVO</b><span>${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</span><small>${CIDADE}</small></div><em>${esc(titulo)}</em></div>`;
+  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-joinha.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">★ Nº 1 EM APROVAÇÃO ★ AQUI SE FAZ EDUCAÇÃO COM QUALIDADE ★</div>`;
+  const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div>`;
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
   function diasDe(e) { const out = []; if (!e.de) return out; const a = new Date(e.de + 'T12:00'), b = new Date((e.ate || e.de) + 'T12:00'); for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) out.push(d.toISOString().slice(0, 10)); return out; }
@@ -272,8 +273,8 @@
   }
   async function imprimir(d) {
     const t = TIPOS[d.tipo]; segDoc = d.seg || null; document.body.dataset.doc = d.tipo;
-    $('#imprimir').innerHTML = t.doc(d);
-    const im = $('#imprimir img'); if (im && !im.complete) await new Promise(r => { im.onload = im.onerror = r; });
+    $('#imprimir').innerHTML = t.doc(d) + (d.copias === '2' ? '' : rodape());
+    await Promise.all([...document.querySelectorAll('#imprimir img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
     window.print();
   }
   let avT = null;

@@ -187,7 +187,8 @@
   }
 
   /* ---------- impressão no formato da escola ---------- */
-  const cab = titulo => `<div class="doc-cab"><img src="assets/portal/icone-192.png" alt=""><div><b>SISTEMA DE ENSINO INCENTIVO</b><span>Atendimento Educacional Especializado — AEE</span><small>São Miguel do Guamá — PA</small></div><em>${esc(titulo)}</em></div>`;
+  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-joinha.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>ATENDIMENTO EDUCACIONAL ESPECIALIZADO</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">★ Nº 1 EM APROVAÇÃO ★ AQUI SE FAZ EDUCAÇÃO COM QUALIDADE ★</div>`;
+  const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div>`;
   const linha = (r, v) => `<tr><th>${r}</th><td>${v || '&nbsp;'}</td></tr>`;
   const bloco = (t, v, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${v ? br(v) : '&nbsp;'}</div></div>`;
   const idAluno = a => `<table class="doc-id">${linha('Aluno(a)', esc(a.nome))}${linha('Série / turma / turno', esc([a.serie, a.classe, a.turno].filter(Boolean).join(' · ')))}${linha('Data de nascimento', fmt(a.nascimento))}${linha('Necessidades', esc(necTxt(a)))}</table>`;
@@ -195,13 +196,13 @@
   function docPerfil(a) {
     return cab('FICHA DO ALUNO') + idAluno(a) + `<table class="doc-id">${linha('Responsável', esc(a.responsavel) + (a.telefone ? ' · ' + esc(a.telefone) : ''))}${linha('Professor(a) regente', esc(a.regente))}${linha('Profissional do AEE', esc(a.profissional))}</table>`
       + bloco('Laudo / informações de saúde', a.laudo) + bloco('Pontos fortes', a.fortes) + bloco('Interesses', a.interesses) + bloco('Dificuldades', a.dificuldades) + bloco('Como aprende melhor', aprTxt(a))
-      + assin(['Profissional do AEE', 'Responsável']);
+      + assin(['Profissional do AEE', 'Responsável']) + rodape();
   }
   function docAtend(a, x) {
     return `<div class="doc-pag">${cab('FICHA DE ATENDIMENTO')}${idAluno(a)}<table class="doc-id">${linha('Data / horário', fmt(x.data) + (x.inicio ? ' · ' + esc(x.inicio) + (x.fim ? ' às ' + esc(x.fim) : '') : ''))}${linha('Tipo de atendimento', esc(x.modalidade))}${linha('Profissional', esc(x.profissional))}</table>`
       + bloco('Objetivo', x.objetivo) + bloco('Atividades realizadas', x.atividades, true) + bloco('Recursos utilizados', [...(x.recursos || []), x.recOutro].filter(Boolean).join(', '))
       + `<div class="doc-b"><h4>Participação do aluno</h4><div class="doc-t doc-op">${PARTICIPA.map(p => `<span>${x.participacao === p ? '☒' : '☐'} ${p}</span>`).join('')}</div></div>`
-      + bloco('Comportamento e observações', x.observacoes, true) + bloco('Próximos passos', x.proximos) + assin(['Profissional do AEE', 'Coordenação']) + '</div>';
+      + bloco('Comportamento e observações', x.observacoes, true) + bloco('Próximos passos', x.proximos) + assin(['Profissional do AEE', 'Coordenação']) + rodape() + '</div>';
   }
   function docPei(a, x) {
     return cab('PLANO EDUCACIONAL INDIVIDUALIZADO — PEI') + idAluno(a) + `<table class="doc-id">${linha('Período', esc(x.periodo + ' de ' + x.ano))}${linha('Frequência do AEE', esc(x.frequencia))}${linha('Professor(a) regente', esc(a.regente))}${linha('Profissional do AEE', esc(x.profissional))}</table>`
@@ -209,7 +210,7 @@
       + `<div class="doc-b"><h4>Objetivos para o período</h4><table class="doc-obj">${AREAS.map(([k, n]) => `<tr><th>${n}</th><td>${x['obj_' + k] ? br(x['obj_' + k]) : '&nbsp;'}</td></tr>`).join('')}</table></div>`
       + bloco('Adaptações nas aulas e avaliações', [...(x.adaptacoes || []), x.adaptacoesTxt].filter(Boolean).join('; ')) + bloco('Recursos e tecnologia assistiva', x.recursos) + bloco('Estratégias de ensino', x.estrategias)
       + bloco('Orientações ao professor regente e à família', x.orientacoes) + bloco('Como será avaliado', x.avaliacao) + (x.revisao ? `<p class="doc-rev">Revisão prevista em ${fmt(x.revisao)}.</p>` : '')
-      + assin(['Profissional do AEE', 'Professor(a) regente', 'Coordenação', 'Responsável']);
+      + assin(['Profissional do AEE', 'Professor(a) regente', 'Coordenação', 'Responsável']) + rodape();
   }
   async function imprimir(tipo, id) {
     let h = '';
@@ -218,7 +219,7 @@
     if (tipo === 'atend-todos') h = (await todos('atend')).filter(x => x.aluno === atual.id).sort((a, b) => (a.data || '').localeCompare(b.data || '')).map(x => docAtend(atual, x)).join('');
     if (tipo === 'pei') h = docPei(atual, (await todos('pei')).find(x => x.id === id));
     $('#imprimir').innerHTML = h;
-    const im = $('#imprimir img'); if (im && !im.complete) await new Promise(r => { im.onload = im.onerror = r; });
+    await Promise.all([...document.querySelectorAll('#imprimir img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
     window.print();
   }
 
