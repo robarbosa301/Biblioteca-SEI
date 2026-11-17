@@ -26,7 +26,7 @@
       const canvas = await html2pdf().set(opt).from(caixa).toContainer().then(function () { this.prop.container.style.background = 'transparent'; if (this.prop.overlay) this.prop.overlay.style.background = 'transparent'; }).toCanvas().get('canvas');
       const base = await html2pdf().set({ jsPDF: opt.jsPDF }).from('<div></div>').toPdf().get('pdf');
       const doc = base; // já vem com uma página A4 em branco
-      const moldura = await imgCarrega('assets/docs/moldura-doc.jpg?v=2');
+      const moldura = await imgCarrega('assets/docs/moldura-doc.jpg?v=3');
       const larg = 210 - MARG.l - MARG.r, alt = 297 - MARG.t - MARG.b, pxmm = canvas.width / larg, pagPx = Math.floor(alt * pxmm);
       const n = Math.max(1, Math.ceil((canvas.height - 2) / pagPx));
       for (let p = 0; p < n; p++) {
@@ -50,7 +50,7 @@
     d.querySelectorAll('.par-agua').forEach(x => x.remove()); // o Word não põe imagem atrás do texto
     d.querySelectorAll('.sei-cab').forEach(c => {
       const st = c.querySelector('strong'); const t = document.createElement('div');
-      t.innerHTML = `<p align="center"><img src="assets/docs/cab-doc.jpg?v=2" width="680"></p><p class="w-tit-c">${st.innerHTML}</p>`;
+      t.innerHTML = `<p align="center"><img src="assets/docs/cab-doc.jpg?v=3" width="680"></p><p class="w-tit-c">${st.innerHTML}</p>`;
       c.replaceWith(...t.childNodes);
     });
     d.querySelectorAll('.sei-fita').forEach(f => { const p = document.createElement('p'); p.className = 'w-fita'; p.innerHTML = f.innerHTML; f.replaceWith(p); });
