@@ -16,6 +16,7 @@
     <div class="fa-corpo">
       <label>Professor(a)<input id="faProf" list="faProfs" required placeholder="Seu nome"><datalist id="faProfs"></datalist></label>
       <div class="fa-l2"><label>Data da aula<input id="faData" type="date" required></label><label>Tipo<input id="faTipo" placeholder="Aula, Revisão, Atividade…"></label></div>
+      <label>Registro<select id="faAval"><option value="">Aula</option>${['1ª Avaliação','2ª Avaliação','3ª Avaliação','4ª Avaliação','1ª Recuperação','2ª Recuperação'].map(t => `<option>${t}</option>`).join('')}</select></label>
       <p class="fa-info" id="faInfo"></p>
       <label>Turma <small>(opcional — ex.: A, B, Manhã; cria a pasta “<span id="faPastaEx"></span>”)</small><input id="faClasse" maxlength="20" placeholder="A, B, Manhã…" list="faClasses"><datalist id="faClasses"></datalist></label>
       <label>Conteúdo / tema da aula<input id="faCont" required placeholder="Ex.: Frações equivalentes"></label>
@@ -52,6 +53,7 @@
     $('#faData').value = (aberta && aberta.data) || A.hoje();
     $('#faTipo').value = (st.identificacao || '').trim();
     $('#faCont').value = (aberta && aberta.conteudo) || st.conteudo || '';
+    $('#faAval').value = st.avaliacao || (aberta && aberta.avaliacao) || '';
     $('#faDiario').value = (aberta && aberta.diario) || '';
     $('#faLivre').value = (aberta && aberta.livre) || '';
     $('#faInfo').textContent = `${inf.etapa} · ${inf.turma} · ${inf.disciplina}`;
@@ -81,13 +83,13 @@
     const aula = Object.assign(base, {
       professor: prof, data: $('#faData').value || A.hoje(), tipo: $('#faTipo').value.trim(), conteudo: $('#faCont').value.trim(),
       habilidades: [...sel], livre: $('#faLivre').value.trim(), diario: $('#faDiario').value.trim(),
-      etapa: inf.etapa, turma: inf.turma, classe: $('#faClasse').value.trim(), disciplina: inf.disciplina, src: st.src,
+      avaliacao: $('#faAval').value, etapa: inf.etapa, turma: inf.turma, classe: $('#faClasse').value.trim(), disciplina: inf.disciplina, src: st.src,
       folha: { blocks: st.blocks, conteudo: st.conteudo, identificacao: st.identificacao }
     });
     await A.gravar(aula); aberta = aula;
     try { const u = JSON.parse(localStorage.getItem('sei-classes') || '{}'); u[inf.turma] = aula.classe; localStorage.setItem('sei-classes', JSON.stringify(u)); } catch (e) {}
     const p = params(); p.set('aula', aula.id); history.replaceState(null, '', '#' + p.toString());
-    mostrarToast(`Aula salva em <b>${esc(prof)} › ${esc(A.pasta(aula))} › ${esc(aula.disciplina)}</b>.`, true);
+    mostrarToast(`${aula.avaliacao ? esc(aula.avaliacao) + ' salva' : 'Aula salva'} em <b>${esc(prof)} › ${esc(A.pasta(aula))} › ${esc(aula.disciplina)}</b>.`, true);
   });
 
   function mostrarToast(html, comNova) {

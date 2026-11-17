@@ -117,3 +117,6 @@ dialog{border:0;border-radius:12px;padding:0;width:min(760px,95vw);box-shadow:0 
 .page .campo.data-p2::placeholder{color:rgba(255,255,255,.55)}
 .page .campo.data-p2:not(:placeholder-shown){background:var(--fundo-data,#001234)}
 @media print{.page .campo.data{border:0}.sei-print-bw .page .campo.data-p2{color:#2d2d2d}.sei-print-bw .page .campo.data-p2:not(:placeholder-shown){background:#fafafa}}
+/* avaliação: quadro da prova */
+.col table.prova-cab td{border-color:var(--divider-prova,#0b2a5b);padding:2.5pt 4pt;font-size:9pt}
+#dlgAval{width:min(560px,96vw)}#dlgAval select,#dlgAval textarea{font:400 15px system-ui,Arial,sans-serif;padding:8px 10px;border:1px solid #b9cce6;border-radius:8px}

@@ -5,7 +5,7 @@
   const $ = s => document.querySelector(s);
   const pagesEl = $('#pages'), measure = $('#measure');
   const src = decodeURIComponent((location.hash.match(/f=([^&]+)/) || [])[1] || '');
-  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', data = '', identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
+  let geo = null, blocks = [], selId = null, nextId = 1, conteudo = '', data = '', avaliacao = '', identificacao = /fundamental-/.test(decodeURIComponent(location.hash)) ? 'Atividades 01' : 'Revisão 01';
   const advanced = /assets\/(pre-vestibular|ensino-medio|convenio)\//.test(src);
   const KEY = 'sei-montar:' + src;
 
@@ -21,7 +21,7 @@
     };
   })();
   let saveT = null;
-  const persist = () => db.set(KEY, { blocks, conteudo, data, identificacao });
+  const persist = () => db.set(KEY, { blocks, conteudo, data, identificacao, avaliacao });
   const save = () => { clearTimeout(saveT); saveT = setTimeout(persist, 300); };
   addEventListener('pagehide', persist);
   let past = [], future = [];
@@ -377,7 +377,7 @@
   }
   function makePage(n) {
     const wrap = document.createElement('div'); wrap.className = 'pwrap';
-    const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg);
+    const pg = document.createElement('div'); pg.className = 'page'; wrap.appendChild(pg); if (geo.dividerColor) pg.style.setProperty('--divider-prova', geo.dividerColor);
     const fr = document.createElement('img'); fr.className = 'frame'; fr.alt = '';
     fr.src = 'assets/montar/' + geo.f + (n === 0 ? '-p1.jpg' : '-p2.jpg') + '?v=6-ponto';
     if (geo.fullPage) Object.assign(fr.style, {left: '0', top: '0', width: '210mm', height: '297mm'});
@@ -416,7 +416,8 @@
         const num = document.createElement('input'); num.className = 'campo id-num'; num.maxLength = 3;
         num.setAttribute('aria-label', 'Número da folha'); num.value = partes[2] || ''; num.style.color = '#' + geo.idColor;
         Object.assign(num.style, box(937, 257, 991, 309));
-        const upd = () => { identificacao = (tipo.value.trim() + ' ' + num.value.trim()).trim(); save(); };
+        const caber = () => { tipo.style.fontSize = tipo.value.trim().length > 9 ? '9.6pt' : ''; }; caber();
+        const upd = () => { caber(); identificacao = (tipo.value.trim() + ' ' + num.value.trim()).trim(); save(); };
         tipo.oninput = upd; num.oninput = upd;
         pg.append(sep, tipo, num);
       }
@@ -537,13 +538,17 @@
     $('#titulo').textContent = 'Montar folha · ' + nome.charAt(0).toUpperCase() + nome.slice(1);
     const back = sessionStorage.getItem('sei-voltar'); if (back) $('#voltar').href = back;
     const saved = await db.get(KEY);
-    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; data = saved.data || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
+    if (saved && saved.blocks) { blocks = saved.blocks; conteudo = saved.conteudo || ''; data = saved.data || ''; avaliacao = saved.avaliacao || ''; identificacao = saved.identificacao ?? identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; }
     render();
     window.dispatchEvent(new CustomEvent('sei-montar-pronto', { detail: { src, geo } }));
   })();
   window.seiMontar = { htmlToBlocks, insertBlocks, get blocks() { return blocks; },
-    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, data, identificacao }; },
-    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; data = st.data || ''; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
-    novaFolha() { remember(); blocks = []; conteudo = ''; selId = null; render(); persist(); },
+    estado() { return { src, blocks: JSON.parse(JSON.stringify(blocks)), conteudo, data, identificacao, avaliacao }; },
+    carregar(st) { remember(); blocks = JSON.parse(JSON.stringify(st.blocks || [])); conteudo = st.conteudo || ''; data = st.data || ''; avaliacao = st.avaliacao || ''; identificacao = st.identificacao || identificacao; nextId = blocks.reduce((m, b) => Math.max(m, b.id), 0) + 1; selId = null; render(); persist(); },
+    novaFolha() { remember(); blocks = []; conteudo = ''; avaliacao = ''; selId = null; render(); persist(); },
+    // avaliação: tipo da folha (ex.: "1ª Avaliação") e identificação do cabeçalho
+    definir(o) { if ('identificacao' in o) identificacao = o.identificacao; if ('avaliacao' in o) avaliacao = o.avaliacao; render(); persist(); },
+    inserirNoInicio(els) { remember(); const items = els.map(e => ({ id: nextId++, html: e.outerHTML })); blocks.unshift(...items); selId = items[0].id; render(); save(); },
+    removerBloco(id) { const i = blocks.findIndex(b => b.id === id); if (i >= 0) { remember(); blocks.splice(i, 1); render(); save(); } },
     get geo() { return geo; } };
 })();
