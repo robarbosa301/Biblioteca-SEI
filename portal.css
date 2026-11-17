@@ -302,3 +302,11 @@ footer .contatos .mp{background:#fff;font-size:12px}
 .av-word label.linha{flex-direction:row;align-items:center;gap:8px;font-weight:600}
 .av-word select,.av-word input:not([type=checkbox]){font:15px system-ui;padding:8px 10px;border:1px solid #b9cce6;border-radius:8px}
 .av-bt{display:flex;justify-content:flex-end;gap:8px}.av-bt button{font:600 15px system-ui;padding:8px 14px;border-radius:9px;border:1px solid #b9cce6;background:#fff;color:#0b2a5b;cursor:pointer}.av-bt .ok{background:#1a73e8;color:#fff;border-color:#1a73e8}
+/* Fileira extra da página inicial: AEE (mesmo estilo dos cartões das etapas) */
+.home-extra{display:flex;justify-content:center;gap:4%;padding:1% 2% 4%;background:linear-gradient(180deg,#04399b,#032c7a)}
+.home-extra .extra-card{display:block;width:47%;aspect-ratio:481/280;border-radius:12px;background:#0a3a9c center/cover no-repeat;outline:2px solid rgba(120,220,255,.55);box-shadow:0 8px 22px rgba(0,8,40,.55),0 0 18px rgba(60,190,255,.25);transition:transform .18s,box-shadow .18s;position:relative}
+.home-extra .extra-card:hover,.home-extra .extra-card:focus-visible{transform:translateY(-4px);outline-color:#8bf5ff;box-shadow:0 14px 30px rgba(0,8,40,.6),0 0 26px rgba(90,210,255,.55)}
+@media screen and (min-width:1100px){
+ .portal-home .home-extra{order:3;grid-column:1/-1;background:none;padding:0;gap:18px}
+ .portal-home .home-extra .extra-card{width:calc((100% - 54px)/4);border-radius:16px}
+}
