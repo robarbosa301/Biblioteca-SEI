@@ -26,7 +26,7 @@
       const canvas = await html2pdf().set(opt).from(caixa).toContainer().then(function () { this.prop.container.style.background = 'transparent'; if (this.prop.overlay) this.prop.overlay.style.background = 'transparent'; }).toCanvas().get('canvas');
       const base = await html2pdf().set({ jsPDF: opt.jsPDF }).from('<div></div>').toPdf().get('pdf');
       const doc = base; // já vem com uma página A4 em branco
-      const moldura = await imgCarrega('assets/docs/moldura-doc.jpg?v=1');
+      const moldura = await imgCarrega('assets/docs/moldura-doc.jpg?v=2');
       const larg = 210 - MARG.l - MARG.r, alt = 297 - MARG.t - MARG.b, pxmm = canvas.width / larg, pagPx = Math.floor(alt * pxmm);
       const n = Math.max(1, Math.ceil((canvas.height - 2) / pagPx));
       for (let p = 0; p < n; p++) {
@@ -49,10 +49,9 @@
     const d = document.createElement('div'); d.innerHTML = html;
     d.querySelectorAll('.par-agua').forEach(x => x.remove()); // o Word não põe imagem atrás do texto
     d.querySelectorAll('.sei-cab').forEach(c => {
-      const masc = c.querySelector('.sei-masc'), logo = c.querySelector('.sei-logo'), sm = c.querySelector('small'), st = c.querySelector('strong');
-      const t = document.createElement('table'); t.className = 'w-cab'; t.setAttribute('width', '100%'); t.setAttribute('cellpadding', '6');
-      t.innerHTML = `<tr><td width="18%" class="w-azul" valign="bottom"><img src="${masc.getAttribute('src')}" width="96"></td><td class="w-azul" valign="middle"><p class="w-sm">${sm.innerHTML.replace(/<i>/, '<br>').replace('</i>', '')}</p><p class="${st.textContent.length > 16 ? 'w-tit-p' : 'w-tit'}">${st.innerHTML}</p></td><td width="22%" class="w-azul" align="right" valign="middle"><img src="${logo.getAttribute('src')}" width="112"></td></tr>`;
-      c.replaceWith(t);
+      const st = c.querySelector('strong'); const t = document.createElement('div');
+      t.innerHTML = `<p align="center"><img src="assets/docs/cab-doc.jpg?v=2" width="680"></p><p class="w-tit-c">${st.innerHTML}</p>`;
+      c.replaceWith(...t.childNodes);
     });
     d.querySelectorAll('.sei-fita').forEach(f => { const p = document.createElement('p'); p.className = 'w-fita'; p.innerHTML = f.innerHTML; f.replaceWith(p); });
     d.querySelectorAll('.sei-rod').forEach(r => { const t = document.createElement('table'); t.className = 'w-rod'; t.setAttribute('width', '100%'); t.innerHTML = `<tr>${[...r.children].map(s => `<td class="w-azul2">${s.innerHTML}</td>`).join('')}</tr>`; r.replaceWith(t); });
@@ -69,8 +68,8 @@
   const X = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const hex = c => { if (!c) return null; c = c.trim(); let m = /^#([0-9a-f]{6})$/i.exec(c); if (m) return m[1].toUpperCase(); m = /^#([0-9a-f]{3})$/i.exec(c); if (m) return m[1].split('').map(x => x + x).join('').toUpperCase(); m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? [m[1], m[2], m[3]].map(v => (+v).toString(16).padStart(2, '0')).join('').toUpperCase() : null; };
   // aparência por classe
-  const P = { 'w-sm': { r: { cor: '8BF5FF', sz: 7.5, b: 1 } }, 'w-tit': { r: { cor: 'FFFFFF', sz: 20, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-p': { r: { cor: 'FFFFFF', sz: 12, b: 1, font: 'Arial Black' }, esp: [20, 0] },
-    'w-fita': { jc: 'center', fill: 'FFC928', r: { cor: '0B2A5B', sz: 7.5, b: 1 }, esp: [0, 160] }, 'w-h4': { fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 8.5, b: 1, caps: 1 }, esp: [140, 0] },
+  const P = { 'w-sm': { r: { cor: '8BF5FF', sz: 7.5, b: 1 } }, 'w-tit': { r: { cor: 'FFFFFF', sz: 20, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-p': { r: { cor: 'FFFFFF', sz: 12, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-c': { jc: 'center', fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 15, b: 1, font: 'Arial Black' }, esp: [40, 0] },
+    'w-fita': { jc: 'center', fill: '0A3A9C', r: { cor: 'FFFFFF', sz: 7.5, b: 1 }, esp: [0, 160] }, 'w-h4': { fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 8.5, b: 1, caps: 1 }, esp: [140, 0] },
     'w-corte': { jc: 'center', r: { cor: '888888', sz: 8 } }, 'doc-para': { r: { b: 1, sz: 12 } }, 'doc-fim': { esp: [200, 0] }, 'doc-rev': { r: { sz: 9 } }, 'doc-num': {},
     'doc-corpo': { linha: 1.5 }, 'grande': { r: { sz: 12.5 } }, 'cal-res': { r: { sz: 9 } }, 'cal-leg': { r: { sz: 8 } }, 'doc-dest': { r: { b: 1 } } };
   const T = { 'w-cab': { fill: '0A3A9C', borda: null, cor: 'FFFFFF' }, 'w-rod': { fill: '0B2A5B', borda: null, cor: 'FFFFFF', sz: 8, b: 1 }, 'w-caixa': { borda: '0B2A5B' }, 'w-ass': { borda: null },

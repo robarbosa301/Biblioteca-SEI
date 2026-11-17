@@ -89,7 +89,7 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 #imprimir .par-corpo>.par-agua,.sei-pdf .par-corpo>.par-agua{display:none}
 @media print{
  @page{size:A4;margin:0}
- body::before{content:'';position:fixed;left:0;top:0;width:210mm;height:297mm;background:url(assets/docs/moldura-doc.jpg?v=1) 0 0/210mm 297mm no-repeat;z-index:-1}
+ body::before{content:'';position:fixed;left:0;top:0;width:210mm;height:297mm;background:url(assets/docs/moldura-doc.jpg?v=2) 0 0/210mm 297mm no-repeat;z-index:-1}
  #imprimir{padding:13mm 14mm 31mm 14mm;-webkit-box-decoration-break:clone;box-decoration-break:clone}
  #imprimir .doc-pag{-webkit-box-decoration-break:clone;box-decoration-break:clone}
  body{background:transparent!important}
@@ -108,3 +108,11 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 .sei-pdf .doc-2 .sei-cab{height:19mm;margin-top:5mm;padding-left:37mm}#imprimir .doc-2 .sei-masc{height:25mm}#imprimir .doc-2 .sei-logo{height:16mm}#imprimir .doc-2 .sei-cab-tx strong{font-size:15pt}#imprimir .doc-2 .sei-fita{margin-bottom:3mm}
 .sei-pdf .cal-m h5{background:#0a3a9c;color:#fff;border-radius:1.5mm;padding:.6mm 0}
 .sei-rod .rod-qr{display:none}
+
+/* ===== Cabeçalho = arte aprovada do site, com o título na faixa ===== */
+#imprimir .sei-cab,.sei-pdf .sei-cab{aspect-ratio:2400/440;background-image:url(assets/docs/cab-doc.jpg?v=2);border-radius:3mm}
+#imprimir .sei-cab-tx,.sei-pdf .sei-cab-tx{left:25.9%;right:32.4%;top:65.4%;bottom:11.6%}
+#imprimir .sei-cab-tx strong,.sei-pdf .sei-cab-tx strong{color:#fff;letter-spacing:.3px;white-space:nowrap;text-shadow:0 0 2mm rgba(80,200,255,.55),0 .5mm 1mm rgba(0,0,0,.5)}
+#imprimir .sei-fita,.sei-pdf .sei-fita{width:auto;margin:1.6mm 0 4.5mm;border-radius:2mm;padding:1.2mm 3mm;text-align:center;font:700 7pt Arial,sans-serif;letter-spacing:.6px;text-transform:uppercase;background:linear-gradient(90deg,#0b2a5b,#0a3a9c,#0b2a5b);color:#9ff0ff}
+#imprimir .sei-fita b,.sei-pdf .sei-fita b{color:#ffd34d}
+#imprimir .doc-2 .sei-cab-tx strong,.sei-pdf .doc-2 .sei-cab-tx strong{font-size:13pt!important}

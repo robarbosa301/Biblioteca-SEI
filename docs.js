@@ -193,7 +193,9 @@
 
   /* ---------- impressão ---------- */
   const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
-  const cab = titulo => `<div class="sei-cab"><img class="sei-masc" src="assets/docs/mascote-prancheta.png" alt=""><div class="sei-cab-tx"><small>SISTEMA DE ENSINO INCENTIVO<i>${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</i></small><strong>${esc(titulo)}</strong></div><img class="sei-logo" src="assets/docs/logo-sei.png" alt="SEI"></div><div class="sei-fita">AQUI SE FAZ EDUCAÇÃO COM QUALIDADE</div>`;
+  // Cabeçalho: a arte aprovada do site (mascote, Nº 1 em aprovação e logo) com o título na faixa
+  const tamTit = t => Math.max(8.5, Math.min(15, Math.round(230 / Math.max(10, t.length) * 10) / 10));
+  const cab = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</div>`;
   const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span><span class="rod-qr"><img src="assets/docs/qr-whatsapp.png" width="62" alt="QR Code do WhatsApp da escola"><br>Fale com a escola</span></div>`;
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
