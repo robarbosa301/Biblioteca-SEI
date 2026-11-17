@@ -47,14 +47,14 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 
 /* ===== Documentos com a cara do Incentivo ===== */
 @font-face{font-family:'SEI Rubik';src:url(assets/fonts/Rubik-ExtraBold.ttf) format('truetype');font-weight:800;font-display:block}
-.sei-cab{position:relative;display:flex;align-items:center;gap:4mm;height:25mm;margin-top:7mm;padding:0 5mm 0 47mm;border-radius:4mm 4mm 0 0;background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center 30%/cover;color:#fff;box-shadow:inset 0 -1.2mm 0 #29c5f8}
+.sei-cab{position:relative;display:flex;align-items:center;gap:4mm;height:25mm;margin-top:7mm;padding:0 5mm 0 47mm;border-radius:4mm 4mm 0 0;background:#0a3a9c url(assets/portal/fundo-etapas.jpg?v=4) center 30%/cover;color:#fff;border-bottom:1.2mm solid #29c5f8}
 .sei-masc{position:absolute;left:2mm;bottom:0;height:33mm;filter:drop-shadow(0 1mm 1.2mm rgba(0,0,0,.35))}
 .sei-cab-tx{display:flex;flex-direction:column;gap:1mm;min-width:0}
 .sei-cab-tx small{color:#8bf5ff;font:700 7.5pt Arial,sans-serif;letter-spacing:.5px;text-transform:uppercase;line-height:1.25}.sei-cab-tx small i{display:block;font-style:normal;color:#fff;opacity:.9}
 .sei-cab-tx strong{font:800 21pt/1.02 'SEI Rubik',Arial Black,sans-serif;letter-spacing:-.2px;text-transform:uppercase;text-shadow:0 .6mm 1.2mm rgba(0,0,0,.45)}
 .sei-logo{margin-left:auto;height:21mm;flex:0 0 auto;filter:drop-shadow(0 .8mm 1mm rgba(0,0,0,.35))}
 .sei-fita{background:linear-gradient(90deg,#ffc928,#ffe17a,#ffc928);color:#0b2a5b;font:800 7.5pt Arial,sans-serif;letter-spacing:.9px;text-align:center;padding:1.2mm;border-radius:0 0 3mm 3mm;margin:0 0 5mm}
-.sei-rod{margin-top:8mm;display:flex;flex-wrap:wrap;justify-content:space-between;gap:1mm 4mm;background:linear-gradient(90deg,#0b2a5b,#0a3a9c);color:#fff;border-radius:3mm;padding:2.2mm 5mm;font:700 8pt Arial,sans-serif;box-shadow:inset 0 .8mm 0 #29c5f8;break-inside:avoid}
+.sei-rod{margin-top:8mm;display:flex;flex-wrap:wrap;justify-content:space-between;gap:1mm 4mm;background:linear-gradient(90deg,#0b2a5b,#0a3a9c);color:#fff;border-radius:3mm;padding:2.2mm 5mm;font:700 8pt Arial,sans-serif;border-top:.8mm solid #29c5f8;break-inside:avoid}
 #imprimir .doc-b h4{display:inline-block;background:#0b2a5b;color:#fff;padding:1mm 3mm;border-radius:2mm 2mm 0 0;margin:0;font-size:8.5pt}
 #imprimir .doc-b .doc-t{border-color:#0b2a5b;border-width:.8pt;border-radius:0 2mm 2mm 2mm}
 #imprimir .doc-id th,#imprimir .doc-obj th{background:#e8f1ff!important;color:#0b2a5b}

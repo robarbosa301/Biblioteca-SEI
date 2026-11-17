@@ -258,19 +258,25 @@
     p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
       <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button></div>
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
-        <div class="acoes"><button class="b main" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">Editar</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
+        <div class="acoes"><button class="b main" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">✏️ Editar</button><button class="b" data-word="${d.id}">⬇ Word</button><button class="b" data-pdf="${d.id}">⬇ PDF</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
         : `<p class="dica">Nenhum documento ainda. Toque em “Novo” para começar.</p>`}`;
     $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
   }
   async function formulario() {
     const t = TIPOS[edit.tipo];
     $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-volta="2">‹ ${t.nome}</button></nav><form class="ficha" id="fDoc"><h3>${t.icone} ${edit.id ? 'Editar' : 'Novo'}: ${t.nome}</h3>${t.form(edit)}
-      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b" type="button" id="salvaImp">💾 Salvar e imprimir</button><button class="b ghost" type="button" data-volta="2">Cancelar</button></div></form>`;
+      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b" type="button" id="salvaImp">💾 Salvar e imprimir</button><button class="b" type="button" id="salvaWord">💾 Salvar e baixar Word</button><button class="b" type="button" id="salvaPdf">💾 Salvar e baixar PDF</button><button class="b ghost" type="button" data-volta="2">Cancelar</button></div></form>`;
     if (t.depois) await t.depois(edit);
     const salvar = async () => { Object.assign(edit, ler(t.campos)); if (t.extra) t.extra(edit); if (!edit.id) { edit.id = novoId(); edit.criado = Date.now(); } await gravar(edit); const d = edit; aviso('Documento salvo.'); edit = null; await carregar(); return d; };
     $('#fDoc').onsubmit = async e => { e.preventDefault(); await salvar(); };
     $('#salvaImp').onclick = async () => imprimir(await salvar());
+    $('#salvaWord').onclick = async () => baixar2('word', await salvar());
+    $('#salvaPdf').onclick = async () => baixar2('pdf', await salvar());
   }
+  // Word / PDF: o mesmo documento da impressão
+  const htmlDe = d => { segDoc = d.seg || null; return TIPOS[d.tipo].doc(d) + (d.copias === '2' ? '' : rodape()); };
+  const nomeDe = d => TIPOS[d.tipo].titulo(d).replace(/—\s*$/, '').trim() + (d.seg && SEGS[d.seg] ? ' - ' + SEGS[d.seg].nome : '');
+  function baixar2(fmt, d) { if (!window.seiBaixar) return alert('Atualize a página e tente de novo.'); return fmt === 'pdf' ? seiBaixar.pdf(htmlDe(d), nomeDe(d)) : seiBaixar.word(htmlDe(d), nomeDe(d), TIPOS[d.tipo].nome); }
   async function imprimir(d) {
     const t = TIPOS[d.tipo]; segDoc = d.seg || null; document.body.dataset.doc = d.tipo;
     $('#imprimir').innerHTML = t.doc(d) + (d.copias === '2' ? '' : rodape());
@@ -286,6 +292,8 @@
     if (b.dataset.seg) { seg = b.dataset.seg; tipo = null; tela(); scrollTo(0, 0); }
     if (b.dataset.volta) { if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
+    if (b.dataset.word) baixar2('word', lista.find(d => d.id === b.dataset.word));
+    if (b.dataset.pdf) baixar2('pdf', lista.find(d => d.id === b.dataset.pdf));
     if (b.dataset.ed) { edit = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.ed))); tela(); }
     if (b.dataset.dup) { const o = JSON.parse(JSON.stringify(lista.find(d => d.id === b.dataset.dup))); delete o.id; o.data = hoje(); if (o.numero) o.numero = proxNum(lista.filter(doSeg), o.tipo, hoje().slice(0, 4)); edit = o; tela(); }
     if (b.dataset.del && confirm('Excluir este documento?')) { await apagar(b.dataset.del); carregar(); }

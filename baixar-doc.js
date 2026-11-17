@@ -1,0 +1,162 @@
+/* Baixar documentos da escola em Word (.doc, editável) e em PDF.
+   PDF: html2pdf (assets/vendor, licença MIT), gerado no próprio aparelho.
+   Word: arquivo "página da web em arquivo único" que o Word abre e edita, com as imagens dentro. */
+(function () {
+  'use strict';
+  const carregar = src => new Promise((ok, erro) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = erro; document.head.appendChild(s); });
+  const nomeArq = n => (n || 'documento').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 90);
+  const espera = el => Promise.all([...el.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  function aviso(t) { let a = document.getElementById('aeeAviso'); if (!a) { a = document.createElement('div'); a.id = 'aeeAviso'; a.className = 'no-print'; document.body.append(a); } a.textContent = t; a.hidden = false; clearTimeout(aviso.t); aviso.t = setTimeout(() => { a.hidden = true; }, 3000); }
+
+  /* ---------- PDF ---------- */
+  async function pdf(html, nome) {
+    aviso('⏳ Gerando o PDF…');
+    if (!window.html2pdf) await carregar('assets/vendor/html2pdf.bundle.min.js');
+    const fora = document.createElement('div'); Object.assign(fora.style, { position: 'fixed', left: '-10000px', top: '0', width: '190mm' });
+    const caixa = document.createElement('div'); caixa.id = 'imprimir'; caixa.className = 'sei-pdf';
+    Object.assign(caixa.style, { width: '190mm', background: '#fff', display: 'block' });
+    caixa.innerHTML = html; fora.append(caixa);
+    const antigo = document.getElementById('imprimir'); if (antigo) antigo.id = 'imprimir-tela';
+    document.body.append(fora);
+    try {
+      await espera(caixa); if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      await html2pdf().set({
+        margin: [10, 10, 10, 10], filename: nomeArq(nome) + '.pdf',
+        image: { type: 'jpeg', quality: 0.96 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['.doc-b', '.sei-cab', '.sei-rod', '.doc-ass', 'tr', '.cal-m'] }
+      }).from(caixa).save();
+      aviso('✅ PDF baixado.');
+    } catch (e) { alert('Não consegui gerar o PDF: ' + (e && e.message || e)); }
+    fora.remove(); if (antigo) antigo.id = 'imprimir';
+  }
+
+  /* ---------- Word ---------- */
+  // O Word não entende flex/grid: troca as partes de layout por tabelas
+  function paraWord(html) {
+    const d = document.createElement('div'); d.innerHTML = html;
+    d.querySelectorAll('.sei-cab').forEach(c => {
+      const masc = c.querySelector('.sei-masc'), logo = c.querySelector('.sei-logo'), sm = c.querySelector('small'), st = c.querySelector('strong');
+      const t = document.createElement('table'); t.className = 'w-cab'; t.setAttribute('width', '100%'); t.setAttribute('cellpadding', '6');
+      t.innerHTML = `<tr><td width="18%" class="w-azul" valign="bottom"><img src="${masc.getAttribute('src')}" width="104"></td><td class="w-azul" valign="middle"><p class="w-sm">${sm.innerHTML.replace(/<i>/, '<br>').replace('</i>', '')}</p><p class="w-tit">${st.innerHTML}</p></td><td width="22%" class="w-azul" align="right" valign="middle"><img src="${logo.getAttribute('src')}" width="120"></td></tr>`;
+      c.replaceWith(t);
+    });
+    d.querySelectorAll('.sei-fita').forEach(f => { const p = document.createElement('p'); p.className = 'w-fita'; p.innerHTML = f.innerHTML; f.replaceWith(p); });
+    d.querySelectorAll('.sei-rod').forEach(r => { const t = document.createElement('table'); t.className = 'w-rod'; t.setAttribute('width', '100%'); t.innerHTML = `<tr>${[...r.children].map(s => `<td class="w-azul2">${s.innerHTML}</td>`).join('')}</tr>`; r.replaceWith(t); });
+    d.querySelectorAll('.doc-num').forEach(n => { const t = document.createElement('table'); t.setAttribute('width', '100%'); t.innerHTML = `<tr><td>${n.children[0].outerHTML}</td><td align="right">${n.children[1] ? n.children[1].innerHTML : ''}</td></tr>`; n.replaceWith(t); });
+    d.querySelectorAll('.doc-ass').forEach(a => { const ds = [...a.children]; const t = document.createElement('table'); t.className = 'w-ass'; t.setAttribute('width', '100%'); let h = ''; for (let i = 0; i < ds.length; i += 2) h += `<tr>${ds.slice(i, i + 2).map(x => `<td align="center" width="50%"><br><br>______________________________<br>${x.innerHTML.replace(/<span><\/span>/, '')}</td>`).join('')}</tr>`; t.innerHTML = h; a.replaceWith(t); });
+    d.querySelectorAll('.cal').forEach(c => { const ms = [...c.children]; const t = document.createElement('table'); t.setAttribute('width', '100%'); let h = ''; for (let i = 0; i < ms.length; i += 4) h += `<tr>${ms.slice(i, i + 4).map(m => `<td valign="top" width="25%">${m.innerHTML}</td>`).join('')}</tr>`; t.innerHTML = h; c.replaceWith(t); });
+    d.querySelectorAll('.doc-b h4').forEach(h => { const p = document.createElement('p'); p.className = 'w-h4'; p.innerHTML = h.innerHTML; h.replaceWith(p); });
+    d.querySelectorAll('.doc-t').forEach(x => { const t = document.createElement('table'); t.className = 'w-caixa'; t.setAttribute('width', '100%'); t.innerHTML = `<tr><td>${x.innerHTML}</td></tr>`; x.replaceWith(t); });
+    d.querySelectorAll('.doc-corte').forEach(x => { x.outerHTML = '<p class="w-corte">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - recorte aqui</p>'; });
+    d.querySelectorAll('.doc-pag').forEach((x, i, l) => { if (i < l.length - 1) x.insertAdjacentHTML('afterend', '<br clear="all" style="page-break-before:always">'); });
+    return d.innerHTML;
+  }
+  /* HTML simples -> WordprocessingML (.docx) */
+  const X = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const hex = c => { if (!c) return null; c = c.trim(); let m = /^#([0-9a-f]{6})$/i.exec(c); if (m) return m[1].toUpperCase(); m = /^#([0-9a-f]{3})$/i.exec(c); if (m) return m[1].split('').map(x => x + x).join('').toUpperCase(); m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c); return m ? [m[1], m[2], m[3]].map(v => (+v).toString(16).padStart(2, '0')).join('').toUpperCase() : null; };
+  // aparência por classe
+  const P = { 'w-sm': { r: { cor: '8BF5FF', sz: 7.5, b: 1 } }, 'w-tit': { r: { cor: 'FFFFFF', sz: 20, b: 1, font: 'Arial Black' }, esp: [20, 0] },
+    'w-fita': { jc: 'center', fill: 'FFC928', r: { cor: '0B2A5B', sz: 7.5, b: 1 }, esp: [0, 160] }, 'w-h4': { fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 8.5, b: 1, caps: 1 }, esp: [140, 0] },
+    'w-corte': { jc: 'center', r: { cor: '888888', sz: 8 } }, 'doc-para': { r: { b: 1, sz: 12 } }, 'doc-fim': { esp: [200, 0] }, 'doc-rev': { r: { sz: 9 } }, 'doc-num': {},
+    'doc-corpo': { linha: 1.5 }, 'grande': { r: { sz: 12.5 } }, 'cal-res': { r: { sz: 9 } }, 'cal-leg': { r: { sz: 8 } }, 'doc-dest': { r: { b: 1 } } };
+  const T = { 'w-cab': { fill: '0A3A9C', borda: null, cor: 'FFFFFF' }, 'w-rod': { fill: '0B2A5B', borda: null, cor: 'FFFFFF', sz: 8, b: 1 }, 'w-caixa': { borda: '0B2A5B' }, 'w-ass': { borda: null },
+    'doc-id': { borda: '777777', th: 'E8F1FF', thCor: '0B2A5B' }, 'doc-obj': { borda: '777777', th: 'E8F1FF', thCor: '0B2A5B' }, 'doc-bol': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 },
+    'doc-hor': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 } };
+  function docx(html) {
+    const d = document.createElement('div'); d.innerHTML = html; const imgs = []; let id = 1;
+    const rPr = r => `<w:rPr><w:rFonts w:ascii="${r.font || 'Arial'}" w:hAnsi="${r.font || 'Arial'}" w:cs="${r.font || 'Arial'}"/>${r.b ? '<w:b/>' : ''}${r.i ? '<w:i/>' : ''}${r.caps ? '<w:caps/>' : ''}${r.cor ? `<w:color w:val="${r.cor}"/>` : ''}<w:sz w:val="${Math.round((r.sz || 10.5) * 2)}"/><w:szCs w:val="${Math.round((r.sz || 10.5) * 2)}"/></w:rPr>`;
+    const estiloEl = (el, r) => { r = Object.assign({}, r); const t = el.tagName; if (t === 'B' || t === 'STRONG' || t === 'TH' || t === 'H2' || t === 'H4' || t === 'H5') r.b = 1; if (t === 'I' || t === 'EM') r.i = 1; if (t === 'SMALL') r.sz = (r.sz || 10.5) * 0.85;
+      if (t === 'H2') { r.sz = 17; r.cor = '0A3A9C'; } for (const c of el.classList || []) if (P[c] && P[c].r) Object.assign(r, P[c].r); const cor = hex(el.style && el.style.color); if (cor) r.cor = cor; return r; };
+    function runs(node, r) {
+      let out = '';
+      for (const n of node.childNodes) {
+        if (n.nodeType === 3) { const t = n.nodeValue.replace(/\s+/g, ' '); if (t) out += `<w:r>${rPr(r)}<w:t xml:space="preserve">${X(t)}</w:t></w:r>`; continue; }
+        if (n.nodeType !== 1) continue;
+        if (n.tagName === 'BR') { out += /page-break/.test(n.getAttribute('style') || '') ? '<w:r><w:br w:type="page"/></w:r>' : '<w:r><w:br/></w:r>'; continue; }
+        if (n.tagName === 'IMG') { out += imagem(n); continue; }
+        if (n.tagName === 'I' && !n.textContent && n.style.background) { const c = hex(n.style.background) || '000000'; out += `<w:r>${rPr(Object.assign({}, r, { cor: c }))}<w:t xml:space="preserve">■ </w:t></w:r>`; continue; }
+        out += runs(n, estiloEl(n, r));
+      }
+      return out;
+    }
+    function imagem(n) {
+      const src = n.getAttribute('src'); const w = +n.getAttribute('width') || n.naturalWidth || 100; const nat = n.dataset.w ? [+n.dataset.w, +n.dataset.h] : [w, w];
+      const h = Math.round(w * nat[1] / nat[0]); const rid = 'rIdImg' + id; const ext = /\.jpe?g/i.test(src) ? 'jpeg' : 'png'; imgs.push({ src, rid, nome: 'img' + id + '.' + ext, ext }); const cx = w * 9525, cy = h * 9525; const k = id++;
+      return `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${k}" name="Imagem ${k}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${k}" name="img${k}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
+    }
+    function par(el, r, extra) {
+      const cls = [...(el.classList || [])]; let jc = (el.getAttribute && el.getAttribute('align')) || null, fill = null, esp = null, linha = null;
+      for (const c of cls) if (P[c]) { if (P[c].jc) jc = P[c].jc; if (P[c].fill) fill = P[c].fill; if (P[c].esp) esp = P[c].esp; if (P[c].linha) linha = P[c].linha; }
+      if (el.tagName === 'H2' || el.tagName === 'H5') jc = 'center'; if (el.tagName === 'H5') fill = '0A3A9C';
+      if (extra) { if (extra.jc && !jc) jc = extra.jc; }
+      const rr = estiloEl(el, r); if (el.tagName === 'H5') { rr.cor = 'FFFFFF'; rr.sz = 7.5; }
+      const conteudo = runs(el, rr);
+      return `<w:p><w:pPr><w:spacing w:before="${esp ? esp[0] : 0}" w:after="${esp ? esp[1] : 80}"${linha ? ` w:line="${Math.round(240 * linha)}" w:lineRule="auto"` : ''}/>${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}${jc ? `<w:jc w:val="${jc === 'right' ? 'right' : jc}"/>` : ''}</w:pPr>${conteudo}</w:p>`;
+    }
+    const BLOCO = /^(P|DIV|H1|H2|H3|H4|H5|TABLE|UL|OL|SECTION|ARTICLE|HR)$/;
+    function blocos(node, r, extra) {
+      let out = '', inl = document.createElement('span');
+      const flush = () => { if (inl.childNodes.length && (inl.textContent.trim() || inl.querySelector('img,br'))) out += par(inl, r, extra); inl = document.createElement('span'); };
+      for (const n of [...node.childNodes]) {
+        if (n.nodeType === 1 && BLOCO.test(n.tagName)) {
+          flush();
+          if (n.tagName === 'TABLE') out += tabela(n, r);
+          else if (n.tagName === 'HR') out += '<w:p/>';
+          else if (n.querySelector && n.querySelector('p,div,table,h1,h2,h3,h4,h5')) out += blocos(n, estiloEl(n, r), extra);
+          else out += par(n, r, extra);
+        } else inl.appendChild(n.cloneNode(true));
+      }
+      flush(); return out;
+    }
+    function tabela(t, r0) {
+      const cls = [...t.classList]; const cfg = Object.assign({ borda: '999999' }, ...cls.map(c => T[c] || {}));
+      if (t.closest('.cal-m')) Object.assign(cfg, { borda: null, sz: 7, jc: 'center' });
+      const rows = [...t.querySelectorAll(':scope > tbody > tr, :scope > thead > tr, :scope > tr')];
+      const ncols = Math.max(1, ...rows.map(tr => [...tr.children].reduce((s, c) => s + (+c.getAttribute('colspan') || 1), 0)));
+      const b = cfg.borda ? `<w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(x => `<w:${x} w:val="single" w:sz="4" w:space="0" w:color="${cfg.borda}"/>`).join('')}</w:tblBorders>` : `<w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(x => `<w:${x} w:val="nil"/>`).join('')}</w:tblBorders>`;
+      let x = `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${b}<w:tblLayout w:type="autofit"/><w:tblCellMar><w:left w:w="70" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${'<w:gridCol w:w="1000"/>'.repeat(ncols)}</w:tblGrid>`;
+      for (const tr of rows) {
+        x += '<w:tr>';
+        for (const c of tr.children) {
+          const th = c.tagName === 'TH'; let fill = cfg.fill || null; let r = Object.assign({}, r0, { sz: cfg.sz || r0.sz, b: cfg.b || r0.b });
+          if (cfg.cor) r.cor = cfg.cor; if (th && cfg.th) { fill = cfg.th; r.cor = cfg.thCor; r.b = 1; }
+          if (c.classList.contains('w-azul')) { fill = '0A3A9C'; r.cor = 'FFFFFF'; } if (c.classList.contains('w-azul2')) { fill = '0B2A5B'; r.cor = 'FFFFFF'; r.b = 1; r.sz = 8; }
+          if (tr.classList.contains('iv')) { fill = 'FFE17A'; r.b = 1; } const bg = hex(c.style.background || c.style.backgroundColor); if (bg) { fill = bg; r.cor = hex(c.style.color) || 'FFFFFF'; r.b = 1; }
+          if (c.classList.contains('fds')) r.cor = '999999';
+          const span = +c.getAttribute('colspan') || 1; const w = c.getAttribute('width');
+          const jc = c.getAttribute('align') || (th && cfg.th ? (cfg.jc || 'left') : cfg.jc) || null;
+          let inner = blocos(c, r, { jc }); if (!inner) inner = '<w:p/>';
+          x += `<w:tc><w:tcPr>${w ? `<w:tcW w:w="${parseInt(w) * 50}" w:type="pct"/>` : ''}${span > 1 ? `<w:gridSpan w:val="${span}"/>` : ''}${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}<w:vAlign w:val="${c.getAttribute('valign') === 'bottom' ? 'bottom' : c.getAttribute('valign') === 'top' ? 'top' : 'center'}"/></w:tcPr>${inner}</w:tc>`;
+        }
+        x += '</w:tr>';
+      }
+      return x + '</w:tbl><w:p><w:pPr><w:spacing w:before="0" w:after="60"/></w:pPr></w:p>';
+    }
+    const corpo = blocos(d, { sz: 10.5 });
+    return { corpo, imgs };
+  }
+  async function word(html, nome) {
+    aviso('⏳ Gerando o arquivo do Word…');
+    try {
+      if (!window.JSZip) await carregar('assets/vendor/jszip.min.js');
+      const tmp = document.createElement('div'); tmp.innerHTML = paraWord(html);
+      // tamanho real das imagens (proporção)
+      await Promise.all([...tmp.querySelectorAll('img')].map(im => new Promise(ok => { const i = new Image(); i.onload = () => { im.dataset.w = i.naturalWidth; im.dataset.h = i.naturalHeight; ok(); }; i.onerror = ok; i.src = im.getAttribute('src'); })));
+      const { corpo, imgs } = docx(tmp.innerHTML);
+      const zip = new JSZip();
+      zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>');
+      zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+      zip.file('word/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial" w:eastAsia="Arial"/><w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="pt-BR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="259" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>');
+      let rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdSt" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>';
+      for (const im of imgs) { const r = await fetch(im.src); zip.file('word/media/' + im.nome, await r.arrayBuffer()); rels += `<Relationship Id="${im.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.nome}"/>`; }
+      zip.file('word/_rels/document.xml.rels', rels + '</Relationships>');
+      zip.file('word/document.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${corpo}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="794" w:right="850" w:bottom="794" w:left="850" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr></w:body></w:document>`);
+      const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression: 'DEFLATE' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nomeArq(nome) + '.docx';
+      document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      aviso('✅ Arquivo do Word baixado.');
+    } catch (e) { alert('Não consegui gerar o arquivo do Word: ' + (e && e.message || e)); }
+  }
+  window.seiBaixar = { pdf, word, paraWord };
+})();

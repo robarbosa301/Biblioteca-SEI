@@ -79,7 +79,7 @@
       ${campo('Interesses', txt('pInteresses', a.interesses, 'Temas, brincadeiras, personagens de que gosta', 2), 'full')}
       ${campo('Dificuldades', txt('pDific', a.dificuldades, 'O que ainda é difícil'), 'full')}
       ${campo('Como aprende melhor', chips('apr', APRENDE, a.aprende) + inp('pAprOutra', a.aprendeOutra, 'Outro (opcional)'), 'full')}
-      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button>${atual.id ? `<button class="b" type="button" data-imp="perfil">🖨 Imprimir ficha do aluno</button><button class="b ghost" type="button" id="delAluno">Excluir aluno</button>` : ''}</div>
+      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button>${atual.id ? `<button class="b" type="button" data-imp="perfil">🖨 Imprimir ficha do aluno</button><button class="b" type="button" data-baixa="word" data-imp2="perfil">⬇ Word</button><button class="b" type="button" data-baixa="pdf" data-imp2="perfil">⬇ PDF</button><button class="b ghost" type="button" id="delAluno">Excluir aluno</button>` : ''}</div>
     </form>`;
     $('#fPerfil').onsubmit = async e => {
       e.preventDefault(); const f = e.target; const nome = val('pNome').trim(); if (!nome) { alert('Escreva o nome do aluno.'); return; }
@@ -106,7 +106,7 @@
     $('#cont').innerHTML = `<div class="acoes"><button class="b main" id="novoAt">➕ Registrar atendimento</button>${l.length ? `<button class="b" data-imp="atend-todos">🖨 Imprimir todos (${l.length})</button>` : ''}</div>
       ${l.length ? `<div class="cards">${l.map(x => `<article class="aula"><div class="topo"><b>${fmt(x.data)}${x.inicio ? ' · ' + esc(x.inicio) + (x.fim ? '–' + esc(x.fim) : '') : ''}</b><span class="tag">${esc(x.modalidade || 'Individual')}</span></div>
         <h3>${esc(x.objetivo || 'Atendimento')}</h3>${x.participacao ? `<p class="cont"><b>${esc(x.participacao)}</b></p>` : ''}<p class="cont">${esc((x.atividades || '').slice(0, 160))}</p>
-        <div class="acoes"><button class="b main" data-imp="atend" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-edat="${x.id}">Editar</button><button class="b ghost" data-delat="${x.id}">Excluir</button></div></article>`).join('')}</div>`
+        <div class="acoes"><button class="b main" data-imp="atend" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="atend" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="atend" data-id="${x.id}">⬇ PDF</button><button class="b" data-edat="${x.id}">Editar</button><button class="b ghost" data-delat="${x.id}">Excluir</button></div></article>`).join('')}</div>`
         : '<p class="dica">Nenhum atendimento registrado. Toque em “Registrar atendimento” depois de cada encontro.</p>'}`;
     $('#novoAt').onclick = () => { edit = { tipo: 'atend', obj: { data: hoje(), profissional: atual.profissional } }; atend(); };
   }
@@ -140,7 +140,7 @@
       <div class="acoes"><button class="b main" id="novoPei">➕ Novo PEI</button></div>
       ${l.length ? `<div class="cards">${l.map(x => `<article class="aula"><div class="topo"><b>${esc(x.periodo)} de ${esc(x.ano)}</b><span class="tag">PEI</span></div>
         <h3>${esc(x.frequencia || '')}</h3><p class="cont">${esc((x.obj_cognitivo || x.obj_comunicacao || '').slice(0, 150))}</p>
-        <div class="acoes"><button class="b main" data-imp="pei" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-edpei="${x.id}">Editar</button><button class="b" data-duppei="${x.id}">Copiar para novo período</button><button class="b ghost" data-delpei="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
+        <div class="acoes"><button class="b main" data-imp="pei" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="pei" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="pei" data-id="${x.id}">⬇ PDF</button><button class="b" data-edpei="${x.id}">Editar</button><button class="b" data-duppei="${x.id}">Copiar para novo período</button><button class="b ghost" data-delpei="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
     $('#novoPei').onclick = () => { edit = { tipo: 'pei', obj: { ano: String(new Date().getFullYear()), periodo: new Date().getMonth() < 6 ? '1º semestre' : '2º semestre', necessidades: necTxt(atual), potencialidades: [atual.fortes, atual.interesses].filter(Boolean).join('\n') } }; pei(); };
   }
   function formPei(x) {
@@ -212,6 +212,17 @@
       + bloco('Orientações ao professor regente e à família', x.orientacoes) + bloco('Como será avaliado', x.avaliacao) + (x.revisao ? `<p class="doc-rev">Revisão prevista em ${fmt(x.revisao)}.</p>` : '')
       + assin(['Profissional do AEE', 'Professor(a) regente', 'Coordenação', 'Responsável']) + rodape();
   }
+  async function montarDoc(tipo, id) {
+    if (tipo === 'perfil') return docPerfil(atual);
+    if (tipo === 'atend') return docAtend(atual, (await todos('atend')).find(x => x.id === id));
+    if (tipo === 'atend-todos') return (await todos('atend')).filter(x => x.aluno === atual.id).sort((a, b) => (a.data || '').localeCompare(b.data || '')).map(x => docAtend(atual, x)).join('');
+    if (tipo === 'pei') return docPei(atual, (await todos('pei')).find(x => x.id === id));
+    return '';
+  }
+  async function baixarAee(fmt, tipo, id) {
+    const h = await montarDoc(tipo, id); const nome = ({ perfil: 'Ficha do aluno', atend: 'Ficha de atendimento', pei: 'PEI', 'atend-todos': 'Atendimentos' })[tipo] + ' - ' + atual.nome;
+    return fmt === 'pdf' ? seiBaixar.pdf(h, nome) : seiBaixar.word(h, nome);
+  }
   async function imprimir(tipo, id) {
     let h = '';
     if (tipo === 'perfil') h = docPerfil(atual);
@@ -231,6 +242,7 @@
     if (t.dataset.al) { atual = alunos.find(a => a.id === t.dataset.al); aba = 'perfil'; edit = null; lista(); painel(); if (innerWidth < 800) $('#painel').scrollIntoView(); return; }
     if (t.dataset.aba && t.closest('.abas-al')) { aba = t.dataset.aba; edit = null; painel(); return; }
     if (t.dataset.imp) { imprimir(t.dataset.imp, t.dataset.id); return; }
+    if (t.dataset.baixa) { baixarAee(t.dataset.baixa, t.dataset.imp2, t.dataset.id); return; }
     if (t.dataset.edat) { edit = { tipo: 'atend', obj: (await todos('atend')).find(x => x.id === t.dataset.edat) }; atend(); }
     if (t.dataset.delat && confirm('Excluir este atendimento?')) { await apagar('atend', t.dataset.delat); atend(); }
     if (t.dataset.edpei) { edit = { tipo: 'pei', obj: (await todos('pei')).find(x => x.id === t.dataset.edpei) }; pei(); }

@@ -305,6 +305,20 @@
       im.onload = im.onerror = () => ok(); im.src = pb;
     })));
   }
+  // Baixar PDF: cada página A4 vira uma página do PDF
+  $('#bPdf').onclick = async () => {
+    select(null); const b = $('#bPdf'); b.disabled = true; b.textContent = '⏳ Gerando PDF…';
+    try {
+      if (!window.html2pdf) await new Promise((ok, er) => { const s = document.createElement('script'); s.src = 'assets/vendor/html2pdf.bundle.min.js'; s.onload = ok; s.onerror = er; document.head.appendChild(s); });
+      const ws = [...pagesEl.querySelectorAll('.pwrap')];
+      ws.forEach(w => { w.style.width = '210mm'; w.style.height = '296.4mm'; w.style.boxShadow = 'none'; w.querySelector('.page').style.transform = 'none'; });
+      const nome = ($('#titulo').textContent.replace('Montar folha · ', '') + (identificacao ? ' - ' + identificacao : '')).replace(/[\\/:*?"<>|]/g, '-');
+      let w = html2pdf().set({ margin: 0, image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, jsPDF: { unit: 'mm', format: 'a4' } }).from(ws[0]).toPdf();
+      for (const pg of ws.slice(1)) w = w.get('pdf').then(p => p.addPage()).from(pg).toContainer().toCanvas().toPdf();
+      await w.save(nome + '.pdf');
+    } catch (e) { alert('Não consegui gerar o PDF: ' + (e && e.message || e)); }
+    b.disabled = false; b.textContent = '⬇ Baixar PDF'; render();
+  };
   $('#bPrintBW').onclick = async () => { seiPrint.mode('bw'); select(null); await moldurasPB(); setTimeout(() => window.print(), 50); };
 
   function select(id) { selId = id; document.querySelectorAll('.col .on').forEach(e => e.classList.remove('on')); if (id != null) document.querySelectorAll(`.col [data-id="${id}"]`).forEach(e => e.classList.add('on')); $('#sel').hidden = id == null; updateToolbar(); }
