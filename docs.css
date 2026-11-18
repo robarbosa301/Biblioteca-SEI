@@ -98,3 +98,13 @@ table.pv-tab tr.iv td{background:#ffe17a;font-weight:700}
 .ress-sit{display:flex;flex-direction:column;gap:1.2mm;margin:2mm 0 0 30mm;font-size:11pt}.ress-sit b:first-child{margin-bottom:1mm}
 .ficha label small{font-weight:400;color:var(--tx2)}
 .ficha [hidden]{display:none!important}
+/* ===== Folha no estilo das folhas de aula ===== */
+.folha-cab,.folha-banda{display:block;max-width:none}
+.folha-banda{width:100%;border-radius:2.5mm;margin:0 0 3mm}
+@media print{
+ body.folha::before{background-image:var(--fundo-doc)!important}
+ body.folha #imprimir{padding:27mm 12mm 14mm}
+ body.folha #imprimir .folha-cab{width:210mm;margin:-27mm -12mm 3mm}
+}
+body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
+.doc-inep:empty{display:none}

@@ -10,15 +10,17 @@
 
   /* ---------- PDF ---------- */
   // PDF com a moldura da escola em todas as páginas (fundo, borda, rodapé com QR Code)
-  const MARG = { t: 13, l: 14, r: 14, b: 31 };
+  const MARG0 = { t: 13, l: 14, r: 14, b: 31 }, MARG_F = { t: 27, l: 12, r: 12, b: 14 }, CAB_MM = 420 * 210 / 1240;
   const imgCarrega = src => new Promise((ok, er) => { const i = new Image(); i.onload = () => ok(i); i.onerror = er; i.src = src; });
-  async function pdf(html, nome) {
+  async function pdf(html, nome, fol) {
+    const MARG = fol ? MARG_F : MARG0;
     aviso('⏳ Gerando o PDF…');
     if (!window.html2pdf) await carregar('assets/vendor/html2pdf.bundle.min.js');
     const fora = document.createElement('div'); Object.assign(fora.style, { position: 'fixed', left: '-10000px', top: '0', width: (210 - MARG.l - MARG.r) + 'mm' });
     const caixa = document.createElement('div'); caixa.className = 'sei-pdf';
     Object.assign(caixa.style, { width: (210 - MARG.l - MARG.r) + 'mm', background: 'transparent', display: 'block' });
     caixa.innerHTML = html; fora.append(caixa); document.body.append(fora);
+    if (fol) caixa.querySelectorAll('img.folha-cab').forEach(im => { const s = document.createElement('div'); s.style.height = (CAB_MM - MARG.t + 3) + 'mm'; im.replaceWith(s); });
     try {
       await espera(caixa); if (document.fonts && document.fonts.ready) await document.fonts.ready;
       const opt = { margin: [MARG.t, MARG.l, MARG.b, MARG.r], html2canvas: { scale: 2, useCORS: true, backgroundColor: null }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -26,12 +28,13 @@
       const canvas = await html2pdf().set(opt).from(caixa).toContainer().then(function () { this.prop.container.style.background = 'transparent'; if (this.prop.overlay) this.prop.overlay.style.background = 'transparent'; }).toCanvas().get('canvas');
       const base = await html2pdf().set({ jsPDF: opt.jsPDF }).from('<div></div>').toPdf().get('pdf');
       const doc = base; // já vem com uma página A4 em branco
-      const moldura = await imgCarrega('assets/docs/moldura-doc.jpg?v=3');
+      const moldura = await imgCarrega(fol ? fol.fundo : 'assets/docs/moldura-doc.jpg?v=3'); const cabImg = fol && fol.cab ? await imgCarrega(fol.cab) : null;
       const larg = 210 - MARG.l - MARG.r, alt = 297 - MARG.t - MARG.b, pxmm = canvas.width / larg, pagPx = Math.floor(alt * pxmm);
       const n = Math.max(1, Math.ceil((canvas.height - 2) / pagPx));
       for (let p = 0; p < n; p++) {
         if (p) doc.addPage();
         doc.addImage(moldura, 'JPEG', 0, 0, 210, 297, 'moldura', 'FAST');
+        if (p === 0 && cabImg && html.includes('folha-cab')) doc.addImage(cabImg, 'JPEG', 0, 0, 210, CAB_MM, 'cabfolha', 'FAST');
         const h = Math.min(pagPx, canvas.height - p * pagPx); if (h <= 0) break;
         const c = document.createElement('canvas'); c.width = canvas.width; c.height = h;
         c.getContext('2d').drawImage(canvas, 0, p * pagPx, canvas.width, h, 0, 0, canvas.width, h);
@@ -48,6 +51,7 @@
   function paraWord(html) {
     const d = document.createElement('div'); d.innerHTML = html;
     d.querySelectorAll('.par-agua').forEach(x => x.remove()); // o Word não põe imagem atrás do texto
+    d.querySelectorAll('img.folha-cab,img.folha-banda').forEach(im => { const p = document.createElement('p'); p.setAttribute('align', 'center'); const h = im.classList.contains('folha-cab') ? 420 : 146; p.innerHTML = `<img src="${im.getAttribute('src')}" width="680" data-w="1240" data-h="${h}">`; im.replaceWith(p); });
     d.querySelectorAll('.sei-cab').forEach(c => {
       const st = c.querySelector('strong'); const t = document.createElement('div');
       t.innerHTML = `<p align="center"><img src="assets/docs/cab-doc.jpg?v=3" width="680"></p><p class="w-tit-c">${st.innerHTML}</p>`;
@@ -94,7 +98,7 @@
     }
     function imagem(n) {
       const src = n.getAttribute('src'); const w = +n.getAttribute('width') || n.naturalWidth || 100; const nat = n.dataset.w ? [+n.dataset.w, +n.dataset.h] : [w, w];
-      const h = Math.round(w * nat[1] / nat[0]); const rid = 'rIdImg' + id; const ext = /\.jpe?g/i.test(src) ? 'jpeg' : 'png'; imgs.push({ src, rid, nome: 'img' + id + '.' + ext, ext }); const cx = w * 9525, cy = h * 9525; const k = id++;
+      const h = Math.round(w * nat[1] / nat[0]); const rid = 'rIdImg' + id; const ext = /\.jpe?g|^data:image\/jpe?g/i.test(src) ? 'jpeg' : 'png'; imgs.push({ src, rid, nome: 'img' + id + '.' + ext, ext }); const cx = w * 9525, cy = h * 9525; const k = id++;
       return `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${k}" name="Imagem ${k}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${k}" name="img${k}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
     }
     function par(el, r, extra) {

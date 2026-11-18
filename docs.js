@@ -222,7 +222,7 @@
   });
   /* ---------- declarações e ressalva (modelos da secretaria da escola) ---------- */
   const INEP = '15590798';
-  const inep = () => `<p class="doc-inep">COD. INEP: ${INEP} · Autorização: Resolução nº 614, de 14 de novembro de 2024 — CEE</p>`;
+  const inep = () => `<p class="doc-inep">${FOLHA ? '' : `COD. INEP: ${INEP} · `}Autorização: Resolução nº 614, de 14 de novembro de 2024 — CEE</p>`;
   const neg = s => esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
   const SIT_RES = ['Aprovado(a)', 'Reprovado(a)', 'Desistente', 'Cancelou', 'Cursando', 'Dependência'];
   const serieNome = t => { t = t || ''; if (/Médio|Convênio/.test(t)) return t.replace(/ \(.*\)/, '') + ' do Ensino Médio'; if (/º ano/.test(t)) return t + ' do Ensino Fundamental'; if (/Maternal|Pré I/.test(t)) return t + ' da Educação Infantil'; return t; };
@@ -282,7 +282,28 @@
   const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
   // Cabeçalho: a arte aprovada do site (mascote, Nº 1 em aprovação e logo) com o título na faixa
   const tamTit = t => t.length <= 24 ? Math.min(22, Math.round(330 / Math.max(8, t.length) * 10) / 10) : Math.max(8.5, Math.min(11.5, Math.round(600 / t.length * 10) / 10));
-  const cab = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</div>`;
+  const cab0 = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</div>`;
+  // Folha no estilo das folhas de aula (mascote, placa, título e barra). FOLHA é preenchido antes de imprimir/baixar.
+  let FOLHA = null, titCap = null, nCab = 0;
+  const cab = titulo => { if (!titCap) titCap = titulo; if (!FOLHA) return cab0(titulo); return FOLHA.duas ? `<img class="folha-banda" src="${FOLHA.banda}" alt="">` : `<img class="folha-cab" src="${FOLHA.cab}" alt="">`; };
+  const PEQ = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'em', 'para']);
+  const tituloCaso = t => t.toLowerCase().split(' ').map((w, i) => i && PEQ.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  const PLACA = { secretaria: ['SECRETARIA', 'ESCOLAR'], coordenacao: ['COORDENAÇÃO', 'PEDAGÓGICA'], avisos: ['AVISOS', 'E COMUNICADOS'], calendario: ['CALENDÁRIO', 'ESCOLAR'], horarios: ['HORÁRIOS', 'DE AULA'] };
+  function faixa(d) {
+    const t = TIPOS[d.tipo]; const ano = (d.data || '').slice(0, 4);
+    const docN = t.nome.split(' /')[0] + (d.numero ? ` nº ${d.numero}/${ano}` : '') + (d.modelo && MOD_DEC[d.modelo] ? ' — ' + MOD_DEC[d.modelo].curto : '');
+    const quem = d.aluno || d.alunoM ? ['Aluno(a)', d.aluno || d.alunoM] : d.nome ? ['Nome', d.nome] : d.resp ? ['Responsável', d.resp] : d.assunto || d.titulo ? ['Assunto', d.assunto || d.titulo] : d.tipoR ? ['Reunião', d.tipoR] : (d.publico || d.para) ? ['Para', d.publico || d.para] : ['Setor', NOME_SETOR];
+    const tur = d.turma ? ['Turma', [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '')] : ['Segmento', segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : 'Todos'];
+    return [['Documento', docN], quem, ['Data', fmt(d.data) || d.ano || ''], tur];
+  }
+  async function prepFolha(d) {
+    segDoc = d.seg || null; FOLHA = null; titCap = null; nCab = 0; TIPOS[d.tipo].doc(d); const tit = tituloCaso(titCap || TIPOS[d.tipo].nome);
+    const pl = PLACA[SETOR] || PLACA.secretaria; const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : '';
+    const o = { titulo: tit, curto: tit, placa: { grande: pl[0], linhas: [pl[1], sg.toUpperCase()] }, campos: faixa(d), selo: ['COD. INEP', INEP], rodape: [NOME_SETOR, sg || 'Sistema de Ensino Incentivo'], num: 'SEI' };
+    FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2' }); nCab = 0;
+    document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);
+  }
+  if (window.seiFolha) document.body.classList.add('folha');
   const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span><span class="rod-qr"><img src="assets/docs/qr-whatsapp.png" width="62" alt="QR Code do WhatsApp da escola"><br>Fale com a escola</span></div>`;
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
@@ -642,12 +663,13 @@
     $('#salvaPdf').onclick = tenta(d => baixar2('pdf', d));
   }
   // Word / PDF: o mesmo documento da impressão
-  const htmlDe = d => { segDoc = d.seg || null; return TIPOS[d.tipo].doc(d) + (d.copias === '2' ? '' : rodape()); };
+  const via1 = h => FOLHA && FOLHA.duas ? h.replace(/<img class="folha-banda"[^>]*>/, '') : h;
+  const htmlDe = d => { segDoc = d.seg || null; nCab = 0; return via1(TIPOS[d.tipo].doc(d)) + (d.copias === '2' ? '' : rodape()); };
   const nomeDe = d => TIPOS[d.tipo].titulo(d).replace(/—\s*$/, '').trim() + (d.seg && SEGS[d.seg] ? ' - ' + SEGS[d.seg].nome : '');
-  function baixar2(fmt, d) { if (!window.seiBaixar) return alert('Atualize a página e tente de novo.'); return fmt === 'pdf' ? seiBaixar.pdf(htmlDe(d), nomeDe(d)) : seiBaixar.word(htmlDe(d), nomeDe(d), TIPOS[d.tipo].nome); }
+  async function baixar2(fmt, d) { if (!window.seiBaixar) return alert('Atualize a página e tente de novo.'); if (window.seiFolha) await prepFolha(d); return fmt === 'pdf' ? seiBaixar.pdf(htmlDe(d), nomeDe(d), FOLHA) : seiBaixar.word(htmlDe(d), nomeDe(d), TIPOS[d.tipo].nome); }
   async function imprimir(d) {
-    const t = TIPOS[d.tipo]; segDoc = d.seg || null; document.body.dataset.doc = d.tipo;
-    $('#imprimir').innerHTML = t.doc(d) + (d.copias === '2' ? '' : rodape());
+    const t = TIPOS[d.tipo]; if (window.seiFolha) await prepFolha(d); segDoc = d.seg || null; nCab = 0; document.body.dataset.doc = d.tipo;
+    $('#imprimir').innerHTML = via1(t.doc(d)) + (d.copias === '2' ? '' : rodape());
     await Promise.all([...document.querySelectorAll('#imprimir img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
     window.print();
   }
