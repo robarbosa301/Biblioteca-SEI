@@ -130,15 +130,18 @@
       novo: () => ({ turma: '6º ano', turno: 'Manhã', dias: 'Segunda a sexta', aulas: [['07:00', '07:50'], ['07:50', '08:40'], ['08:40', '09:30'], ['INTERVALO', ''], ['09:50', '10:40'], ['10:40', '11:30']], grade: {} }),
       form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
         <div class="g2">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}</div>
-        <p class="dica">Em cada horário, escolha a disciplina e escreva o professor. Para o intervalo, escreva <b>INTERVALO</b> no início.</p>
+        <p class="dica">Em cada horário, escolha a disciplina e o professor. Para o intervalo, escreva <b>INTERVALO</b> no início. O site avisa quando o professor não pode naquele dia e turno, ou já está em outra turma no mesmo horário.</p><div id="alertas" class="alertas"></div><datalist id="profsDL"></datalist>
         <div class="tab"><table class="grade" id="grade"></table></div><button type="button" class="b" id="maisAula">➕ Mais um horário</button>`,
       campos: ['turma', 'classe', 'turno', 'dias', 'data'],
       depois: async d => { const montar = async () => { const ds = await disciplinas(v('turma')); const dias = DIAS(v('dias')); const g = d.grade || {};
-          $('#grade').innerHTML = `<thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(d.aulas || []).map((a, i) => { const iv = /^interv/i.test(a[0]); return `<tr><td class="hr"><input class="hi" value="${esc(a[0])}"> <input class="hf" value="${esc(a[1])}" ${iv ? 'hidden' : ''}></td>${iv ? `<td colspan="${dias.length}" class="iv">INTERVALO</td>` : dias.map(x => { const c = (g[i + '|' + x] || {}); return `<td><select class="gd" data-k="${i}|${x}"><option value="">—</option>${ds.map(s => `<option ${c.d === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select><input class="gp" data-k="${i}|${x}" placeholder="Professor(a)" value="${esc(c.p || '')}"></td>`; }).join('')}</tr>`; }).join('')}</tbody>`; };
-        await montar(); const guarda = () => { d.aulas = [...document.querySelectorAll('#grade tbody tr')].map(r => [r.querySelector('.hi').value, r.querySelector('.hf').value]); d.grade = lerGrade(); };
-        $('#turma').onchange = $('#dias').onchange = async () => { guarda(); await montar(); };
-        $('#grade').onchange = async e => { if (e.target.matches('.hi')) { guarda(); await montar(); } };
-        $('#maisAula').onclick = async () => { guarda(); d.aulas.push(['', '']); await montar(); }; },
+          $('#grade').innerHTML = `<thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(d.aulas || []).map((a, i) => { const iv = /^interv/i.test(a[0]); return `<tr><td class="hr"><input class="hi" value="${esc(a[0])}"> <input class="hf" value="${esc(a[1])}" ${iv ? 'hidden' : ''}></td>${iv ? `<td colspan="${dias.length}" class="iv">INTERVALO</td>` : dias.map(x => { const c = (g[i + '|' + x] || {}); return `<td><select class="gd" data-k="${i}|${x}"><option value="">—</option>${ds.map(s => `<option ${c.d === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select><input class="gp" data-k="${i}|${x}" list="profsDL" placeholder="Professor(a)" value="${esc(c.p || '')}"><span class="alerta-c" data-k="${i}|${x}"></span></td>`; }).join('')}</tr>`; }).join('')}</tbody>`; };
+        const montar0 = montar; const montarC = async () => { await montar0(); await ligaChecagem(d); };
+        await montarC(); const guarda = () => { d.aulas = [...document.querySelectorAll('#grade tbody tr')].map(r => [r.querySelector('.hi').value, r.querySelector('.hf').value]); d.grade = lerGrade(); };
+        $('#turma').onchange = $('#dias').onchange = async () => { guarda(); await montarC(); };
+        $('#grade').onchange = async e => { if (e.target.matches('.hi')) { guarda(); await montarC(); } else if (e.target.matches('.hf')) { guarda(); checaForm(d); } else if (e.target.matches('.gd')) { sugere(d, e.target.dataset.k); checaForm(d); } };
+        $('#grade').oninput = e => { if (e.target.matches('.gp')) checaForm(d); };
+        $('#classe').oninput = $('#turno').oninput = () => checaForm(d);
+        $('#maisAula').onclick = async () => { guarda(); d.aulas.push(['', '']); await montarC(); }; },
       extra: d => { d.aulas = [...document.querySelectorAll('#grade tbody tr')].map(r => [r.querySelector('.hi').value.trim(), r.querySelector('.hf').value.trim()]).filter(a => a[0] || a[1]); d.grade = lerGrade(); },
       doc: d => docHorario(d)
     },
@@ -232,18 +235,154 @@
       <table class="doc-hor"><thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(d.aulas || []).map((a, i) => /^interv/i.test(a[0]) ? `<tr class="iv"><td colspan="${dias.length + 1}">INTERVALO${a[1] ? ' · ' + esc(a[1]) : ''}</td></tr>` : `<tr><td class="hr">${esc(a[0])}${a[1] ? '<br>' + esc(a[1]) : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; return `<td><b>${esc(c.d || '')}</b>${c.p ? '<small>' + esc(c.p) + '</small>' : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
   }
 
+  /* ---------- Horários: professores, disponibilidade e conflitos ---------- */
+  const DIAS6 = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'], TURNOS = ['Manhã', 'Tarde', 'Noite'];
+  const min = t => { const m = /(\d{1,2})[:h.](\d{2})/.exec(t || ''); return m ? +m[1] * 60 + +m[2] : null; };
+  const turnoDe = (ini, padrao) => { const m = min(ini); if (m === null) return /tarde/i.test(padrao || '') ? 'Tarde' : /noite/i.test(padrao || '') ? 'Noite' : 'Manhã'; return m < 12 * 60 + 30 ? 'Manhã' : m < 18 * 60 ? 'Tarde' : 'Noite'; };
+  const nomeT = h => [h.turma, h.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '');
+  const normal = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const achaProf = nome => profs.find(x => normal(x.nome) === normal(nome));
+  let editProf = null;
+  // todas as aulas de um horário: [{dia, ini, fim, turno, disc, prof, k}]
+  function aulasDe(h) {
+    const out = []; const g = h.grade || {};
+    (h.aulas || []).forEach((a, i) => { if (/^interv/i.test(a[0] || '')) return; const ini = min(a[0]), fim = min(a[1]) ?? (ini !== null ? ini + 50 : null);
+      DIAS(h.dias).forEach(dia => { const c = g[i + '|' + dia]; if (c && (c.p || c.d)) out.push({ dia, ini, fim, turno: turnoDe(a[0], h.turno), disc: c.d, prof: (c.p || '').trim(), k: i + '|' + dia, h }); }); });
+    return out;
+  }
+  const choca = (a, b) => a.dia === b.dia && (a.ini === null || b.ini === null ? a.turno === b.turno && a.k.split('|')[0] === b.k.split('|')[0] : a.ini < b.fim && b.ini < a.fim);
+  // problemas de uma aula (em relação aos outros horários salvos)
+  function problemas(x, outros) {
+    const r = []; if (!x.prof) return r; const p = achaProf(x.prof);
+    if (!p) { r.push({ n: 1, t: 'Professor(a) não cadastrado(a) — cadastre para o site conferir a disponibilidade.' }); }
+    else {
+      if (p.disp && p.disp[x.dia + '|' + x.turno] === 0) r.push({ n: 3, t: `${p.nome} não pode na ${x.dia.toLowerCase()} de ${x.turno.toLowerCase()}.` });
+      if (x.disc && (p.disciplinas || []).length && !p.disciplinas.includes(x.disc)) r.push({ n: 2, t: `${x.disc} não está entre as disciplinas de ${p.nome}.` });
+    }
+    for (const o of outros) if (normal(o.prof) === normal(x.prof) && choca(x, o)) r.push({ n: 3, t: `${x.prof} já está no ${nomeT(o.h)} (${o.disc || 'aula'}) nesse horário.` });
+    return r;
+  }
+  function cargaDe(nome, extra) { let n = 0; for (const h of todosHor) for (const a of aulasDe(h)) if (normal(a.prof) === normal(nome)) n++; return n + (extra || 0); }
+  function conflitosGerais() {
+    const todas = todosHor.flatMap(aulasDe); const out = [];
+    const vistos = new Set();
+    todas.forEach((x, i) => { const outros = todas.filter((o, j) => j !== i && o.h.id !== x.h.id);
+      for (const p of problemas(x, outros)) { if (p.n !== 3) continue;
+        const ch = /já está no/.test(p.t) ? 'c|' + normal(x.prof) + '|' + x.dia + '|' + x.ini : 'i|' + x.h.id + '|' + x.k;
+        if (vistos.has(ch)) continue; vistos.add(ch);
+        const outro = /já está no (.*?) \(/.exec(p.t);
+        out.push({ ...p, t: outro ? `${x.prof} está em duas turmas ao mesmo tempo: ${nomeT(x.h)} e ${outro[1]}.` : p.t, onde: `${x.dia} ${x.h.aulas[+x.k.split('|')[0]][0]}` }); } });
+    return out;
+  }
+  // checagem ao vivo no formulário do horário
+  function horDoForm(d) { return Object.assign({}, d, { turma: v('turma'), classe: v('classe').trim(), turno: v('turno').trim(), dias: v('dias'), aulas: [...document.querySelectorAll('#grade tbody tr')].map(r => [r.querySelector('.hi').value.trim(), r.querySelector('.hf').value.trim()]), grade: lerGrade() }); }
+  function checaForm(d) {
+    const h = horDoForm(d); const outros = todosHor.filter(o => o.id !== d.id).flatMap(aulasDe); const mine = aulasDe(h);
+    const lista2 = []; document.querySelectorAll('#grade td').forEach(td => td.classList.remove('conflito', 'aviso'));
+    document.querySelectorAll('#grade .alerta-c').forEach(sp => { sp.textContent = ''; sp.title = ''; });
+    mine.forEach(x => {
+      const iguais = mine.filter(o => o !== x && o.prof && normal(o.prof) === normal(x.prof) && o.k !== x.k && choca(x, o)).map(o => ({ prof: o.prof, h: { turma: 'esta mesma turma' }, dia: o.dia, ini: o.ini, fim: o.fim, turno: o.turno, k: o.k, disc: o.disc }));
+      const pr = problemas(x, outros.concat(iguais)); if (!pr.length) return;
+      const pior = Math.max(...pr.map(z => z.n)); const sp = document.querySelector(`#grade .alerta-c[data-k="${x.k}"]`); const td = sp && sp.closest('td');
+      if (td) { td.classList.add(pior === 3 ? 'conflito' : 'aviso'); sp.textContent = pior === 3 ? '⛔' : pior === 2 ? '⚠️' : 'ℹ️'; sp.title = pr.map(z => z.t).join('\n'); }
+      pr.forEach(z => lista2.push({ ...z, onde: `${x.dia}, ${h.aulas[+x.k.split('|')[0]][0]}` }));
+    });
+    // carga semanal
+    const porProf = {}; mine.forEach(x => { if (x.prof) porProf[normal(x.prof)] = (porProf[normal(x.prof)] || 0) + 1; });
+    for (const [nn, q] of Object.entries(porProf)) { const p = profs.find(z => normal(z.nome) === nn); if (p && +p.max) { const tot = todosHor.filter(o => o.id !== d.id).flatMap(aulasDe).filter(a => normal(a.prof) === nn).length + q; if (tot > +p.max) lista2.push({ n: 2, t: `${p.nome} fica com ${tot} aulas na semana (máximo ${p.max}).`, onde: 'Carga semanal' }); } }
+    const box = $('#alertas'); if (!box) return;
+    const c = lista2.filter(z => z.n === 3).length, a = lista2.filter(z => z.n < 3).length;
+    box.className = 'alertas ' + (c ? 'tem-c' : a ? 'tem-a' : 'ok');
+    box.innerHTML = !lista2.length ? (mine.some(x => x.prof) ? '✅ Nenhum conflito: os professores estão disponíveis e não se repetem em outra turma no mesmo horário.' : '') :
+      `<b>${c ? '⛔ ' + c + ' conflito' + (c > 1 ? 's' : '') : ''}${c && a ? ' · ' : ''}${a ? '⚠️ ' + a + ' aviso' + (a > 1 ? 's' : '') : ''}</b><ul>${lista2.slice(0, 12).map(z => `<li class="n${z.n}"><span>${esc(z.onde)}:</span> ${esc(z.t)}</li>`).join('')}</ul>`;
+  }
+  async function ligaChecagem(d) {
+    const et = etapaDe(v('turma')); const ds = await disciplinas(v('turma'));
+    const daEtapa = profs.filter(p => !(p.etapas || []).length || p.etapas.includes(et));
+    $('#profsDL').innerHTML = daEtapa.map(p => `<option value="${esc(p.nome)}">${esc((p.disciplinas || []).filter(x => ds.includes(x)).join(', '))}</option>`).join('');
+    checaForm(d);
+  }
+  // ao escolher a disciplina: se só um professor livre pode dar, já preenche
+  function sugere(d, k) {
+    const inp = document.querySelector(`#grade .gp[data-k="${k}"]`); const disc = document.querySelector(`#grade .gd[data-k="${k}"]`).value; if (!inp || inp.value.trim() || !disc) return;
+    const h = horDoForm(d); const [i, dia] = k.split('|'); const a = h.aulas[+i]; const ini = min(a[0]); const x0 = { dia, ini, fim: min(a[1]) ?? (ini !== null ? ini + 50 : null), turno: turnoDe(a[0], h.turno), disc, k };
+    const outros = todosHor.filter(o => o.id !== d.id).flatMap(aulasDe).concat(aulasDe(h).filter(o => o.k !== k));
+    const et = etapaDe(h.turma); const livres = profs.filter(p => (p.disciplinas || []).includes(disc) && (!(p.etapas || []).length || p.etapas.includes(et)) && !problemas({ ...x0, prof: p.nome, h }, outros).some(z => z.n === 3));
+    if (livres.length === 1) { inp.value = livres[0].nome; inp.classList.add('sugerido'); setTimeout(() => inp.classList.remove('sugerido'), 1500); }
+  }
+  // tela: lista de professores
+  function telaProfs() {
+    $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-modo="">‹ Horário de aula</button><span>›</span><b class="tr-atual">👩‍🏫 Professores</b></nav>
+      <div class="acoes"><button class="b main" id="novoProf">➕ Cadastrar professor(a)</button></div>
+      ${profs.length ? `<div class="cards">${profs.map(p => { const n = cargaDe(p.nome); const ind = Object.values(p.disp || {}).filter(x => x === 0).length; return `<article class="aula"><div class="topo"><b>${esc(p.nome)}</b><span class="tag">${n} aula${n === 1 ? '' : 's'}${+p.max ? ' / ' + p.max : ''}</span></div>
+        <p class="cont">${esc((p.etapas || []).map(k => ETAPAS[k] ? ETAPAS[k].nome : k).join(', ') || 'Todas as etapas')}</p><p class="hab">${(p.disciplinas || []).map(x => `<span>${esc(x)}</span>`).join('')}</p>
+        <p class="cont">${ind ? '🚫 Não pode em ' + ind + ' período' + (ind > 1 ? 's' : '') + ' da semana' : '✅ Disponível em todos os períodos'}</p>
+        <div class="acoes"><button class="b" data-edprof="${p.id}">✏️ Editar</button><button class="b ghost" data-delprof="${p.id}">Excluir</button></div></article>`; }).join('')}</div>`
+        : '<p class="dica">Cadastre os professores com as etapas, as disciplinas e a disponibilidade. Depois, ao montar os horários, o site avisa os conflitos.</p>'}`;
+    $('#novoProf').onclick = () => { editProf = { tipo: 'professor', setor: 'horarios', nome: '', etapas: [], disciplinas: [], disp: {}, max: '' }; modo = 'prof'; tela(); };
+  }
+  async function discDasEtapas(ets) {
+    const ts = (ets.length ? ets : Object.keys(ETAPAS)).flatMap(k => ETAPAS[k].turmas); const set = new Set();
+    for (const t of ts) (await disciplinas(t)).forEach(x => set.add(x)); return [...set].sort((a, b) => a.localeCompare(b, 'pt'));
+  }
+  async function formProf() {
+    const p = editProf; const ch = (nome, ops, marc, lab2) => `<div class="chips">${ops.map(o => `<label><input type="checkbox" name="${nome}" value="${esc(o[0])}" ${marc.includes(o[0]) ? 'checked' : ''}><span>${esc(o[1])}</span></label>`).join('')}</div>`;
+    const grade = () => `<table class="disp"><thead><tr><th></th>${DIAS6.map(dd => `<th>${dd.slice(0, 3)}</th>`).join('')}</tr></thead><tbody>${TURNOS.map(t => `<tr><th>${t}</th>${DIAS6.map(dd => { const k = dd + '|' + t; const val = p.disp[k] === undefined ? (dd === 'Sábado' || t === 'Noite' ? null : 1) : p.disp[k]; return `<td><button type="button" class="dp ${val === 1 ? 'sim' : val === 0 ? 'nao' : 'nd'}" data-dk="${k}">${val === 1 ? '✓' : val === 0 ? '✕' : '–'}</button></td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
+    $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-modo="profs">‹ Professores</button></nav><form class="ficha" id="fProf"><h3>👩‍🏫 ${p.id ? 'Editar' : 'Cadastrar'} professor(a)</h3>
+      <div class="g2">${lab('Nome', inp('pNome', p.nome, 'Nome do professor(a)'))}${lab('Máximo de aulas por semana (opcional)', inp('pMax', p.max, 'Ex.: 20', 'number'))}</div>
+      <label class="full"><span>Etapas em que dá aula</span>${ch('et', Object.entries(ETAPAS).map(([k, e]) => [k, e.nome]), p.etapas || [])}</label>
+      <label class="full"><span>Disciplinas</span><div id="discBox"></div></label>
+      <label class="full"><span>Disponibilidade — toque para marcar: <b class="ok">✓ pode</b> · <b class="no">✕ não pode</b> · – não se aplica</span><div class="tab" id="dispBox">${grade()}</div></label>
+      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b ghost" type="button" data-modo="profs">Cancelar</button></div></form>`;
+    const desenhaDisc = async () => { const ets = [...document.querySelectorAll('input[name=et]:checked')].map(i => i.value); const marc = [...document.querySelectorAll('input[name=di]:checked')].map(i => i.value).concat(p.disciplinas || []); const ds = await discDasEtapas(ets); $('#discBox').innerHTML = ch('di', ds.map(x => [x, x]), marc); };
+    await desenhaDisc(); document.querySelectorAll('input[name=et]').forEach(i => i.onchange = desenhaDisc);
+    $('#dispBox').onclick = e => { const b = e.target.closest('.dp'); if (!b) return; const k = b.dataset.dk; const cur = b.classList.contains('sim') ? 1 : b.classList.contains('nao') ? 0 : null; const nx = cur === 1 ? 0 : cur === 0 ? null : 1; p.disp[k] = nx; b.className = 'dp ' + (nx === 1 ? 'sim' : nx === 0 ? 'nao' : 'nd'); b.textContent = nx === 1 ? '✓' : nx === 0 ? '✕' : '–'; };
+    $('#fProf').onsubmit = async e => {
+      e.preventDefault(); const nome = v('pNome').trim().replace(/\s+/g, ' '); if (!nome) { alert('Escreva o nome do professor(a).'); return; }
+      if (profs.some(x => x.id !== p.id && normal(x.nome) === normal(nome))) { alert('Já existe um professor com esse nome.'); return; }
+      document.querySelectorAll('#dispBox .dp').forEach(b => { p.disp[b.dataset.dk] = b.classList.contains('sim') ? 1 : b.classList.contains('nao') ? 0 : null; });
+      Object.assign(p, { nome, max: v('pMax').trim(), etapas: [...document.querySelectorAll('input[name=et]:checked')].map(i => i.value), disciplinas: [...document.querySelectorAll('input[name=di]:checked')].map(i => i.value) });
+      if (!p.id) { p.id = novoId(); p.criado = Date.now(); }
+      await gravar(p); aviso('Professor(a) salvo(a).'); modo = 'profs'; editProf = null; await carregar();
+    };
+  }
+  // quadro: semana de cada professor, em todas as turmas
+  function quadroHTML(imp) {
+    const todas = todosHor.flatMap(aulasDe).filter(a => a.prof);
+    const nomes = [...new Set(profs.map(p => p.nome).concat(todas.map(a => a.prof)).map(n => n.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+    const uniq = []; nomes.forEach(n => { if (!uniq.some(u => normal(u) === normal(n))) uniq.push(n); });
+    const conf = conflitosGerais();
+    const bloco = nome => { const minhas = todas.filter(a => normal(a.prof) === normal(nome)); const p = achaProf(nome);
+      const horas = [...new Set(minhas.map(a => a.ini).filter(x => x !== null))].sort((a, b) => a - b); const hh = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+      const dias = DIAS6.filter(dd => dd !== 'Sábado' || minhas.some(a => a.dia === 'Sábado'));
+      const corpo = horas.length ? horas.map(hr => `<tr><th>${hh(hr)}</th>${dias.map(dd => { const aqui = minhas.filter(a => a.dia === dd && a.ini === hr); const ruim = aqui.length > 1 || aqui.some(a => p && p.disp && p.disp[a.dia + '|' + a.turno] === 0); return `<td class="${ruim ? 'conflito' : aqui.length ? 'tem' : ''}">${aqui.map(a => `<b>${esc(nomeT(a.h))}</b><small>${esc(a.disc || '')}</small>`).join('<hr>')}</td>`; }).join('')}</tr>`).join('') : `<tr><td colspan="${dias.length + 1}" class="vazio-q">Sem aulas nos horários salvos.</td></tr>`;
+      return `<div class="q-prof"><h4>${esc(nome)} <small>${minhas.length} aula${minhas.length === 1 ? '' : 's'}${p && +p.max ? ' de ' + p.max : ''}${p ? '' : ' · não cadastrado'}</small></h4><div class="tab"><table class="q-tab"><thead><tr><th></th>${dias.map(dd => `<th>${dd}</th>`).join('')}</tr></thead><tbody>${corpo}</tbody></table></div></div>`; };
+    return `${conf.length ? `<div class="alertas tem-c"><b>⛔ ${conf.length} conflito${conf.length > 1 ? 's' : ''} nos horários salvos</b><ul>${conf.map(z => `<li class="n3"><span>${esc(z.onde)}:</span> ${esc(z.t)}</li>`).join('')}</ul></div>` : `<div class="alertas ok">✅ Nenhum conflito entre os horários salvos.</div>`}
+      ${uniq.length ? uniq.map(bloco).join('') : '<p class="dica">Ainda não há professores nos horários.</p>'}`;
+  }
+  function telaQuadro() {
+    $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-modo="">‹ Horário de aula</button><span>›</span><b class="tr-atual">🧭 Quadro dos professores</b></nav><div class="acoes"><button class="b main" data-impquadro="1">🖨 Imprimir quadro</button></div>${quadroHTML()}`;
+  }
+  async function imprimirQuadro() { segDoc = null; $('#imprimir').innerHTML = cab('QUADRO DOS PROFESSORES') + quadroHTML(true); await Promise.all([...document.querySelectorAll('#imprimir img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))); window.print(); }
+
   /* ---------- telas ---------- */
   let lista = [], tipo = null, edit = null;
   const meus = () => Object.entries(TIPOS).filter(([, t]) => t.setores.includes(SETOR));
-  async function carregar() { lista = (await todos()).filter(d => d.setor === SETOR); tela(); }
+  let todosHor = [], profs = [], modo = null;
+  async function carregar() { const t = await todos(); lista = t.filter(d => d.setor === SETOR); todosHor = t.filter(d => d.tipo === 'horario'); profs = t.filter(d => d.tipo === 'professor').sort((a, b) => a.nome.localeCompare(b.nome, 'pt')); tela(); }
   function tela() {
     const p = $('#docs');
     if (edit) return formulario();
     const unico = meus().length === 1;
     if (unico) tipo = meus()[0][0];
+    if (SETOR === 'horarios' && modo === 'profs') return telaProfs();
+    if (SETOR === 'horarios' && modo === 'prof') return formProf();
+    if (SETOR === 'horarios' && modo === 'quadro') return telaQuadro();
     if (tipo === 'horario' && SETOR === 'horarios' && !etapa) {
+      const nc = conflitosGerais().length;
+      p.innerHTML = `<div class="tiles-doc ferr"><button class="tile-doc" data-modo="profs"><span class="ti">👩‍🏫</span><b>Professores e disponibilidade</b><small>Quem dá aula em cada etapa, as disciplinas e os dias e turnos em que pode</small><em>${profs.length ? profs.length + ' cadastrado' + (profs.length > 1 ? 's' : '') : 'cadastrar'}</em></button><button class="tile-doc${nc ? ' tem-conf' : ''}" data-modo="quadro"><span class="ti">🧭</span><b>Quadro dos professores</b><small>A semana de cada professor em todas as turmas, com os conflitos</small><em>${nc ? '⚠️ ' + nc + ' conflito' + (nc > 1 ? 's' : '') : 'sem conflitos'}</em></button></div>`;
       const n = k => lista.filter(d => d.tipo === 'horario' && etapaDe(d.turma) === k).length;
-      p.innerHTML = `<p class="dica">Escolha a etapa para ver os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => e.simples ? `<button class="etapa simples" data-et="${k}" aria-label="${e.nome}"><span class="es-i">${e.simples}</span><b>${e.nome}</b><small>${e.desc}</small>${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>` : `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
+      p.innerHTML += `<p class="dica">Escolha a etapa para montar os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => e.simples ? `<button class="etapa simples" data-et="${k}" aria-label="${e.nome}"><span class="es-i">${e.simples}</span><b>${e.nome}</b><small>${e.desc}</small>${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>` : `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
       return;
     }
     if (SETOR === 'secretaria' && !seg) {
@@ -269,11 +408,14 @@
     $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-volta="2">‹ ${t.nome}</button></nav><form class="ficha" id="fDoc"><h3>${t.icone} ${edit.id ? 'Editar' : 'Novo'}: ${t.nome}</h3>${t.form(edit)}
       <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b" type="button" id="salvaImp">💾 Salvar e imprimir</button><button class="b" type="button" id="salvaWord">💾 Salvar e baixar Word</button><button class="b" type="button" id="salvaPdf">💾 Salvar e baixar PDF</button><button class="b ghost" type="button" data-volta="2">Cancelar</button></div></form>`;
     if (t.depois) await t.depois(edit);
-    const salvar = async () => { Object.assign(edit, ler(t.campos)); if (t.extra) t.extra(edit); if (!edit.id) { edit.id = novoId(); edit.criado = Date.now(); } await gravar(edit); const d = edit; aviso('Documento salvo.'); edit = null; await carregar(); return d; };
-    $('#fDoc').onsubmit = async e => { e.preventDefault(); await salvar(); };
-    $('#salvaImp').onclick = async () => imprimir(await salvar());
-    $('#salvaWord').onclick = async () => baixar2('word', await salvar());
-    $('#salvaPdf').onclick = async () => baixar2('pdf', await salvar());
+    const salvar = async () => {
+      if (edit.tipo === 'horario') { const n = document.querySelectorAll('#grade td.conflito').length; if (n && !confirm(`Este horário tem ${n} conflito(s) marcado(s) em vermelho. Salvar mesmo assim?`)) throw new Error('cancelado'); }
+      Object.assign(edit, ler(t.campos)); if (t.extra) t.extra(edit); if (!edit.id) { edit.id = novoId(); edit.criado = Date.now(); } await gravar(edit); const d = edit; aviso('Documento salvo.'); edit = null; await carregar(); return d; };
+    $('#fDoc').onsubmit = async e => { e.preventDefault(); try { await salvar(); } catch (x) { if (x.message !== 'cancelado') throw x; } };
+    const tenta = f => async () => { try { f(await salvar()); } catch (x) { if (x.message !== 'cancelado') throw x; } };
+    $('#salvaImp').onclick = tenta(imprimir);
+    $('#salvaWord').onclick = tenta(d => baixar2('word', d));
+    $('#salvaPdf').onclick = tenta(d => baixar2('pdf', d));
   }
   // Word / PDF: o mesmo documento da impressão
   const htmlDe = d => { segDoc = d.seg || null; return TIPOS[d.tipo].doc(d) + (d.copias === '2' ? '' : rodape()); };
@@ -291,6 +433,10 @@
     const b = e.target.closest('button,a'); if (!b) return;
     if (b.dataset.t) { tipo = b.dataset.t; edit = null; tela(); scrollTo(0, 0); }
     if (b.dataset.et) { etapa = b.dataset.et; tela(); scrollTo(0, 0); }
+    if (b.dataset.modo !== undefined) { modo = b.dataset.modo || null; editProf = null; tela(); scrollTo(0, 0); }
+    if (b.dataset.edprof) { editProf = JSON.parse(JSON.stringify(profs.find(x => x.id === b.dataset.edprof))); modo = 'prof'; tela(); scrollTo(0, 0); }
+    if (b.dataset.delprof && confirm('Excluir este professor? Os horários já montados não mudam.')) { await apagar(b.dataset.delprof); await carregar(); }
+    if (b.dataset.impquadro) imprimirQuadro();
     if (b.dataset.seg) { seg = b.dataset.seg; tipo = null; tela(); scrollTo(0, 0); }
     if (b.dataset.volta) { if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
