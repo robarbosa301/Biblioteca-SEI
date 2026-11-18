@@ -61,6 +61,10 @@
     d.querySelectorAll('.sei-rod').forEach(r => { const t = document.createElement('table'); t.className = 'w-rod'; t.setAttribute('width', '100%'); t.innerHTML = `<tr>${[...r.children].map(s => `<td class="w-azul2">${s.innerHTML}</td>`).join('')}</tr>`; r.replaceWith(t); });
     d.querySelectorAll('.doc-num').forEach(n => { const t = document.createElement('table'); t.setAttribute('width', '100%'); t.innerHTML = `<tr><td>${n.children[0].outerHTML}</td><td align="right">${n.children[1] ? n.children[1].innerHTML : ''}</td></tr>`; n.replaceWith(t); });
     d.querySelectorAll('.doc-ass').forEach(a => { const ds = [...a.children]; const t = document.createElement('table'); t.className = 'w-ass'; t.setAttribute('width', '100%'); let h = ''; for (let i = 0; i < ds.length; i += 2) h += `<tr>${ds.slice(i, i + 2).map(x => `<td align="center" width="50%"><br><br>______________________________<br>${x.innerHTML.replace(/<span><\/span>/, '')}</td>`).join('')}</tr>`; t.innerHTML = h; a.replaceWith(t); });
+    d.querySelectorAll('.cm-ev i').forEach(i => { const b = document.createElement('b'); b.style.color = i.style.background; b.textContent = i.textContent + ' '; i.replaceWith(b); });
+    d.querySelectorAll('.cm-h').forEach(h => { const p = document.createElement('p'); p.className = 'w-mes'; p.style.background = h.style.background; p.innerHTML = `${h.querySelector('b').innerHTML}${h.querySelector('span') ? ' · ' + h.querySelector('span').innerHTML : ''}`; h.replaceWith(p); });
+    d.querySelectorAll('.calp').forEach(c => { const ms = [...c.children]; const t = document.createElement('table'); t.setAttribute('width', '100%'); let h = ''; for (let i = 0; i < ms.length; i += 3) h += `<tr>${ms.slice(i, i + 3).map(m => `<td valign="top" width="33%">${m.innerHTML}</td>`).join('')}</tr>`; t.innerHTML = h; c.replaceWith(t); });
+    d.querySelectorAll('.calp-tot').forEach(x => { x.outerHTML = `<p class="w-tot">${x.textContent.replace(/\s+/g, ' ').trim()}</p>`; });
     d.querySelectorAll('.cal').forEach(c => { const ms = [...c.children]; const t = document.createElement('table'); t.setAttribute('width', '100%'); let h = ''; for (let i = 0; i < ms.length; i += 4) h += `<tr>${ms.slice(i, i + 4).map(m => `<td valign="top" width="25%">${m.innerHTML}</td>`).join('')}</tr>`; t.innerHTML = h; c.replaceWith(t); });
     d.querySelectorAll('.doc-b h4').forEach(h => { const p = document.createElement('p'); p.className = 'w-h4'; p.innerHTML = h.innerHTML; h.replaceWith(p); });
     d.querySelectorAll('.doc-t').forEach(x => { const t = document.createElement('table'); t.className = 'w-caixa'; t.setAttribute('width', '100%'); t.innerHTML = `<tr><td>${x.innerHTML}</td></tr>`; x.replaceWith(t); });
@@ -75,7 +79,7 @@
   const P = { 'w-sm': { r: { cor: '8BF5FF', sz: 7.5, b: 1 } }, 'w-tit': { r: { cor: 'FFFFFF', sz: 20, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-p': { r: { cor: 'FFFFFF', sz: 12, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-c': { jc: 'center', fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 22, b: 1, font: 'Arial Black' }, esp: [40, 0] },
     'w-fita': { jc: 'center', fill: '0A3A9C', r: { cor: 'FFFFFF', sz: 7.5, b: 1 }, esp: [0, 160] }, 'w-h4': { fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 8.5, b: 1, caps: 1 }, esp: [140, 0] },
     'w-corte': { jc: 'center', r: { cor: '888888', sz: 8 } }, 'doc-para': { r: { b: 1, sz: 12 } }, 'doc-fim': { esp: [200, 0] }, 'doc-rev': { r: { sz: 9 } }, 'doc-num': {},
-    'doc-corpo': { linha: 1.5 }, 'grande': { r: { sz: 12.5 } }, 'cal-res': { r: { sz: 9 } }, 'cal-leg': { r: { sz: 8 } }, 'doc-dest': { r: { b: 1 } }, 'doc-inep': { jc: 'center', r: { sz: 8, cor: '0B2A5B', b: 1 }, esp: [0, 200] }, 'dec': { jc: 'both', linha: 1.7, r: { sz: 12 } }, 'doc-data': { jc: 'right', esp: [240, 0] }, 'ress-sit': { esp: [160, 0] } };
+    'doc-corpo': { linha: 1.5 }, 'grande': { r: { sz: 12.5 } }, 'cal-res': { r: { sz: 9 } }, 'cal-leg': { r: { sz: 8 } }, 'doc-dest': { r: { b: 1 } }, 'cm-ev': { r: { sz: 7 } }, 'cal-leg2': { r: { sz: 7 } }, 'w-mes': { jc: 'center', r: { cor: 'FFFFFF', b: 1, sz: 9.5 }, esp: [60, 40] }, 'w-tot': { jc: 'right', r: { b: 1, sz: 11, cor: '0B2A6B' }, esp: [120, 0] }, 'doc-inep': { jc: 'center', r: { sz: 8, cor: '0B2A5B', b: 1 }, esp: [0, 200] }, 'dec': { jc: 'both', linha: 1.7, r: { sz: 12 } }, 'doc-data': { jc: 'right', esp: [240, 0] }, 'ress-sit': { esp: [160, 0] } };
   const T = { 'w-cab': { fill: '0A3A9C', borda: null, cor: 'FFFFFF' }, 'w-rod': { fill: '0B2A5B', borda: null, cor: 'FFFFFF', sz: 8, b: 1 }, 'w-caixa': { borda: '0B2A5B' }, 'w-ass': { borda: null },
     'doc-id': { borda: '777777', th: 'E8F1FF', thCor: '0B2A5B' }, 'doc-obj': { borda: '777777', th: 'E8F1FF', thCor: '0B2A5B' }, 'doc-bol': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 },
     'doc-hor': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 } };
@@ -104,7 +108,7 @@
     function par(el, r, extra) {
       const cls = [...(el.classList || [])]; let jc = (el.getAttribute && el.getAttribute('align')) || null, fill = null, esp = null, linha = null;
       for (const c of cls) if (P[c]) { if (P[c].jc) jc = P[c].jc; if (P[c].fill) fill = P[c].fill; if (P[c].esp) esp = P[c].esp; if (P[c].linha) linha = P[c].linha; }
-      if (el.tagName === 'H2' || el.tagName === 'H5') jc = 'center'; if (el.tagName === 'H5') fill = '0A3A9C';
+      if (el.tagName === 'H2' || el.tagName === 'H5') jc = 'center'; if (el.tagName === 'H5') fill = '0A3A9C'; const bgc = el.style && hex(el.style.background || el.style.backgroundColor); if (bgc && el.tagName === 'P') fill = bgc;
       if (extra) { if (extra.jc && !jc) jc = extra.jc; if (extra.linha && !linha) linha = extra.linha; }
       const rr = estiloEl(el, r); if (el.tagName === 'H5') { rr.cor = 'FFFFFF'; rr.sz = 7.5; }
       const conteudo = runs(el, rr);
@@ -128,6 +132,7 @@
     function tabela(t, r0) {
       const cls = [...t.classList]; const cfg = Object.assign({ borda: null }, ...cls.map(c => T[c] || {}));
       if (t.closest('.cal-m')) Object.assign(cfg, { borda: null, sz: 7, jc: 'center' });
+      if (t.classList.contains('cm-t')) Object.assign(cfg, { borda: null, sz: 7.5, jc: 'center' });
       const rows = [...t.querySelectorAll(':scope > tbody > tr, :scope > thead > tr, :scope > tr')];
       const ncols = Math.max(1, ...rows.map(tr => [...tr.children].reduce((s, c) => s + (+c.getAttribute('colspan') || 1), 0)));
       const b = cfg.borda ? `<w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(x => `<w:${x} w:val="single" w:sz="4" w:space="0" w:color="${cfg.borda}"/>`).join('')}</w:tblBorders>` : `<w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(x => `<w:${x} w:val="nil"/>`).join('')}</w:tblBorders>`;

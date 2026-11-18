@@ -101,15 +101,17 @@
       doc: d => { const um = `<div class="doc-aviso">${cab('COMUNICADO')}<h2>${esc(d.titulo)}</h2><p class="doc-para">${esc(d.publico)},</p><div class="doc-corpo grande">${br(d.texto)}</div><p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.<br><b>${esc(d.assinante)}</b></p></div>`; return d.copias === '2' ? `<div class="doc-2">${um}<hr class="doc-corte">${um}</div>` : um; }
     },
     calendario: {
-      nome: 'Calendário escolar', icone: '🗓️', desc: 'Ano letivo, feriados, avaliações', setores: ['secretaria', 'coordenacao', 'calendario'],
-      titulo: d => 'Calendário escolar ' + (d.ano || ''),
-      novo: () => { const y = new Date().getFullYear(); return { ano: String(y), inicio: y + '-02-03', fim: y + '-12-12', eventos: [] }; },
-      form: d => `<div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
+      nome: 'Calendário pedagógico', icone: '🗓️', desc: 'Por semestre: dias letivos, feriados, avaliações e eventos', setores: ['secretaria', 'coordenacao', 'calendario'],
+      titulo: d => `Calendário pedagógico ${d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre + ' ' : ''}${d.ano || ''}`,
+      novo: () => { const y = new Date().getFullYear(); return { ano: String(y), semestre: '1º semestre', inicio: y + '-02-03', fim: y + '-12-12', eventos: [] }; },
+      form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Período', sel('semestre', d.semestre || 'Ano inteiro', ['1º semestre', '2º semestre', 'Ano inteiro']))}</div><div class="g2">${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
         <h4>Datas do ano</h4><div id="evs">${(d.eventos || []).map(linhaEv).join('')}</div><button type="button" class="b" id="maisEv">➕ Adicionar data</button>
-        <p class="dica">Dias letivos: contados de segunda a sexta entre o início e o fim, tirando feriados e recessos. Marque “Letivo (sábado)” para sábados letivos.</p>`,
-      campos: ['ano', 'inicio', 'fim'],
+        <p class="dica">Dias letivos: contados de segunda a sexta entre o início e o fim, tirando feriados, pontos facultativos e recessos. Marque “Letivo (sábado)” para sábados letivos. Cada mês mostra os seus dias letivos e as datas embaixo.</p>`,
+      campos: ['ano', 'semestre', 'inicio', 'fim'],
       extra: d => { d.eventos = [...document.querySelectorAll('.ev')].map(r => ({ de: r.querySelector('.ev-de').value, ate: r.querySelector('.ev-ate').value, tipo: r.querySelector('.ev-tipo').value, desc: r.querySelector('.ev-desc').value.trim() })).filter(e => e.de); },
       depois: () => { $('#maisEv').onclick = () => $('#evs').insertAdjacentHTML('beforeend', linhaEv({})); $('#evs').onclick = e => { if (e.target.matches('.ev-x')) e.target.closest('.ev').remove(); }; },
+      // arte das folhas (mascote e placa), mais alegre que os documentos de secretaria
+      arte: d => { const sem = d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre : 'Ano letivo'; const nl = letivos(d, mesesDe(d)); return { estilo: 'folha', titulo: 'Calendário Pedagógico', curto: `Calendário Pedagógico — ${sem} ${d.ano || ''}`, placa: { grande: d.ano || '', linhas: [sem.toUpperCase(), 'ANO LETIVO'] }, campos: [['Documento', 'Calendário pedagógico'], ['Período', `${sem} de ${d.ano || ''}`], ['Aulas', `${fmt(d.inicio)} a ${fmt(d.fim)}`], ['Dias letivos', nl === null ? '' : String(nl)]] }; },
       doc: d => docCalendario(d)
     },
     boletim: {
@@ -274,8 +276,8 @@
   const lerNotas = () => Object.fromEntries([...document.querySelectorAll('#notas tbody tr')].map(tr => [tr.dataset.d, lerLinha(tr)]));
   const DIAS = d => d === 'Segunda a sábado' ? ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'] : ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
   const lerGrade = () => { const g = {}; document.querySelectorAll('#grade .gd').forEach(s => { const k = s.dataset.k; const p = document.querySelector(`#grade .gp[data-k="${k}"]`); if (s.value || (p && p.value.trim())) g[k] = { d: s.value, p: p ? p.value.trim() : '' }; }); return g; };
-  const TIPOS_EV = ['Feriado', 'Recesso / férias', 'Avaliação', 'Recuperação', 'Reunião', 'Evento', 'Letivo (sábado)', 'Planejamento'];
-  const COR_EV = { 'Feriado': '#e53935', 'Recesso / férias': '#fb8c00', 'Avaliação': '#1e88e5', 'Recuperação': '#8e24aa', 'Reunião': '#43a047', 'Evento': '#00acc1', 'Letivo (sábado)': '#3949ab', 'Planejamento': '#6d4c41' };
+  const TIPOS_EV = ['Feriado', 'Ponto facultativo', 'Recesso / férias', 'Avaliação', 'Recuperação', 'Reunião', 'Evento', 'Letivo (sábado)', 'Planejamento'];
+  const COR_EV = { 'Feriado': '#e53935', 'Ponto facultativo': '#f06292', 'Recesso / férias': '#fb8c00', 'Avaliação': '#1e88e5', 'Recuperação': '#8e24aa', 'Reunião': '#43a047', 'Evento': '#00acc1', 'Letivo (sábado)': '#3949ab', 'Planejamento': '#6d4c41' };
   const linhaEv = e => `<div class="ev"><input type="date" class="ev-de" value="${esc(e.de || '')}"><input type="date" class="ev-ate" value="${esc(e.ate || '')}" title="Até (opcional)"><select class="ev-tipo">${TIPOS_EV.map(t => `<option ${e.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select><input class="ev-desc" placeholder="Descrição" value="${esc(e.desc || '')}"><button type="button" class="b ghost ev-x" title="Tirar">✕</button></div>`;
 
   /* ---------- impressão ---------- */
@@ -300,6 +302,7 @@
     segDoc = d.seg || null; FOLHA = null; titCap = null; nCab = 0; TIPOS[d.tipo].doc(d); const tit = tituloCaso(titCap || TIPOS[d.tipo].nome);
     const pl = PLACA[SETOR] || PLACA.secretaria; const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : '';
     const o = { titulo: tit, curto: tit, placa: { grande: pl[0], linhas: [pl[1], sg.toUpperCase()] }, campos: faixa(d), selo: ['COD. INEP', INEP], rodape: [NOME_SETOR, sg || 'Sistema de Ensino Incentivo'], num: 'SEI', estilo: new URLSearchParams(location.search).get('cab') || 'formal' };
+    if (TIPOS[d.tipo].arte) Object.assign(o, TIPOS[d.tipo].arte(d));
     FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2' }); nCab = 0;
     document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);
   }
@@ -308,24 +311,41 @@
   const bloco = (t, val, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${val ? br(val) : '&nbsp;'}</div></div>`;
   const assina = (n, c) => `<div class="doc-ass um"><div><span></span><b>${esc(n || '')}</b><br>${esc(c || '')}</div></div>`;
   function diasDe(e) { const out = []; if (!e.de) return out; const a = new Date(e.de + 'T12:00'), b = new Date((e.ate || e.de) + 'T12:00'); for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) out.push(d.toISOString().slice(0, 10)); return out; }
-  function letivos(d) {
+  const NAO_LETIVO = new Set(['Feriado', 'Ponto facultativo', 'Recesso / férias']);
+  function letivos(d, meses) {
     if (!d.inicio || !d.fim) return null; const fora = new Set(), sab = new Set();
-    (d.eventos || []).forEach(e => diasDe(e).forEach(x => { if (e.tipo === 'Feriado' || e.tipo === 'Recesso / férias') fora.add(x); if (e.tipo === 'Letivo (sábado)') sab.add(x); }));
-    let n = 0; for (let x = new Date(d.inicio + 'T12:00'); x <= new Date(d.fim + 'T12:00'); x.setDate(x.getDate() + 1)) { const k = x.toISOString().slice(0, 10), w = x.getDay(); if ((w >= 1 && w <= 5 && !fora.has(k)) || sab.has(k)) n++; }
+    (d.eventos || []).forEach(e => diasDe(e).forEach(x => { if (NAO_LETIVO.has(e.tipo)) fora.add(x); if (e.tipo === 'Letivo (sábado)') sab.add(x); }));
+    let n = 0; for (let x = new Date(d.inicio + 'T12:00'); x <= new Date(d.fim + 'T12:00'); x.setDate(x.getDate() + 1)) { const k = x.toISOString().slice(0, 10), w = x.getDay(); if (meses && !meses.includes(x.getMonth())) continue; if ((w >= 1 && w <= 5 && !fora.has(k)) || sab.has(k)) n++; }
     return n;
   }
+  const mesesDe = d => d.semestre === '1º semestre' ? [0, 1, 2, 3, 4, 5] : d.semestre === '2º semestre' ? [6, 7, 8, 9, 10, 11] : [...Array(12).keys()];
+  const COR_MES = ['#1e6fe8', '#7b3fd6', '#0a9d74', '#f0671f', '#2f47c4', '#d6336c', '#0d8f8f', '#f29f05', '#5b3cc4', '#c62828', '#0b8ed1', '#2e8b3e'];
+  const CURTO_EV = { 'Feriado': 'Feriado', 'Ponto facultativo': 'Facultativo', 'Recesso / férias': 'Recesso' };
   function docCalendario(d) {
-    const marca = {}; (d.eventos || []).forEach(e => diasDe(e).forEach(x => { marca[x] = marca[x] || e.tipo; }));
-    const y = +d.ano || new Date().getFullYear();
-    const mes = m => { const p = new Date(y, m, 1).getDay(); const n = new Date(y, m + 1, 0).getDate(); let c = '<tr>' + '<td></td>'.repeat(p);
-      for (let i = 1; i <= n; i++) { const k = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`; const t = marca[k]; const fds = (p + i - 1) % 7 === 0 || (p + i - 1) % 7 === 6; c += `<td class="${fds ? 'fds' : ''}${k === d.inicio || k === d.fim ? ' ini' : ''}" ${t ? `style="background:${COR_EV[t]};color:#fff"` : ''}>${i}</td>`; if ((p + i) % 7 === 0) c += '</tr><tr>'; }
-      return `<div class="cal-m"><h5>${MESES[m].toUpperCase()}</h5><table><tr>${'DSTQQSS'.split('').map(x => `<th>${x}</th>`).join('')}</tr>${c}</tr></table></div>`; };
-    const ev = [...(d.eventos || [])].sort((a, b) => a.de.localeCompare(b.de));
-    const nl = letivos(d);
-    return `${cab('CALENDÁRIO ESCOLAR ' + y)}<div class="cal">${[...Array(12).keys()].map(mes).join('')}</div>
-      <div class="cal-leg">${Object.entries(COR_EV).map(([t, c]) => `<span><i style="background:${c}"></i>${t}</span>`).join('')}<span><i class="ini"></i>Início / fim das aulas</span></div>
-      <p class="cal-res"><b>Início das aulas:</b> ${fmt(d.inicio)} · <b>Fim:</b> ${fmt(d.fim)}${nl !== null ? ` · <b>Dias letivos:</b> ${nl}` : ''}</p>
-      ${ev.length ? `<table class="doc-id cal-ev">${ev.map(e => `<tr><th>${fmt(e.de)}${e.ate && e.ate !== e.de ? ' a ' + fmt(e.ate) : ''}</th><td><i style="background:${COR_EV[e.tipo]}"></i>${esc(e.tipo)}${e.desc ? ' — ' + esc(e.desc) : ''}</td></tr>`).join('')}</table>` : ''}`;
+    const y = +d.ano || new Date().getFullYear(); const marca = {};
+    (d.eventos || []).forEach(e => diasDe(e).forEach(x => { if (!marca[x] || NAO_LETIVO.has(e.tipo)) marca[x] = e.tipo; }));
+    const ini = d.inicio, fim = d.fim; const evs = [...(d.eventos || [])].sort((a, b) => a.de.localeCompare(b.de));
+    const dd = k => k.slice(8, 10);
+    const mes = m => {
+      const c = COR_MES[m]; const p = new Date(y, m, 1).getDay(); const n = new Date(y, m + 1, 0).getDate(); const nl = letivos(d, [m]);
+      let h = '<tr>' + '<td></td>'.repeat(p);
+      for (let i = 1; i <= n; i++) { const k = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`; const t = marca[k]; const w = (p + i - 1) % 7; const cls = w === 0 ? 'dom' : w === 6 ? 'sab' : '';
+        const n2 = String(i).padStart(2, '0'); const ehIni = k === ini || k === fim;
+        h += t ? `<td class="${cls}" style="background:${COR_EV[t]};color:#fff"><b>${n2}</b></td>` : `<td class="${cls}${ehIni ? ' ini' : ''}"${ehIni ? ` style="background:#ffd34d;color:#0b2a5b"` : ''}>${n2}</td>`; if (w === 6 && i < n) h += '</tr><tr>'; }
+      const me = evs.filter(e => (+e.de.slice(5, 7) - 1) === m && +e.de.slice(0, 4) === y);
+      const extra = []; if (ini && +ini.slice(5, 7) - 1 === m && +ini.slice(0, 4) === y) extra.push({ de: ini, tipo: '_ini', desc: 'Início das aulas' }); if (fim && +fim.slice(5, 7) - 1 === m && +fim.slice(0, 4) === y) extra.push({ de: fim, tipo: '_fim', desc: 'Encerramento das aulas' });
+      const lista = me.concat(extra).sort((a, b) => a.de.localeCompare(b.de));
+      return `<div class="cm"><div class="cm-h" style="background:${c}"><b>${MESES[m].toUpperCase()}</b>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
+        <table class="cm-t"><tr>${['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((x, i) => `<th class="${i === 0 ? 'dom' : ''}" style="color:${i === 0 ? '#e53935' : c}">${x}</th>`).join('')}</tr>${h}</tr></table>
+        <div class="cm-ev">${lista.map(e => `<p><i style="background:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}">${dd(e.de)}${e.ate && e.ate !== e.de ? '–' + dd(e.ate) : ''}</i>${esc(e.desc || e.tipo)}${CURTO_EV[e.tipo] ? ` <em>(${CURTO_EV[e.tipo]})</em>` : ''}</p>`).join('') || '<p class="vazio">—</p>'}</div></div>`;
+    };
+    const blocos = d.semestre === '1º semestre' ? [[0, 1, 2, 3, 4, 5]] : d.semestre === '2º semestre' ? [[6, 7, 8, 9, 10, 11]] : [[0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11]];
+    const usados = new Set(evs.map(e => e.tipo));
+    const leg = `<div class="cal-leg2">${Object.entries(COR_EV).filter(([t]) => usados.has(t)).map(([t, c]) => `<span><i style="background:${c}"></i>${t}</span>`).join('')}<span><i style="background:#ffd34d"></i>Início / fim das aulas</span><span><i class="dom"></i>Domingo</span></div>`;
+    return `${cab('CALENDÁRIO PEDAGÓGICO')}${blocos.map((b, i) => { const nl = letivos(d, b); const sem = b[0] ? '2º semestre' : '1º semestre';
+      return `<div class="calp-pag"${i ? ' style="page-break-before:always;break-before:page"' : ''}>${blocos.length > 1 ? `<h3 class="calp-sem">${sem} · ${y}</h3>` : ''}<div class="calp">${b.map(mes).join('')}</div>
+      <div class="calp-rod">${leg}<div class="calp-tot"><span>Dias letivos ${blocos.length > 1 ? 'no ' + sem : d.semestre ? 'no ' + d.semestre : ''}</span><b>${nl === null ? '—' : nl}</b></div></div></div>`; }).join('')}
+      ${blocos.length > 1 ? `<p class="calp-ano">Total de dias letivos no ano: <b>${letivos(d)}</b></p>` : ''}`;
   }
   function docBoletim(d) {
     const n = d.notas || {}; const ds = Object.keys(n); const min = num(d.minima) || 6;
