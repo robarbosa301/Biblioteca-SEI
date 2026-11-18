@@ -71,7 +71,7 @@
   const P = { 'w-sm': { r: { cor: '8BF5FF', sz: 7.5, b: 1 } }, 'w-tit': { r: { cor: 'FFFFFF', sz: 20, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-p': { r: { cor: 'FFFFFF', sz: 12, b: 1, font: 'Arial Black' }, esp: [20, 0] }, 'w-tit-c': { jc: 'center', fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 22, b: 1, font: 'Arial Black' }, esp: [40, 0] },
     'w-fita': { jc: 'center', fill: '0A3A9C', r: { cor: 'FFFFFF', sz: 7.5, b: 1 }, esp: [0, 160] }, 'w-h4': { fill: '0B2A5B', r: { cor: 'FFFFFF', sz: 8.5, b: 1, caps: 1 }, esp: [140, 0] },
     'w-corte': { jc: 'center', r: { cor: '888888', sz: 8 } }, 'doc-para': { r: { b: 1, sz: 12 } }, 'doc-fim': { esp: [200, 0] }, 'doc-rev': { r: { sz: 9 } }, 'doc-num': {},
-    'doc-corpo': { linha: 1.5 }, 'grande': { r: { sz: 12.5 } }, 'cal-res': { r: { sz: 9 } }, 'cal-leg': { r: { sz: 8 } }, 'doc-dest': { r: { b: 1 } } };
+    'doc-corpo': { linha: 1.5 }, 'grande': { r: { sz: 12.5 } }, 'cal-res': { r: { sz: 9 } }, 'cal-leg': { r: { sz: 8 } }, 'doc-dest': { r: { b: 1 } }, 'doc-inep': { jc: 'center', r: { sz: 8, cor: '0B2A5B', b: 1 }, esp: [0, 200] }, 'dec': { jc: 'both', linha: 1.7, r: { sz: 12 } }, 'doc-data': { jc: 'right', esp: [240, 0] }, 'ress-sit': { esp: [160, 0] } };
   const T = { 'w-cab': { fill: '0A3A9C', borda: null, cor: 'FFFFFF' }, 'w-rod': { fill: '0B2A5B', borda: null, cor: 'FFFFFF', sz: 8, b: 1 }, 'w-caixa': { borda: '0B2A5B' }, 'w-ass': { borda: null },
     'doc-id': { borda: '777777', th: 'E8F1FF', thCor: '0B2A5B' }, 'doc-obj': { borda: '777777', th: 'E8F1FF', thCor: '0B2A5B' }, 'doc-bol': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 },
     'doc-hor': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 } };
@@ -101,7 +101,7 @@
       const cls = [...(el.classList || [])]; let jc = (el.getAttribute && el.getAttribute('align')) || null, fill = null, esp = null, linha = null;
       for (const c of cls) if (P[c]) { if (P[c].jc) jc = P[c].jc; if (P[c].fill) fill = P[c].fill; if (P[c].esp) esp = P[c].esp; if (P[c].linha) linha = P[c].linha; }
       if (el.tagName === 'H2' || el.tagName === 'H5') jc = 'center'; if (el.tagName === 'H5') fill = '0A3A9C';
-      if (extra) { if (extra.jc && !jc) jc = extra.jc; }
+      if (extra) { if (extra.jc && !jc) jc = extra.jc; if (extra.linha && !linha) linha = extra.linha; }
       const rr = estiloEl(el, r); if (el.tagName === 'H5') { rr.cor = 'FFFFFF'; rr.sz = 7.5; }
       const conteudo = runs(el, rr);
       return `<w:p><w:pPr><w:spacing w:before="${esp ? esp[0] : 0}" w:after="${esp ? esp[1] : 80}"${linha ? ` w:line="${Math.round(240 * linha)}" w:lineRule="auto"` : ''}/>${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}${jc ? `<w:jc w:val="${jc === 'right' ? 'right' : jc}"/>` : ''}</w:pPr>${conteudo}</w:p>`;
@@ -115,7 +115,7 @@
           flush();
           if (n.tagName === 'TABLE') out += tabela(n, r);
           else if (n.tagName === 'HR') out += '<w:p/>';
-          else if (n.querySelector && n.querySelector('p,div,table,h1,h2,h3,h4,h5')) out += blocos(n, estiloEl(n, r), extra);
+          else if (n.querySelector && n.querySelector('p,div,table,h1,h2,h3,h4,h5')) { const pj = [...n.classList].map(c => P[c]).filter(Boolean); const ex = Object.assign({}, extra, ...pj.map(x => ({ ...(x.jc ? { jc: x.jc } : {}), ...(x.linha ? { linha: x.linha } : {}) }))); out += blocos(n, estiloEl(n, r), ex); }
           else out += par(n, r, extra);
         } else inl.appendChild(n.cloneNode(true));
       }

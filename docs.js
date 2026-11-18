@@ -181,6 +181,90 @@
       doc: d => { const um = `<div class="doc-aviso">${cab('CONVOCAÇÃO')}<p class="doc-para">Senhor(a) responsável pelo(a) aluno(a) <b>${esc(d.aluno)}</b>, ${esc([d.turma, d.classe].filter(Boolean).join(' '))}:</p><div class="doc-corpo grande">Solicitamos o seu comparecimento à escola no dia <b>${fmt(d.dia) || '___/___/_____'}</b>${d.hora ? ', às <b>' + esc(d.hora) + '</b>' : ''}, para conversar com ${esc(d.com || 'a coordenação')}.${d.texto ? '<br><br><b>Assunto:</b> ' + br(d.texto) : ''}<br><br>Contamos com a sua presença.</div><p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.</p><div class="doc-ass"><div><span></span>Coordenação</div><div><span></span>Ciente do responsável</div></div></div>`; return d.copias === '2' ? `<div class="doc-2">${um}<hr class="doc-corte">${um}</div>` : um; }
     }
   };
+  Object.assign(TIPOS, {
+    declaracao: {
+      nome: 'Declaração', icone: '🧾', desc: 'Pagamento (IR), serviço prestado, liberação de funcionário, matrícula', setores: ['secretaria'],
+      titulo: d => `Declaração — ${MOD_DEC[d.modelo] ? MOD_DEC[d.modelo].curto : ''}${d.nome || d.aluno ? ': ' + (d.modelo === 'pagamento' ? d.aluno || d.resp : d.nome || d.aluno) : ''}`,
+      novo: () => ({ data: hoje(), modelo: 'pagamento', turma: '6º ano', anoRef: String(new Date().getFullYear() - 1), cargo: 'Secretária Escolar' }),
+      form: d => `${lab('Modelo', `<select id="modelo">${Object.entries(MOD_DEC).map(([k, m]) => `<option value="${k}" ${d.modelo === k ? 'selected' : ''}>${m.nome}</option>`).join('')}</select>`, 1)}
+        <div class="g3 m-pagamento">${lab('Responsável que pagou', inp('resp', d.resp, 'Nome completo'))}${lab('RG', inp('rg', d.rg))}${lab('CPF', inp('cpf', d.cpf, '000.000.000-00'))}</div>
+        <div class="g3 m-pagamento">${lab('Valor pago (R$)', inp('valor', d.valor, 'Ex.: 7.190,00'))}${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Ano em que estudou', inp('anoRef', d.anoRef))}</div>
+        <div class="g3 m-servico m-liberacao">${lab('Funcionário(a)', inp('nome', d.nome, 'Nome completo'))}${lab('RG', inp('rg2', d.rg2))}${lab('CPF', inp('cpf2', d.cpf2, '000.000.000-00'))}</div>
+        <div class="g3 m-servico">${lab('Função', inp('funcao', d.funcao, 'Ex.: Pedagoga'))}${lab('Desde', inp('desde', d.desde, 'Ex.: outubro de 2024'))}${lab('Até', inp('ate', d.ate, 'Ex.: abril de 2026 (ou vazio: até hoje)'))}</div>
+        <div class="m-servico">${lab('Atividades (opcional)', inp('ativ', d.ativ, 'Ex.: no planejamento e execução de atividades pedagógicas no AEE'), 1)}</div>
+        <div class="g2 m-liberacao">${lab('Ao gestor(a) da escola', inp('gestor', d.gestor, 'Nome do gestor(a)'))}${lab('Escola / órgão (opcional)', inp('escola', d.escola))}</div>
+        <div class="g3 m-liberacao">${lab('Motivo / evento', inp('motivo', d.motivo, 'Ex.: XVI Jogos Internos do SEI'))}${lab('Dia(s)', inp('quando', d.quando, 'Ex.: 01, 02 e 03 de outubro de 2025'))}${lab('Turno(s)', inp('turno', d.turno, 'Ex.: tarde e noite'))}</div>
+        <div class="g3 m-matricula">${lab('Aluno(a)', inp('alunoM', d.alunoM))}${lab('Nascimento', inp('nasc', d.nasc, '', 'date'))}${lab('Turno', inp('turnoM', d.turnoM, 'Manhã'))}</div>
+        <div class="g3 m-pagamento m-matricula">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}<span class="m-matricula">${lab('Ano letivo', inp('anoM', d.anoM || String(new Date().getFullYear())))}</span></div>
+        ${lab('Texto da declaração <small>(montado sozinho a partir dos campos; pode ajustar. Palavras entre *asteriscos* saem em negrito)</small>', txt('texto', d.texto, '', 7), 1)}<button type="button" class="b ghost" id="refazTx">↻ Montar o texto de novo a partir dos campos</button>
+        <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Quem assina', inp('assinante', d.assinante))}${lab('Cargo', inp('cargo', d.cargo))}</div>`,
+      campos: ['modelo', 'resp', 'rg', 'cpf', 'valor', 'aluno', 'anoRef', 'nome', 'rg2', 'cpf2', 'funcao', 'desde', 'ate', 'ativ', 'gestor', 'escola', 'motivo', 'quando', 'turno', 'alunoM', 'nasc', 'turnoM', 'turma', 'anoM', 'texto', 'data', 'assinante', 'cargo'],
+      depois: d => { const f = $('#fDoc'); const mostra = () => { const m = v('modelo'); f.querySelectorAll('[class*="m-"]').forEach(x => { x.hidden = ![...x.classList].includes('m-' + m); }); };
+        const monta = () => { const o = ler(TIPOS.declaracao.campos); $('#texto').value = textoDec(o); };
+        mostra(); if (!d.texto) monta();
+        let manual = !!d.manual; $('#texto').oninput = () => { manual = d.manual = true; };
+        f.addEventListener('input', e => { if (e.target.id !== 'texto' && !manual) monta(); });
+        $('#modelo').onchange = () => { mostra(); manual = d.manual = false; monta(); };
+        $('#refazTx').onclick = () => { manual = d.manual = false; monta(); }; },
+      doc: d => `${cab('DECLARAÇÃO')}${inep()}${d.modelo === 'liberacao' && d.gestor ? `<p class="doc-dest">Ao gestor(a) da escola${d.escola ? ' ' + esc(d.escola) : ''}<br>${esc(d.gestor)}</p>` : ''}<div class="doc-corpo dec">${neg(d.texto)}</div><p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>${assina(d.assinante, d.cargo)}`
+    },
+    ressalva: {
+      nome: 'Ressalva', icone: '📎', desc: 'Matrícula condicional com transferência em andamento', setores: ['secretaria'],
+      titulo: d => `Ressalva — ${d.aluno || ''}`,
+      novo: () => ({ data: hoje(), turma: '6º ano', sit: 'Cursando', prazo: '30', cargo: 'Secretária Escolar' }),
+      form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Nascimento', inp('nasc', d.nasc, '', 'date'))}${lab('Tem direito à matrícula na', sel('turma', d.turma, turmasAtuais()))}</div>
+        <div class="g3">${lab('Situação do aluno(a)', sel('sit', d.sit, SIT_RES))}${lab('Prazo para os documentos (dias)', inp('prazo', d.prazo, '30', 'number'))}${lab('Data', inp('data', d.data, '', 'date'))}</div>
+        <div class="g2">${lab('Quem assina', inp('assinante', d.assinante))}${lab('Cargo', inp('cargo', d.cargo))}</div>`,
+      campos: ['aluno', 'nasc', 'turma', 'sit', 'prazo', 'data', 'assinante', 'cargo'],
+      doc: d => `${cab('RESSALVA')}${inep()}<div class="doc-corpo dec"><p>Declaramos, para fins de matrícula, que deu entrada na secretaria deste Sistema de Ensino o pedido de transferência do(a) aluno(a) <b>${esc((d.aluno || '').toUpperCase()) || '______________________________'}</b>, nascido(a) em ${fmt(d.nasc) || '___/___/_____'}, o(a) qual tem direito à matrícula no(a) <b>${esc(serieNome(d.turma))}</b>.</p><p>Declaramos ainda que os documentos serão entregues no prazo de ${esc(d.prazo || '30')} dias, a contar desta data, servindo esta como condicional para a matrícula.</p></div>
+        <div class="ress-sit"><div><b>Situação do aluno(a):</b></div>${SIT_RES.map(s => `<div>( ${s === d.sit ? '<b>X</b>' : '&nbsp;&nbsp;&nbsp;'} ) ${s}</div>`).join('')}</div><p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>${assina(d.assinante, d.cargo)}`
+    }
+  });
+  /* ---------- declarações e ressalva (modelos da secretaria da escola) ---------- */
+  const INEP = '15590798';
+  const inep = () => `<p class="doc-inep">COD. INEP: ${INEP} · Autorização: Resolução nº 614, de 14 de novembro de 2024 — CEE</p>`;
+  const neg = s => esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+  const SIT_RES = ['Aprovado(a)', 'Reprovado(a)', 'Desistente', 'Cancelou', 'Cursando', 'Dependência'];
+  const serieNome = t => { t = t || ''; if (/Médio|Convênio/.test(t)) return t.replace(/ \(.*\)/, '') + ' do Ensino Médio'; if (/º ano/.test(t)) return t + ' do Ensino Fundamental'; if (/Maternal|Pré I/.test(t)) return t + ' da Educação Infantil'; return t; };
+  const MOD_DEC = {
+    pagamento: { nome: 'Pagamento de mensalidades (para Imposto de Renda)', curto: 'Pagamento' },
+    servico: { nome: 'Prestação de serviço (funcionário ou ex-funcionário)', curto: 'Serviço prestado' },
+    liberacao: { nome: 'Liberação de funcionário (para outra escola ou órgão)', curto: 'Liberação' },
+    matricula: { nome: 'Matrícula do aluno (está estudando na escola)', curto: 'Matrícula' },
+    livre: { nome: 'Texto livre', curto: 'Livre' }
+  };
+  // valor por extenso em reais
+  function porExtenso(n) {
+    const U = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+    const D = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+    const C = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+    const ate999 = x => { if (x === 100) return 'cem'; const c = Math.floor(x / 100), r = x % 100; const p = []; if (c) p.push(C[c]); if (r) p.push(r < 20 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ' e ' + U[r % 10] : '')); return p.join(' e '); };
+    if (!n) return 'zero';
+    const mi = Math.floor(n / 1e6), mil = Math.floor(n / 1000) % 1000, r = n % 1000; const p = [];
+    if (mi) p.push(mi === 1 ? 'um milhão' : ate999(mi) + ' milhões');
+    if (mil) p.push(mil === 1 ? 'mil' : ate999(mil) + ' mil');
+    if (r) p.push(ate999(r));
+    const sep = (r && (r < 100 || r % 100 === 0)) || (!r && mil && (mil < 100 || mil % 100 === 0)) ? ' e ' : ' ';
+    return p.length === 1 ? p[0] : p.slice(0, -1).join(' ') + sep + p[p.length - 1];
+  }
+  function reais(s) {
+    const t = String(s || '').replace(/[R$\s]/g, ''); if (!t) return null;
+    const n = parseFloat(t.includes(',') ? t.replace(/\./g, '').replace(',', '.') : t); if (isNaN(n)) return null;
+    const r = Math.floor(n + 1e-9), c = Math.round((n - r) * 100);
+    const num = 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let ext = r ? porExtenso(r) + (r === 1 ? ' real' : (r % 1e6 === 0 ? ' de reais' : ' reais')) : '';
+    if (c) ext += (ext ? ' e ' : '') + porExtenso(c) + (c === 1 ? ' centavo' : ' centavos');
+    return `${num} (${ext})`;
+  }
+  const doc2 = (rg, cpf) => [rg && 'RG nº ' + rg, cpf && 'CPF nº ' + cpf].filter(Boolean).join(' e ');
+  function textoDec(o) {
+    const L = '______________________________';
+    if (o.modelo === 'pagamento') return `Declaramos, para os devidos fins, que o(a) Sr.(a) *${(o.resp || L).toUpperCase()}*${doc2(o.rg, o.cpf) ? ', portador(a) do ' + doc2(o.rg, o.cpf) : ''}, efetuou pagamento na secretaria do Sistema de Ensino Incentivo no valor de *${reais(o.valor) || 'R$ ________'}*, referente às mensalidades de estudos do(a) aluno(a) *${(o.aluno || L).toUpperCase()}*.\n\nAluno(a) devidamente matriculado(a) neste Sistema de Ensino, onde cursou o(a) ${serieNome(o.turma)} no ano de ${o.anoRef || '____'}.`;
+    if (o.modelo === 'servico') return `Declaramos, para os devidos fins, que *${(o.nome || L).toUpperCase()}*${doc2(o.rg2, o.cpf2) ? ', portador(a) do ' + doc2(o.rg2, o.cpf2) : ''}, ${o.ate ? 'prestou' : 'presta'} serviços neste Sistema de Ensino como *${(o.funcao || '__________').toUpperCase()}*${o.ativ ? ', atuando ' + o.ativ.replace(/^atuando\s+/i, '') : ''}, desde ${o.desde || '__________'}${o.ate ? ' até ' + o.ate : ' até a presente data'}.`;
+    if (o.modelo === 'liberacao') return `Honrados em cumprimentá-lo(a), vimos por meio deste solicitar a liberação do(a) Sr.(a) *${(o.nome || L).toUpperCase()}*${doc2(o.rg2, o.cpf2) ? ', portador(a) do ' + doc2(o.rg2, o.cpf2) : ''}, em razão do(a) ${o.motivo || '__________'}, que ocorrerá ${/^\d|^nos?\b|^dias?\b/i.test(o.quando || '') ? (/^\d/.test(o.quando) ? 'no(s) dia(s) ' : '') + o.quando : 'no dia ' + (o.quando || '__________')}${o.turno ? ', no(s) turno(s) da ' + o.turno : ''}.\n\nSem mais para o momento, reiteramos votos de estima e consideração.\n\nAtenciosamente,`;
+    if (o.modelo === 'matricula') return `Declaramos, para os devidos fins, que o(a) aluno(a) *${(o.alunoM || L).toUpperCase()}*${o.nasc ? ', nascido(a) em ' + fmt(o.nasc) : ''}, está regularmente matriculado(a) neste Sistema de Ensino, cursando o(a) *${serieNome(o.turma)}*${o.turnoM ? ', no turno da ' + o.turnoM.toLowerCase() : ''}, no ano letivo de ${o.anoM || new Date().getFullYear()}.`;
+    return o.texto || 'Declaramos, para os devidos fins, que ';
+  }
   const COLS = [['a1', '1ª Aval.'], ['a2', '2ª Aval.'], ['a3', '3ª Aval.'], ['a4', '4ª Aval.'], ['r1', '1ª Rec.'], ['r2', '2ª Rec.']];
   const num = s => { const n = parseFloat(String(s || '').replace(',', '.')); return isNaN(n) ? null : n; };
   function media(n) { if (!n) return ''; const a = ['a1', 'a2', 'a3', 'a4'].map(k => num(n[k])); if (a.some(x => x === null)) return ''; // recuperação substitui a menor nota quando for maior

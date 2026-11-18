@@ -91,3 +91,10 @@ table.pv-tab th{background:#0a3a9c;color:#fff;position:static}table.pv-tab td sm
 table.pv-tab tr.iv td{background:#ffe17a;font-weight:700}
 @media (max-width:700px){body>header{position:static}}
 .ordem{font:800 13px system-ui;color:#fff;background:var(--azul);border-radius:999px;padding:4px 9px;align-self:center}
+/* Declarações e ressalva */
+.doc-inep{text-align:center;font-size:8.5pt;font-weight:700;color:#0b2a5b;margin:0 0 7mm}
+.doc-corpo.dec{font-size:12pt;line-height:1.75;min-height:0;margin:3mm 0 4mm}.doc-corpo.dec p{margin:0 0 4mm;text-indent:12mm}
+.doc-data{text-align:right;margin:8mm 0 4mm}
+.ress-sit{display:flex;flex-direction:column;gap:1.2mm;margin:2mm 0 0 30mm;font-size:11pt}.ress-sit b:first-child{margin-bottom:1mm}
+.ficha label small{font-weight:400;color:var(--tx2)}
+.ficha [hidden]{display:none!important}
