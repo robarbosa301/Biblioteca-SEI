@@ -123,7 +123,8 @@
       x.globalAlpha = .04; x.strokeStyle = '#0b2a6b'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1;
       if (lt) desenhos(x, 'rgba(30,111,232,.30)'); }
     else { const g = x.createLinearGradient(0, 0, 1240, 0); g.addColorStop(0, '#0540a0'); g.addColorStop(.26, '#06307f'); g.addColorStop(.6, '#071c55'); g.addColorStop(1, '#0a2f86'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
-      x.globalAlpha = .07; x.strokeStyle = '#9fdcff'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1; }
+      x.globalAlpha = .05; x.strokeStyle = '#9fdcff'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1;
+      desenhos(x, 'rgba(120,200,255,.22)'); }
     // logo com as bordas esfumadas no painel
     const lc = document.createElement('canvas'); lc.width = 380; lc.height = 248; const lx = lc.getContext('2d'); lx.drawImage(l, 0, 0, 380, 248);
     lx.globalCompositeOperation = 'destination-in'; const rg = lx.createRadialGradient(190, 124, 70, 190, 124, 200); rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(.62, 'rgba(0,0,0,1)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); lx.fillStyle = rg; lx.fillRect(0, 0, 380, 248);
