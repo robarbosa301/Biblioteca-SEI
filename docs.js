@@ -243,6 +243,14 @@
   const normal = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/\s+/g, ' ');
   const achaProf = nome => profs.find(x => normal(x.nome) === normal(nome));
   let editProf = null;
+  const chaveT = x => x.turma + '|' + (x.classe || '') + '|' + (x.turno || '');
+  const rotT = k => { const [t, c, tu] = k.split('|'); return nomeT({ turma: t, classe: c }) + (tu ? ' (' + tu + ')' : ''); };
+  function turmasConhecidas(ets) {
+    const set = new Map(); for (const x of todosHor.concat(planosTodos)) if (!ets.length || ets.includes(etapaDe(x.turma))) set.set(chaveT(x), 1);
+    return [...set.keys()].sort((a, b) => TURMAS.indexOf(a.split('|')[0]) - TURMAS.indexOf(b.split('|')[0]) || a.localeCompare(b));
+  }
+  // o professor dá aula nesta turma? (se ele não marcou turmas, vale para todas da etapa)
+  const daTurma = (p, x) => !(p.turmas || []).length || p.turmas.includes(chaveT(x)) || p.turmas.includes(x.turma + '||');
   // todas as aulas de um horário: [{dia, ini, fim, turno, disc, prof, k}]
   function aulasDe(h) {
     const out = []; const g = h.grade || {};
@@ -258,6 +266,7 @@
     else {
       if (p.disp && p.disp[x.dia + '|' + x.turno] === 0) r.push({ n: 3, t: `${p.nome} não pode na ${x.dia.toLowerCase()} de ${x.turno.toLowerCase()}.` });
       if (x.disc && (p.disciplinas || []).length && !p.disciplinas.includes(x.disc)) r.push({ n: 2, t: `${x.disc} não está entre as disciplinas de ${p.nome}.` });
+      if (x.h && x.h.turma && !daTurma(p, x.h)) r.push({ n: 2, t: `${nomeT(x.h)} não está entre as turmas de ${p.nome} neste ano.` });
     }
     for (const o of outros) if (normal(o.prof) === normal(x.prof) && choca(x, o)) r.push({ n: 3, t: `${x.prof} já está no ${nomeT(o.h)} (${o.disc || 'aula'}) nesse horário.` });
     return r;
@@ -314,10 +323,12 @@
   function telaProfs() {
     $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-modo="">‹ Horário de aula</button><span>›</span><b class="tr-atual">👩‍🏫 Professores</b></nav>
       <div class="acoes"><button class="b main" id="novoProf">➕ Cadastrar professor(a)</button></div>
+      <p class="dica">A ordem conta: quem informou a disponibilidade primeiro é encaixado primeiro no horário ideal, e os seguintes se ajustam nos horários que sobram. Use ↑ e ↓ para mudar a ordem.</p>
       ${profs.length ? `<div class="cards">${profs.map(p => { const n = cargaDe(p.nome); const ind = Object.values(p.disp || {}).filter(x => x === 0).length; return `<article class="aula"><div class="topo"><b>${esc(p.nome)}</b><span class="tag">${n} aula${n === 1 ? '' : 's'}${+p.max ? ' / ' + p.max : ''}</span></div>
         <p class="cont">${esc((p.etapas || []).map(k => ETAPAS[k] ? ETAPAS[k].nome : k).join(', ') || 'Todas as etapas')}</p><p class="hab">${(p.disciplinas || []).map(x => `<span>${esc(x)}</span>`).join('')}</p>
         <p class="cont">${ind ? '🚫 Não pode em ' + ind + ' período' + (ind > 1 ? 's' : '') + ' da semana' : '✅ Disponível em todos os períodos'}</p>
-        <div class="acoes"><button class="b" data-edprof="${p.id}">✏️ Editar</button><button class="b ghost" data-delprof="${p.id}">Excluir</button></div></article>`; }).join('')}</div>`
+        ${(p.turmas || []).length ? `<p class="cont">🏫 ${esc(p.turmas.map(rotT).join(', '))}</p>` : ''}
+        <div class="acoes"><span class="ordem">${profs.indexOf(p) + 1}º</span><button class="b" data-sobe="${p.id}" title="Passar na frente">↑</button><button class="b" data-desce="${p.id}" title="Passar para trás">↓</button><button class="b" data-edprof="${p.id}">✏️ Editar</button><button class="b ghost" data-delprof="${p.id}">Excluir</button></div></article>`; }).join('')}</div>`
         : '<p class="dica">Cadastre os professores com as etapas, as disciplinas e a disponibilidade. Depois, ao montar os horários, o site avisa os conflitos.</p>'}`;
     $('#novoProf').onclick = () => { editProf = { tipo: 'professor', setor: 'horarios', nome: '', etapas: [], disciplinas: [], disp: {}, max: '' }; modo = 'prof'; tela(); };
   }
@@ -332,15 +343,22 @@
       <div class="g2">${lab('Nome', inp('pNome', p.nome, 'Nome do professor(a)'))}${lab('Máximo de aulas por semana (opcional)', inp('pMax', p.max, 'Ex.: 20', 'number'))}</div>
       <label class="full"><span>Etapas em que dá aula</span>${ch('et', Object.entries(ETAPAS).map(([k, e]) => [k, e.nome]), p.etapas || [])}</label>
       <label class="full"><span>Disciplinas</span><div id="discBox"></div></label>
+      <label class="full"><span>Turmas em que vai dar aula neste ano <small>(sem marcar nenhuma, vale para todas as turmas das etapas)</small></span><div id="turBox"></div></label>
       <label class="full"><span>Disponibilidade — toque para marcar: <b class="ok">✓ pode</b> · <b class="no">✕ não pode</b> · – não se aplica</span><div class="tab" id="dispBox">${grade()}</div></label>
       <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b ghost" type="button" data-modo="profs">Cancelar</button></div></form>`;
     const desenhaDisc = async () => { const ets = [...document.querySelectorAll('input[name=et]:checked')].map(i => i.value); const marc = [...document.querySelectorAll('input[name=di]:checked')].map(i => i.value).concat(p.disciplinas || []); const ds = await discDasEtapas(ets); $('#discBox').innerHTML = ch('di', ds.map(x => [x, x]), marc); };
-    await desenhaDisc(); document.querySelectorAll('input[name=et]').forEach(i => i.onchange = desenhaDisc);
+    const desenhaTur = () => { const ets = [...document.querySelectorAll('input[name=et]:checked')].map(i => i.value); const marc = [...document.querySelectorAll('input[name=tu]:checked')].map(i => i.value).concat(p.turmas || []);
+      const conh = turmasConhecidas(ets); const series = (ets.length ? ets : Object.keys(ETAPAS)).flatMap(k => ETAPAS[k].turmas).filter(t => !conh.some(c => c.startsWith(t + '|'))).map(t => t + '||');
+      const ops = conh.concat(series).concat(marc.filter(m => !conh.includes(m) && !series.includes(m)));
+      $('#turBox').innerHTML = ch('tu', [...new Set(ops)].map(k => [k, k.endsWith('||') ? nomeT({ turma: k.split('|')[0] }) + ' (todas as letras)' : rotT(k)]), marc); };
+    await desenhaDisc(); desenhaTur(); document.querySelectorAll('input[name=et]').forEach(i => i.onchange = () => { desenhaDisc(); desenhaTur(); });
     $('#dispBox').onclick = e => { const b = e.target.closest('.dp'); if (!b) return; const k = b.dataset.dk; const cur = b.classList.contains('sim') ? 1 : b.classList.contains('nao') ? 0 : null; const nx = cur === 1 ? 0 : cur === 0 ? null : 1; p.disp[k] = nx; b.className = 'dp ' + (nx === 1 ? 'sim' : nx === 0 ? 'nao' : 'nd'); b.textContent = nx === 1 ? '✓' : nx === 0 ? '✕' : '–'; };
     $('#fProf').onsubmit = async e => {
       e.preventDefault(); const nome = v('pNome').trim().replace(/\s+/g, ' '); if (!nome) { alert('Escreva o nome do professor(a).'); return; }
       if (profs.some(x => x.id !== p.id && normal(x.nome) === normal(nome))) { alert('Já existe um professor com esse nome.'); return; }
       document.querySelectorAll('#dispBox .dp').forEach(b => { p.disp[b.dataset.dk] = b.classList.contains('sim') ? 1 : b.classList.contains('nao') ? 0 : null; });
+      p.turmas = [...document.querySelectorAll('input[name=tu]:checked')].map(i => i.value);
+      if (p.ordem === undefined) p.ordem = profs.length;
       Object.assign(p, { nome, max: v('pMax').trim(), etapas: [...document.querySelectorAll('input[name=et]:checked')].map(i => i.value), disciplinas: [...document.querySelectorAll('input[name=di]:checked')].map(i => i.value) });
       if (!p.id) { p.id = novoId(); p.criado = Date.now(); }
       await gravar(p); aviso('Professor(a) salvo(a).'); modo = 'profs'; editProf = null; await carregar();
@@ -393,7 +411,7 @@
   }
   async function cartaoTurma(x, i) {
     const ds = await disciplinas(x.turma); const et = etapaDe(x.turma);
-    const elig = d => profs.filter(p => (p.disciplinas || []).includes(d) && (!(p.etapas || []).length || p.etapas.includes(et)));
+    const elig = d => profs.filter(p => (p.disciplinas || []).includes(d) && (!(p.etapas || []).length || p.etapas.includes(et)) && daTurma(p, x));
     const tot = ds.reduce((a, d) => a + (+x.carga[d] || 0), 0), vg = vagas(x);
     return `<article class="pl" data-i="${i}"><div class="pl-top"><b>${esc(nomeT(x))}</b> <small>${esc(x.turno || '')}</small><span class="pl-tot ${tot === vg ? 'ok' : 'ruim'}">${tot} de ${vg} aulas</span><button type="button" class="b ghost pl-x" data-plx="${i}" title="Tirar esta turma">✕</button></div>
       <div class="tab"><table class="pl-tab"><thead><tr><th>Disciplina</th><th>Aulas/semana</th><th>Professor(a)</th></tr></thead><tbody>${ds.map(d => { const e = elig(d); return `<tr><td>${esc(d)}</td><td><input class="pl-n" type="number" min="0" max="10" data-i="${i}" data-d="${esc(d)}" value="${+x.carga[d] || 0}"></td><td><select class="pl-p" data-i="${i}" data-d="${esc(d)}"><option value="">${e.length ? 'Automático' : '— sem professor cadastrado —'}</option>${e.map(p => `<option ${x.prof[d] === p.nome ? 'selected' : ''}>${esc(p.nome)}</option>`).join('')}</select></td></tr>`; }).join('')}</tbody></table></div></article>`;
@@ -432,7 +450,8 @@
     const fixos = todosHor.filter(h => !ids.includes(h.turma + '|' + (h.classe || '') + '|' + (h.turno || ''))).flatMap(aulasDe).filter(a => a.prof);
     const slotsDe = x => { const out = []; (x.aulas || []).forEach((a, i) => { if (/^interv/i.test(a[0] || '')) return; const ini = min(a[0]); DIAS(x.dias).forEach(dia => out.push({ i, dia, ini, fim: min(a[1]) ?? (ini !== null ? ini + 50 : null), turno: turnoDe(a[0], x.turno), k: i + '|' + dia })); }); return out; };
     const dispOk = (pn, s) => { const p = achaProf(pn); return !p || !p.disp || p.disp[s.dia + '|' + s.turno] !== 0; };
-    const elig = (x, d) => profs.filter(p => (p.disciplinas || []).includes(d) && (!(p.etapas || []).length || p.etapas.includes(etapaDe(x.turma))));
+    const elig = (x, d) => profs.filter(p => (p.disciplinas || []).includes(d) && (!(p.etapas || []).length || p.etapas.includes(etapaDe(x.turma))) && daTurma(p, x));
+    const prio = pn => { const i = profs.findIndex(q => normal(q.nome) === normal(pn)); return i < 0 ? 999 : i; };
     let melhor = null;
     for (let tent = 0; tent < 120; tent++) {
       const ocup = fixos.map(a => ({ prof: normal(a.prof), dia: a.dia, ini: a.ini, fim: a.fim, turno: a.turno, k: a.k }));
@@ -444,7 +463,8 @@
       const fila = [];
       res.forEach((r, ri) => Object.entries(r.x.carga).forEach(([d, n]) => { for (let j = 0; j < (+n || 0); j++) fila.push({ ri, d, p: quem[ri][d] }); }));
       const livres = it => { const p = achaProf(it.p); return p && p.disp ? Object.values(p.disp).filter(v2 => v2 !== 0).length : 99; };
-      fila.sort((a, b) => livres(a) - livres(b) || (Math.random() - .5)); if (tent) fila.forEach((_, i) => { if (Math.random() < .25) { const j = Math.floor(Math.random() * fila.length); [fila[i], fila[j]] = [fila[j], fila[i]]; } });
+      // quem cadastrou primeiro escolhe primeiro; nas outras tentativas, pequenas trocas só entre vizinhos de prioridade
+      fila.sort((a, b) => prio(a.p) - prio(b.p) || livres(a) - livres(b) || (Math.random() - .5)); if (tent) fila.forEach((_, i) => { if (i && Math.random() < .15 && Math.abs(prio(fila[i].p) - prio(fila[i - 1].p)) <= 1) [fila[i], fila[i - 1]] = [fila[i - 1], fila[i]]; });
       let pena = 0;
       for (const it of fila) {
         const r = res[it.ri]; const cand = [];
@@ -470,7 +490,7 @@
   function telaPrevia(trilha) {
     const pv = ideal.previa; const faltas = pv.flatMap(r => r.falta.map(f => ({ r, f })));
     const grid = r => { const dias = DIAS(r.x.dias); return `<div class="tab"><table class="doc-hor pv-tab"><thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(r.x.aulas || []).map((a, i) => /^interv/i.test(a[0]) ? `<tr class="iv"><td colspan="${dias.length + 1}">INTERVALO</td></tr>` : `<tr><td class="hr">${esc(a[0])}<br>${esc(a[1])}</td>${dias.map(dd => { const c = r.grade[i + '|' + dd]; return `<td class="${c ? '' : 'vago'}">${c ? `<b>${esc(c.d)}</b><small>${esc(c.p || 'sem professor')}</small>` : '—'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`; };
-    $('#docs').innerHTML = trilha + `<div class="alertas ${faltas.length ? 'tem-a' : 'ok'}">${faltas.length ? `<b>⚠️ ${faltas.length} aula${faltas.length > 1 ? 's' : ''} não coube${faltas.length > 1 ? 'ram' : ''}</b> — o professor não tem horário livre ou a disponibilidade não bate:<ul>${faltas.slice(0, 15).map(({ r, f }) => `<li class="n2"><span>${esc(nomeT(r.x))}:</span> ${esc(f.d)}${f.p ? ' (' + esc(f.p) + ')' : ''}</li>`).join('')}</ul>Os espaços vazios ficam marcados com “—” para você completar à mão.` : '✅ Horário ideal montado: todas as aulas couberam, sem professor em duas turmas ao mesmo tempo e respeitando a disponibilidade.'}</div>
+    $('#docs').innerHTML = trilha + `<div class="alertas ${faltas.length ? 'tem-a' : 'ok'}">${faltas.length ? `<b>⚠️ ${faltas.length} aula${faltas.length > 1 ? 's' : ''} não coube${faltas.length > 1 ? 'ram' : ''}</b> — o professor não tem horário livre ou a disponibilidade não bate:<ul>${faltas.slice(0, 15).map(({ r, f }) => `<li class="n2"><span>${esc(nomeT(r.x))}:</span> ${esc(f.d)}${f.p ? ' (' + esc(f.p) + ')' : ''}</li>`).join('')}</ul>Os espaços vazios ficam marcados com “—” para você completar à mão.` : '✅ Horário ideal montado: todas as aulas couberam, respeitando a disponibilidade e a ordem dos professores (quem informou primeiro foi encaixado primeiro), sem ninguém em duas turmas ao mesmo tempo.'}</div>
       <div class="acoes"><button class="b main" id="usar">💾 Usar estes horários</button><button class="b" id="outra">🔄 Gerar outra opção</button><button class="b ghost" id="voltaPl">‹ Ajustar aulas por semana</button></div>
       ${pv.map(r => `<div class="q-prof"><h4>${esc(nomeT(r.x))} <small>${esc(r.x.turno || '')}</small></h4>${grid(r)}</div>`).join('')}`;
     $('#outra').onclick = async () => { ideal.previa = gerarIdeal(ideal.turmas); telaIdeal(); };
@@ -487,8 +507,8 @@
   /* ---------- telas ---------- */
   let lista = [], tipo = null, edit = null;
   const meus = () => Object.entries(TIPOS).filter(([, t]) => t.setores.includes(SETOR));
-  let todosHor = [], profs = [], modo = null;
-  async function carregar() { const t = await todos(); lista = t.filter(d => d.setor === SETOR); todosHor = t.filter(d => d.tipo === 'horario'); profs = t.filter(d => d.tipo === 'professor').sort((a, b) => a.nome.localeCompare(b.nome, 'pt')); tela(); }
+  let todosHor = [], profs = [], modo = null, planosTodos = [];
+  async function carregar() { const t = await todos(); lista = t.filter(d => d.setor === SETOR); todosHor = t.filter(d => d.tipo === 'horario'); profs = t.filter(d => d.tipo === 'professor').sort((a, b) => (a.ordem ?? a.criado ?? 0) - (b.ordem ?? b.criado ?? 0)); planosTodos = t.filter(d => d.tipo === 'plano'); tela(); }
   function tela() {
     const p = $('#docs');
     if (edit) return formulario();
@@ -554,6 +574,8 @@
     if (b.dataset.t) { tipo = b.dataset.t; edit = null; tela(); scrollTo(0, 0); }
     if (b.dataset.et) { etapa = b.dataset.et; tela(); scrollTo(0, 0); }
     if (b.dataset.modo !== undefined) { modo = b.dataset.modo || null; editProf = null; tela(); scrollTo(0, 0); }
+    if (b.dataset.sobe || b.dataset.desce) { const id = b.dataset.sobe || b.dataset.desce; const i = profs.findIndex(x => x.id === id); const j = i + (b.dataset.sobe ? -1 : 1);
+      if (j >= 0 && j < profs.length) { [profs[i], profs[j]] = [profs[j], profs[i]]; for (const [n, x] of profs.entries()) { x.ordem = n; await gravar(x); } await carregar(); } }
     if (b.dataset.edprof) { editProf = JSON.parse(JSON.stringify(profs.find(x => x.id === b.dataset.edprof))); modo = 'prof'; tela(); scrollTo(0, 0); }
     if (b.dataset.delprof && confirm('Excluir este professor? Os horários já montados não mudam.')) { await apagar(b.dataset.delprof); await carregar(); }
     if (b.dataset.impquadro) imprimirQuadro();

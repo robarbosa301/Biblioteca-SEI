@@ -90,3 +90,4 @@ table.pv-tab{min-width:620px;width:100%;border-collapse:collapse}table.pv-tab th
 table.pv-tab th{background:#0a3a9c;color:#fff;position:static}table.pv-tab td small{display:block;color:var(--tx2)}table.pv-tab td.vago{background:#fff6dc;color:#b07a00}
 table.pv-tab tr.iv td{background:#ffe17a;font-weight:700}
 @media (max-width:700px){body>header{position:static}}
+.ordem{font:800 13px system-ui;color:#fff;background:var(--azul);border-radius:999px;padding:4px 9px;align-self:center}
