@@ -233,8 +233,8 @@
 
   /* ---------- impressão no formato da escola ---------- */
   // Cabeçalho: a arte aprovada do site (mascote, Nº 1 em aprovação e logo) com o título na faixa
-  const tamTit = t => Math.max(8.5, Math.min(15, Math.round(230 / Math.max(10, t.length) * 10) / 10));
-  const cab = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ATENDIMENTO EDUCACIONAL ESPECIALIZADO</div>`;
+  const tamTit = t => t.length <= 24 ? Math.min(22, Math.round(330 / Math.max(8, t.length) * 10) / 10) : Math.max(8.5, Math.min(11.5, Math.round(600 / t.length * 10) / 10));
+  const cab = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ATENDIMENTO EDUCACIONAL ESPECIALIZADO</div>`;
   const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span><span class="rod-qr"><img src="assets/docs/qr-whatsapp.png" width="62" alt="QR Code do WhatsApp da escola"><br>Fale com a escola</span></div>`;
   const linha = (r, v) => `<tr><th>${r}</th><td>${v || '&nbsp;'}</td></tr>`;
   const bloco = (t, v, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${v ? br(v) : '&nbsp;'}</div></div>`;

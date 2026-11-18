@@ -116,3 +116,7 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 #imprimir .sei-fita,.sei-pdf .sei-fita{width:auto;margin:1.6mm 0 4.5mm;border-radius:2mm;padding:1.2mm 3mm;text-align:center;font:700 7pt Arial,sans-serif;letter-spacing:.6px;text-transform:uppercase;background:linear-gradient(90deg,#0b2a5b,#0a3a9c,#0b2a5b);color:#9ff0ff}
 #imprimir .sei-fita b,.sei-pdf .sei-fita b{color:#ffd34d}
 #imprimir .doc-2 .sei-cab-tx strong,.sei-pdf .doc-2 .sei-cab-tx strong{font-size:13pt!important}
+/* títulos maiores na faixa do cabeçalho */
+#imprimir .sei-cab-tx strong,.sei-pdf .sei-cab-tx strong{font-family:'SEI Rubik',Arial Black,sans-serif;font-weight:800;line-height:1;letter-spacing:.6px}
+#imprimir .sei-cab-tx strong.duas,.sei-pdf .sei-cab-tx strong.duas{white-space:normal;line-height:1.02;letter-spacing:.2px}
+#imprimir .doc-2 .sei-cab-tx strong,.sei-pdf .doc-2 .sei-cab-tx strong{font-size:17pt!important}
