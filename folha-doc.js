@@ -3,14 +3,14 @@
    no próprio aparelho. Devolve imagens prontas para a impressão, o PDF e o Word. */
 (function () {
   'use strict';
-  const BASE = { cab: 'assets/docs/folha-cab.jpg?v=1', fundo: 'assets/docs/folha-fundo.jpg?v=1', logo: 'assets/docs/logo-sei.jpg?v=1' };
+  const BASE = { cab: 'assets/docs/folha-cab.jpg?v=1', fundo: 'assets/docs/folha-fundo.jpg?v=1', logo: 'assets/docs/logo-sei.jpg?v=1', logoT: 'assets/docs/logo-sei.png?v=1' };
   const FONTES = [['SEI Rubik', 'assets/fonts/Rubik-ExtraBold.ttf', '800'], ['SEI Barlow', 'assets/fonts/BarlowCondensed-SemiBold.ttf', '600'], ['SEI Poppins', 'assets/fonts/Poppins-Bold.ttf', '700']];
   let pronto = null;
   const img = src => new Promise((ok, er) => { const i = new Image(); i.onload = () => ok(i); i.onerror = er; i.src = src; });
   function preparar() {
     if (pronto) return pronto;
     const fs = FONTES.map(([n, u, w]) => { try { const f = new FontFace(n, `url(${u})`, { weight: w }); return f.load().then(x => { document.fonts.add(x); }).catch(() => {}); } catch (e) { return Promise.resolve(); } });
-    return (pronto = Promise.all([img(BASE.cab), img(BASE.fundo), img(BASE.logo), ...fs]).then(([c, f, l]) => ({ c, f, l })));
+    return (pronto = Promise.all([img(BASE.cab), img(BASE.fundo), img(BASE.logo), img(BASE.logoT), ...fs]).then(([c, f, l, lt]) => ({ c, f, l, lt })));
   }
   const F = (w, px, fam) => `${w} ${px}px '${fam}', Arial, sans-serif`;
   // texto que cabe numa largura, diminuindo a fonte
@@ -91,7 +91,7 @@
     const p = cabe(x, linhas[1], (R - 40) * 2, 25, 'SEI Rubik', 800, 12); x.font = F(800, p, 'SEI Rubik'); x.fillStyle = '#fff'; x.fillText(linhas[1], cx, cy + 12);
     if (linhas[2]) { const z = cabe(x, linhas[2], (R - 48) * 2, 11, 'SEI Poppins', 700, 7); x.font = F(700, z, 'SEI Poppins'); x.fillStyle = '#ffd34d'; x.fillText(linhas[2], cx, cy + 36); }
   }
-  function cabFormal(x, o, l, vidro) {
+  function cabFormal(x, o, l, vidro, lt) {
     // painel
     x.save(); rr(x, 34, 22, 1172, 268, 26); x.clip();
     if (vidro) { const g = x.createLinearGradient(0, 22, 0, 290); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#e8f1ff'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
@@ -101,7 +101,8 @@
     // logo com as bordas esfumadas no painel
     const lc = document.createElement('canvas'); lc.width = 380; lc.height = 248; const lx = lc.getContext('2d'); lx.drawImage(l, 0, 0, 380, 248);
     lx.globalCompositeOperation = 'destination-in'; const rg = lx.createRadialGradient(190, 124, 70, 190, 124, 200); rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(.62, 'rgba(0,0,0,1)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); lx.fillStyle = rg; lx.fillRect(0, 0, 380, 248);
-    if (vidro) { x.save(); rr(x, 50, 38, 330, 236, 20); x.clip(); x.drawImage(l, 50, 38, 330, 236); x.restore(); rr(x, 50, 38, 330, 236, 20); x.strokeStyle = '#d7b44a'; x.lineWidth = 2; x.stroke(); } else x.drawImage(lc, 40, 32);
+    if (vidro && lt) { const h = 236, w = h * lt.width / lt.height; x.save(); x.shadowColor = 'rgba(7,28,85,.35)'; x.shadowBlur = 10; x.shadowOffsetY = 3; x.drawImage(lt, 215 - w / 2, 40, w, h); x.restore(); }
+    else if (vidro) { x.save(); rr(x, 50, 38, 330, 236, 20); x.clip(); x.drawImage(l, 50, 38, 330, 236); x.restore(); rr(x, 50, 38, 330, 236, 20); x.strokeStyle = '#d7b44a'; x.lineWidth = 2; x.stroke(); } else x.drawImage(lc, 40, 32);
     x.restore();
     // moldura dourada fina do painel
     rr(x, 34, 22, 1172, 268, 26); const gd = x.createLinearGradient(0, 0, 1240, 0); gd.addColorStop(0, '#b8860b'); gd.addColorStop(.5, '#ffe58a'); gd.addColorStop(1, '#b8860b'); x.strokeStyle = gd; x.lineWidth = 3; x.stroke();
@@ -138,10 +139,10 @@
   /* o: { titulo, placa: {grande, linhas[]}, campos: [[rótulo, valor] x4], selo: [a, b], rodape: [a, b], num, curto } */
   async function compor(o) {
     const k = JSON.stringify(o); if (cache.has(k)) return cache.get(k);
-    const { c, f, l } = await preparar();
+    const { c, f, l, lt } = await preparar();
     const cv = document.createElement('canvas'); cv.width = 1240; cv.height = 420; let x = cv.getContext('2d'); x.drawImage(c, 0, 0);
     if (o.estilo === 'folha') { placa(x, o.placa.grande, o.placa.linhas || []); titulo(x, o.titulo, 790, 210, 330, 90); barra(x, o.campos || []); seloF(x, ...(o.selo || [])); }
-    else cabFormal(x, o, l, o.estilo === 'claro');
+    else cabFormal(x, o, l, o.estilo === 'claro' || o.estilo === 'claro2', o.estilo === 'claro2' ? lt : null);
     const cab = cv.toDataURL('image/jpeg', .9);
     const fv = document.createElement('canvas'); fv.width = 1240; fv.height = 1754; x = fv.getContext('2d'); x.drawImage(f, 0, 0);
     banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2));
