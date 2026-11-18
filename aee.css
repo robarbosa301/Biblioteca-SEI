@@ -124,3 +124,4 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 .ficha input,.ficha select,.ficha textarea,.ev input,.ev select{min-width:0;max-width:100%}
 .g2>*,.g3>*{min-width:0}
 input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-height:38px}
+@media (max-width:700px){body>header{position:static}}

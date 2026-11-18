@@ -76,3 +76,17 @@ table.q-tab td b{display:block;color:var(--azul)}table.q-tab td small{color:var(
 .vazio-q{color:var(--tx2)}
 #imprimir .q-prof,.sei-pdf .q-prof{border-color:#0b2a5b;margin-top:3mm;padding:2mm}#imprimir table.q-tab,.sei-pdf table.q-tab{min-width:0;width:100%;border-collapse:collapse}
 #imprimir table.q-tab th,#imprimir table.q-tab td{border:.6pt solid #777;font-size:8.5pt;padding:1mm}#imprimir table.q-tab th{background:#0a3a9c!important;color:#fff}
+/* Horário ideal */
+.tile-doc.ideal{border-color:#ffc928;background:linear-gradient(140deg,#fffbea,#fff)}
+.pl{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:10px;margin:10px 0}
+.pl-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}.pl-top b{color:var(--azul);font-size:16px}.pl-top small{color:var(--tx2)}
+.pl-tot{margin-left:auto;font:700 12px system-ui;border-radius:999px;padding:3px 10px}.pl-tot.ok{background:#e3f6ea;color:#1c6b33}.pl-tot.ruim{background:#ffe9c7;color:#8a4b00}
+.pl-x{padding:4px 9px}
+table.pl-tab{min-width:420px}table.pl-tab th{position:static}table.pl-tab input{width:64px;padding:6px;border:1px solid #b9cce6;border-radius:8px;font:15px system-ui;text-align:center}
+table.pl-tab select{width:100%;padding:6px;border:1px solid #b9cce6;border-radius:8px;font:14px system-ui}
+.pl-add{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;padding:10px;border:1px dashed var(--bd);border-radius:12px;margin:8px 0}
+.pl-add label{flex:1 1 120px}
+table.pv-tab{min-width:620px;width:100%;border-collapse:collapse}table.pv-tab th,table.pv-tab td{border:1px solid #d6e0ef;padding:5px;text-align:center;font-size:13px}
+table.pv-tab th{background:#0a3a9c;color:#fff;position:static}table.pv-tab td small{display:block;color:var(--tx2)}table.pv-tab td.vago{background:#fff6dc;color:#b07a00}
+table.pv-tab tr.iv td{background:#ffe17a;font-weight:700}
+@media (max-width:700px){body>header{position:static}}

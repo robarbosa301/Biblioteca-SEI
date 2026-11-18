@@ -365,6 +365,125 @@
   }
   async function imprimirQuadro() { segDoc = null; $('#imprimir').innerHTML = cab('QUADRO DOS PROFESSORES') + quadroHTML(true); await Promise.all([...document.querySelectorAll('#imprimir img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))); window.print(); }
 
+  /* ---------- Horário ideal: aulas por semana + gerador automático ---------- */
+  let ideal = null;
+  const MODELOS = { 'Manhã': [['07:00', '07:50'], ['07:50', '08:40'], ['08:40', '09:30'], ['INTERVALO', ''], ['09:50', '10:40'], ['10:40', '11:30']],
+    'Tarde': [['13:00', '13:50'], ['13:50', '14:40'], ['14:40', '15:30'], ['INTERVALO', ''], ['15:50', '16:40'], ['16:40', '17:30']],
+    'Noite': [['18:30', '19:20'], ['19:20', '20:10'], ['INTERVALO', ''], ['20:25', '21:15'], ['21:15', '22:05']] };
+  const PESO = { 'Língua Portuguesa': 5, 'Matemática': 5, 'Ciências': 3, 'História': 3, 'Geografia': 3, 'Física': 3, 'Química': 3, 'Biologia': 3, 'Inglês': 2, 'Educação Física': 2, 'Espanhol': 1, 'Arte': 1, 'Ensino Religioso': 1, 'Filosofia': 1, 'Sociologia': 1, 'Literatura': 2, 'Redação': 2 };
+  const vagas = t => (t.aulas || []).filter(a => !/^interv/i.test(a[0] || '')).length * DIAS(t.dias).length;
+  function cargaPadrao(ds, total) {
+    // distribui as aulas da semana pelo peso de cada disciplina
+    const w = ds.map(d => PESO[d] || 2); const soma = w.reduce((a, b) => a + b, 0) || 1;
+    const c = Object.fromEntries(ds.map((d, i) => [d, Math.max(1, Math.floor(total * w[i] / soma))]));
+    let falta = total - Object.values(c).reduce((a, b) => a + b, 0);
+    const ord = ds.map((d, i) => [d, total * w[i] / soma - c[d] + w[i] / 100]).sort((a, b) => b[1] - a[1]);
+    for (let i = 0; falta > 0 && ord.length; i++, falta--) c[ord[i % ord.length][0]]++;
+    while (falta < 0) { const d = Object.keys(c).filter(x => c[x] > 1).sort((a, b) => (c[b] - total * (PESO[b] || 2) / soma) - (c[a] - total * (PESO[a] || 2) / soma))[0]; if (!d) break; c[d]--; falta++; }
+    return c;
+  }
+  async function turmasIdeal(et) {
+    // turmas da etapa: as que já têm horário + as já preparadas antes (planos salvos)
+    const planos = (await todos()).filter(d => d.tipo === 'plano' && etapaDe(d.turma) === et);
+    const hs = todosHor.filter(h => etapaDe(h.turma) === et);
+    const out = planos.map(x => JSON.parse(JSON.stringify(x)));
+    for (const h of hs) if (!out.some(x => x.turma === h.turma && (x.classe || '') === (h.classe || '') && (x.turno || '') === (h.turno || ''))) out.push({ tipo: 'plano', setor: 'horarios', turma: h.turma, classe: h.classe || '', turno: h.turno || 'Manhã', dias: h.dias || 'Segunda a sexta', aulas: JSON.parse(JSON.stringify(h.aulas || MODELOS.Manhã)), carga: null, prof: {} });
+    for (const x of out) if (!x.carga) { const ds = await disciplinas(x.turma); x.carga = cargaPadrao(ds, vagas(x)); x.prof = x.prof || {}; }
+    return out;
+  }
+  async function cartaoTurma(x, i) {
+    const ds = await disciplinas(x.turma); const et = etapaDe(x.turma);
+    const elig = d => profs.filter(p => (p.disciplinas || []).includes(d) && (!(p.etapas || []).length || p.etapas.includes(et)));
+    const tot = ds.reduce((a, d) => a + (+x.carga[d] || 0), 0), vg = vagas(x);
+    return `<article class="pl" data-i="${i}"><div class="pl-top"><b>${esc(nomeT(x))}</b> <small>${esc(x.turno || '')}</small><span class="pl-tot ${tot === vg ? 'ok' : 'ruim'}">${tot} de ${vg} aulas</span><button type="button" class="b ghost pl-x" data-plx="${i}" title="Tirar esta turma">✕</button></div>
+      <div class="tab"><table class="pl-tab"><thead><tr><th>Disciplina</th><th>Aulas/semana</th><th>Professor(a)</th></tr></thead><tbody>${ds.map(d => { const e = elig(d); return `<tr><td>${esc(d)}</td><td><input class="pl-n" type="number" min="0" max="10" data-i="${i}" data-d="${esc(d)}" value="${+x.carga[d] || 0}"></td><td><select class="pl-p" data-i="${i}" data-d="${esc(d)}"><option value="">${e.length ? 'Automático' : '— sem professor cadastrado —'}</option>${e.map(p => `<option ${x.prof[d] === p.nome ? 'selected' : ''}>${esc(p.nome)}</option>`).join('')}</select></td></tr>`; }).join('')}</tbody></table></div></article>`;
+  }
+  async function telaIdeal() {
+    const P = $('#docs'); const trilha = `<nav class="trilha"><button class="b ghost" data-modo="">‹ Horário de aula</button><span>›</span><b class="tr-atual">✨ Horário ideal${ideal && ideal.etapa ? ' · ' + ETAPAS[ideal.etapa].nome : ''}</b></nav>`;
+    if (!ideal || !ideal.etapa) {
+      P.innerHTML = trilha + `<p class="dica">Escolha a etapa. O site monta uma prévia para todas as turmas dela ao mesmo tempo, sem repetir professor em duas turmas no mesmo horário.</p><div class="tiles-doc">${Object.entries(ETAPAS).map(([k, e]) => `<button class="tile-doc" data-idet="${k}"><span class="ti">${e.simples || '🏫'}</span><b>${e.nome}</b><small>${esc(e.turmas.join(', ').replace(/ \((Médio|Convênio)\)/g, ''))}</small><em>abrir</em></button>`).join('')}</div>`;
+      return;
+    }
+    if (!ideal.turmas) ideal.turmas = await turmasIdeal(ideal.etapa);
+    if (ideal.previa) return telaPrevia(trilha);
+    const E = ETAPAS[ideal.etapa];
+    P.innerHTML = trilha + `<div class="ficha"><h3>1. Turmas e aulas por semana</h3><p class="dica">Ajuste quantas aulas cada disciplina tem por semana e, se quiser, quem dá. Em “Automático”, o site escolhe entre os professores cadastrados para a disciplina. O total precisa bater com os horários da turma.</p>
+      <div id="plCards">${(await Promise.all(ideal.turmas.map(cartaoTurma))).join('')}</div>
+      <div class="pl-add"><b>➕ Adicionar turma:</b> ${lab('Série', sel('plT', E.turmas[0], E.turmas))}${lab('Letra', inp('plL', '', 'A, B…'))}${lab('Turno', sel('plTu', 'Manhã', ['Manhã', 'Tarde', 'Noite']))}<button type="button" class="b" id="plAdd">Adicionar</button></div>
+      <div class="acoes"><button class="b main" id="gerar">✨ Gerar horário ideal</button><button class="b" id="plSalva">💾 Guardar as aulas por semana</button></div></div>`;
+    $('#plCards').oninput = e => { const t = e.target; if (!t.dataset.d) return; const x = ideal.turmas[+t.dataset.i]; if (t.matches('.pl-n')) { x.carga[t.dataset.d] = Math.max(0, +t.value || 0); const c = t.closest('.pl'); const tot = Object.values(x.carga).reduce((a, b) => a + (+b || 0), 0), vg = vagas(x); const sp = c.querySelector('.pl-tot'); sp.textContent = tot + ' de ' + vg + ' aulas'; sp.className = 'pl-tot ' + (tot === vg ? 'ok' : 'ruim'); } };
+    $('#plCards').onchange = e => { const t = e.target; if (t.matches('.pl-p')) ideal.turmas[+t.dataset.i].prof[t.dataset.d] = t.value; };
+    $('#plCards').onclick = e => { const b = e.target.closest('[data-plx]'); if (b && confirm('Tirar esta turma da prévia?')) { const x = ideal.turmas.splice(+b.dataset.plx, 1)[0]; if (x.id) apagar(x.id); telaIdeal(); } };
+    $('#plAdd').onclick = async () => { const tu = v('plTu'); const x = { tipo: 'plano', setor: 'horarios', turma: v('plT'), classe: v('plL').trim(), turno: tu, dias: 'Segunda a sexta', aulas: JSON.parse(JSON.stringify(MODELOS[tu])), prof: {} };
+      if (ideal.turmas.some(z => z.turma === x.turma && z.classe === x.classe && z.turno === x.turno)) { alert('Essa turma já está na lista.'); return; }
+      x.carga = cargaPadrao(await disciplinas(x.turma), vagas(x)); ideal.turmas.push(x); telaIdeal(); };
+    const guardaPlanos = async () => { for (const x of ideal.turmas) { if (!x.id) { x.id = novoId(); x.criado = Date.now(); } await gravar(x); } };
+    $('#plSalva').onclick = async () => { await guardaPlanos(); aviso('Aulas por semana guardadas.'); };
+    $('#gerar').onclick = async () => {
+      const ruins = ideal.turmas.filter(x => Object.values(x.carga).reduce((a, b) => a + (+b || 0), 0) !== vagas(x));
+      if (ruins.length && !confirm(`O total de aulas não bate com os horários em: ${ruins.map(nomeT).join(', ')}. Gerar mesmo assim?`)) return;
+      await guardaPlanos(); const b = $('#gerar'); b.disabled = true; b.textContent = '⏳ Montando…';
+      await new Promise(r => setTimeout(r, 30)); ideal.previa = gerarIdeal(ideal.turmas); telaIdeal();
+    };
+  }
+  // gerador: coloca cada aula num horário livre, respeitando disponibilidade e choques; tenta várias vezes e fica com o melhor
+  function gerarIdeal(turmas) {
+    const ids = turmas.map(x => x.turma + '|' + x.classe + '|' + x.turno);
+    const fixos = todosHor.filter(h => !ids.includes(h.turma + '|' + (h.classe || '') + '|' + (h.turno || ''))).flatMap(aulasDe).filter(a => a.prof);
+    const slotsDe = x => { const out = []; (x.aulas || []).forEach((a, i) => { if (/^interv/i.test(a[0] || '')) return; const ini = min(a[0]); DIAS(x.dias).forEach(dia => out.push({ i, dia, ini, fim: min(a[1]) ?? (ini !== null ? ini + 50 : null), turno: turnoDe(a[0], x.turno), k: i + '|' + dia })); }); return out; };
+    const dispOk = (pn, s) => { const p = achaProf(pn); return !p || !p.disp || p.disp[s.dia + '|' + s.turno] !== 0; };
+    const elig = (x, d) => profs.filter(p => (p.disciplinas || []).includes(d) && (!(p.etapas || []).length || p.etapas.includes(etapaDe(x.turma))));
+    let melhor = null;
+    for (let tent = 0; tent < 120; tent++) {
+      const ocup = fixos.map(a => ({ prof: normal(a.prof), dia: a.dia, ini: a.ini, fim: a.fim, turno: a.turno, k: a.k }));
+      const carga = {}; ocup.forEach(o => { carga[o.prof] = (carga[o.prof] || 0) + 1; });
+      const res = turmas.map(x => ({ x, grade: {}, falta: [] }));
+      // professor de cada disciplina em cada turma (fixo ou automático, pelo menos ocupado)
+      const quem = res.map(r => Object.fromEntries(Object.keys(r.x.carga).map(d => { if (r.x.prof[d]) return [d, r.x.prof[d]]; const e = elig(r.x, d); if (!e.length) return [d, '']; e.sort((a, b) => (carga[normal(a.nome)] || 0) - (carga[normal(b.nome)] || 0) + (Math.random() - .5) * (tent ? 2 : 0)); const pn = e[0].nome; carga[normal(pn)] = (carga[normal(pn)] || 0) + (+r.x.carga[d] || 0); return [d, pn]; })));
+      // lista de aulas a colocar, das mais difíceis para as mais fáceis
+      const fila = [];
+      res.forEach((r, ri) => Object.entries(r.x.carga).forEach(([d, n]) => { for (let j = 0; j < (+n || 0); j++) fila.push({ ri, d, p: quem[ri][d] }); }));
+      const livres = it => { const p = achaProf(it.p); return p && p.disp ? Object.values(p.disp).filter(v2 => v2 !== 0).length : 99; };
+      fila.sort((a, b) => livres(a) - livres(b) || (Math.random() - .5)); if (tent) fila.forEach((_, i) => { if (Math.random() < .25) { const j = Math.floor(Math.random() * fila.length); [fila[i], fila[j]] = [fila[j], fila[i]]; } });
+      let pena = 0;
+      for (const it of fila) {
+        const r = res[it.ri]; const cand = [];
+        for (const sl of slotsDe(r.x)) {
+          if (r.grade[sl.k]) continue;
+          if (it.p && (!dispOk(it.p, sl) || ocup.some(o => o.prof === normal(it.p) && o.dia === sl.dia && (o.ini === null || sl.ini === null ? o.turno === sl.turno && o.k === sl.k : o.ini < sl.fim && sl.ini < o.fim)))) continue;
+          const noDia = Object.entries(r.grade).filter(([k, c]) => k.endsWith('|' + sl.dia) && c.d === it.d).length;
+          if (noDia >= 2) continue;
+          const vizinha = r.grade[(sl.i - 1) + '|' + sl.dia] || r.grade[(sl.i + 1) + '|' + sl.dia];
+          const sc = noDia * 6 - (noDia && vizinha && vizinha.d === it.d ? 3 : 0) + Math.random() * 2;
+          cand.push([sc, sl]);
+        }
+        if (!cand.length) { r.falta.push(it); pena += 100; continue; }
+        cand.sort((a, b) => a[0] - b[0]); const [sc, sl] = cand[0]; pena += sc;
+        r.grade[sl.k] = { d: it.d, p: it.p };
+        if (it.p) ocup.push({ prof: normal(it.p), dia: sl.dia, ini: sl.ini, fim: sl.fim, turno: sl.turno, k: sl.k });
+      }
+      if (!melhor || pena < melhor.pena) melhor = { pena, res };
+      if (melhor.res.every(r => !r.falta.length) && tent > 20) break;
+    }
+    return melhor.res;
+  }
+  function telaPrevia(trilha) {
+    const pv = ideal.previa; const faltas = pv.flatMap(r => r.falta.map(f => ({ r, f })));
+    const grid = r => { const dias = DIAS(r.x.dias); return `<div class="tab"><table class="doc-hor pv-tab"><thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(r.x.aulas || []).map((a, i) => /^interv/i.test(a[0]) ? `<tr class="iv"><td colspan="${dias.length + 1}">INTERVALO</td></tr>` : `<tr><td class="hr">${esc(a[0])}<br>${esc(a[1])}</td>${dias.map(dd => { const c = r.grade[i + '|' + dd]; return `<td class="${c ? '' : 'vago'}">${c ? `<b>${esc(c.d)}</b><small>${esc(c.p || 'sem professor')}</small>` : '—'}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`; };
+    $('#docs').innerHTML = trilha + `<div class="alertas ${faltas.length ? 'tem-a' : 'ok'}">${faltas.length ? `<b>⚠️ ${faltas.length} aula${faltas.length > 1 ? 's' : ''} não coube${faltas.length > 1 ? 'ram' : ''}</b> — o professor não tem horário livre ou a disponibilidade não bate:<ul>${faltas.slice(0, 15).map(({ r, f }) => `<li class="n2"><span>${esc(nomeT(r.x))}:</span> ${esc(f.d)}${f.p ? ' (' + esc(f.p) + ')' : ''}</li>`).join('')}</ul>Os espaços vazios ficam marcados com “—” para você completar à mão.` : '✅ Horário ideal montado: todas as aulas couberam, sem professor em duas turmas ao mesmo tempo e respeitando a disponibilidade.'}</div>
+      <div class="acoes"><button class="b main" id="usar">💾 Usar estes horários</button><button class="b" id="outra">🔄 Gerar outra opção</button><button class="b ghost" id="voltaPl">‹ Ajustar aulas por semana</button></div>
+      ${pv.map(r => `<div class="q-prof"><h4>${esc(nomeT(r.x))} <small>${esc(r.x.turno || '')}</small></h4>${grid(r)}</div>`).join('')}`;
+    $('#outra').onclick = async () => { ideal.previa = gerarIdeal(ideal.turmas); telaIdeal(); };
+    $('#voltaPl').onclick = () => { ideal.previa = null; telaIdeal(); };
+    $('#usar').onclick = async () => {
+      const subst = pv.filter(r => todosHor.some(h => h.turma === r.x.turma && (h.classe || '') === r.x.classe && (h.turno || '') === r.x.turno));
+      if (subst.length && !confirm(`Já existe horário para ${subst.map(r => nomeT(r.x)).join(', ')}. Substituir pela prévia?`)) return;
+      for (const r of pv) { const h = todosHor.find(z => z.turma === r.x.turma && (z.classe || '') === r.x.classe && (z.turno || '') === r.x.turno) || { tipo: 'horario', setor: 'horarios', id: novoId(), criado: Date.now(), data: hoje() };
+        Object.assign(h, { turma: r.x.turma, classe: r.x.classe, turno: r.x.turno, dias: r.x.dias, aulas: JSON.parse(JSON.stringify(r.x.aulas)), grade: JSON.parse(JSON.stringify(r.grade)) }); await gravar(h); }
+      aviso('Horários salvos. Agora dá para ajustar cada um à mão.'); const et = ideal.etapa; ideal = null; modo = null; etapa = et; tipo = 'horario'; await carregar();
+    };
+  }
+
   /* ---------- telas ---------- */
   let lista = [], tipo = null, edit = null;
   const meus = () => Object.entries(TIPOS).filter(([, t]) => t.setores.includes(SETOR));
@@ -378,9 +497,10 @@
     if (SETOR === 'horarios' && modo === 'profs') return telaProfs();
     if (SETOR === 'horarios' && modo === 'prof') return formProf();
     if (SETOR === 'horarios' && modo === 'quadro') return telaQuadro();
+    if (SETOR === 'horarios' && modo === 'ideal') return telaIdeal();
     if (tipo === 'horario' && SETOR === 'horarios' && !etapa) {
       const nc = conflitosGerais().length;
-      p.innerHTML = `<div class="tiles-doc ferr"><button class="tile-doc" data-modo="profs"><span class="ti">👩‍🏫</span><b>Professores e disponibilidade</b><small>Quem dá aula em cada etapa, as disciplinas e os dias e turnos em que pode</small><em>${profs.length ? profs.length + ' cadastrado' + (profs.length > 1 ? 's' : '') : 'cadastrar'}</em></button><button class="tile-doc${nc ? ' tem-conf' : ''}" data-modo="quadro"><span class="ti">🧭</span><b>Quadro dos professores</b><small>A semana de cada professor em todas as turmas, com os conflitos</small><em>${nc ? '⚠️ ' + nc + ' conflito' + (nc > 1 ? 's' : '') : 'sem conflitos'}</em></button></div>`;
+      p.innerHTML = `<div class="tiles-doc ferr"><button class="tile-doc" data-modo="profs"><span class="ti">👩‍🏫</span><b>Professores e disponibilidade</b><small>Quem dá aula em cada etapa, as disciplinas e os dias e turnos em que pode</small><em>${profs.length ? profs.length + ' cadastrado' + (profs.length > 1 ? 's' : '') : 'cadastrar'}</em></button><button class="tile-doc${nc ? ' tem-conf' : ''}" data-modo="quadro"><span class="ti">🧭</span><b>Quadro dos professores</b><small>A semana de cada professor em todas as turmas, com os conflitos</small><em>${nc ? '⚠️ ' + nc + ' conflito' + (nc > 1 ? 's' : '') : 'sem conflitos'}</em></button><button class="tile-doc ideal" data-modo="ideal"><span class="ti">✨</span><b>Horário ideal</b><small>Defina as aulas por semana de cada disciplina e o site monta uma prévia sem conflitos, para ajustar depois</small><em>gerar prévia</em></button></div>`;
       const n = k => lista.filter(d => d.tipo === 'horario' && etapaDe(d.turma) === k).length;
       p.innerHTML += `<p class="dica">Escolha a etapa para montar os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => e.simples ? `<button class="etapa simples" data-et="${k}" aria-label="${e.nome}"><span class="es-i">${e.simples}</span><b>${e.nome}</b><small>${e.desc}</small>${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>` : `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
       return;
@@ -437,6 +557,7 @@
     if (b.dataset.edprof) { editProf = JSON.parse(JSON.stringify(profs.find(x => x.id === b.dataset.edprof))); modo = 'prof'; tela(); scrollTo(0, 0); }
     if (b.dataset.delprof && confirm('Excluir este professor? Os horários já montados não mudam.')) { await apagar(b.dataset.delprof); await carregar(); }
     if (b.dataset.impquadro) imprimirQuadro();
+    if (b.dataset.idet) { ideal = { etapa: b.dataset.idet, turmas: null, previa: null }; tela(); scrollTo(0, 0); }
     if (b.dataset.seg) { seg = b.dataset.seg; tipo = null; tela(); scrollTo(0, 0); }
     if (b.dataset.volta) { if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
