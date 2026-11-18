@@ -91,11 +91,37 @@
     const p = cabe(x, linhas[1], (R - 40) * 2, 25, 'SEI Rubik', 800, 12); x.font = F(800, p, 'SEI Rubik'); x.fillStyle = '#fff'; x.fillText(linhas[1], cx, cy + 12);
     if (linhas[2]) { const z = cabe(x, linhas[2], (R - 48) * 2, 11, 'SEI Poppins', 700, 7); x.font = F(700, z, 'SEI Poppins'); x.fillStyle = '#ffd34d'; x.fillText(linhas[2], cx, cy + 36); }
   }
+
+  /* desenhos de traço no fundo (estilo do cabeçalho das folhas) */
+  const ICONES = {
+    livro: x => { x.beginPath(); x.moveTo(0, -18); x.quadraticCurveTo(-14, -24, -30, -18); x.lineTo(-30, 18); x.quadraticCurveTo(-14, 12, 0, 18); x.quadraticCurveTo(14, 12, 30, 18); x.lineTo(30, -18); x.quadraticCurveTo(14, -24, 0, -18); x.lineTo(0, 18); x.stroke(); [-8, 0, 8].forEach(k => { x.beginPath(); x.moveTo(-24, k - 4); x.lineTo(-6, k - 4); x.moveTo(6, k - 4); x.lineTo(24, k - 4); x.stroke(); }); },
+    lapis: x => { x.beginPath(); x.rect(-30, -7, 46, 14); x.moveTo(16, -7); x.lineTo(32, 0); x.lineTo(16, 7); x.moveTo(-22, -7); x.lineTo(-22, 7); x.stroke(); },
+    capelo: x => { x.beginPath(); x.moveTo(-32, -6); x.lineTo(0, -20); x.lineTo(32, -6); x.lineTo(0, 8); x.closePath(); x.moveTo(-18, 0); x.lineTo(-18, 14); x.quadraticCurveTo(0, 24, 18, 14); x.lineTo(18, 0); x.moveTo(28, -4); x.lineTo(28, 16); x.stroke(); },
+    lampada: x => { x.beginPath(); x.arc(0, -6, 16, Math.PI * .8, Math.PI * .2); x.lineTo(7, 16); x.lineTo(-7, 16); x.closePath(); x.moveTo(-6, 21); x.lineTo(6, 21); x.stroke(); [[-26, -6, -34, -6], [26, -6, 34, -6], [0, -30, 0, -38], [-19, -25, -24, -31], [19, -25, 24, -31]].forEach(([a, b, c, d]) => { x.beginPath(); x.moveTo(a, b); x.lineTo(c, d); x.stroke(); }); },
+    estrela: x => { x.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 9 : 22, a = -Math.PI / 2 + i * Math.PI / 5; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); } x.closePath(); x.stroke(); },
+    globo: x => { x.beginPath(); x.arc(0, 0, 22, 0, Math.PI * 2); x.moveTo(-22, 0); x.lineTo(22, 0); x.stroke(); x.beginPath(); x.ellipse(0, 0, 10, 22, 0, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.moveTo(-19, -11); x.lineTo(19, -11); x.moveTo(-19, 11); x.lineTo(19, 11); x.stroke(); },
+    atomo: x => { [0, Math.PI / 3, -Math.PI / 3].forEach(r => { x.beginPath(); x.ellipse(0, 0, 28, 10, r, 0, Math.PI * 2); x.stroke(); }); x.beginPath(); x.arc(0, 0, 4, 0, Math.PI * 2); x.fill(); },
+    balao: x => { x.beginPath(); x.moveTo(-26, -16); x.lineTo(26, -16); x.quadraticCurveTo(30, -16, 30, -12); x.lineTo(30, 10); x.quadraticCurveTo(30, 14, 26, 14); x.lineTo(-6, 14); x.lineTo(-16, 24); x.lineTo(-14, 14); x.lineTo(-26, 14); x.quadraticCurveTo(-30, 14, -30, 10); x.lineTo(-30, -12); x.quadraticCurveTo(-30, -16, -26, -16); x.stroke(); [-12, 0, 12].forEach(k => { x.beginPath(); x.arc(k, -1, 3, 0, Math.PI * 2); x.fill(); }); },
+    regua: x => { x.beginPath(); x.rect(-34, -8, 68, 16); for (let k = -28; k <= 28; k += 7) { x.moveTo(k, -8); x.lineTo(k, k % 14 ? -3 : 0); } x.stroke(); },
+    prancheta: x => { x.beginPath(); x.rect(-18, -22, 36, 46); x.rect(-8, -27, 16, 9); for (let k = -8; k <= 14; k += 8) { x.moveTo(-10, k); x.lineTo(10, k); } x.stroke(); },
+    abc: x => { x.font = F(800, 30, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('ABC', 0, 0); },
+    n123: x => { x.font = F(800, 30, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('1 2 3', 0, 0); },
+    mais: x => { x.font = F(800, 26, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('a + b', 0, 0); }
+  };
+  const ONDE = [['abc', 70, 52, -.25, 1], ['lapis', 395, 50, -.6, 1], ['estrela', 470, 120, .2, .9], ['livro', 420, 250, -.1, 1.1], ['lampada', 545, 240, .1, .9],
+    ['balao', 850, 240, .08, 1], ['atomo', 905, 70, 0, .9], ['globo', 835, 120, 0, .8], ['regua', 560, 46, .2, .9], ['capelo', 780, 46, -.1, .9], ['n123', 1180, 270, -.2, .7],
+    ['prancheta', 1180, 70, .15, .8], ['mais', 960, 262, -.12, .9], ['estrela', 300, 268, -.3, .6], ['lapis', 640, 268, .4, .8], ['estrela', 1000, 30, .3, .5], ['livro', 120, 270, .15, .8]];
+  function desenhos(x, cor) {
+    x.save(); x.strokeStyle = cor; x.fillStyle = cor; x.lineWidth = 2.6; x.lineJoin = 'round'; x.lineCap = 'round';
+    for (const [n, a, b, r, k] of ONDE) { x.save(); x.translate(a, b); x.rotate(r); x.scale(k, k); ICONES[n](x); x.restore(); }
+    x.restore();
+  }
   function cabFormal(x, o, l, vidro, lt) {
     // painel
     x.save(); rr(x, 34, 22, 1172, 268, 26); x.clip();
     if (vidro) { const g = x.createLinearGradient(0, 22, 0, 290); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#e8f1ff'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
-      x.globalAlpha = .06; x.strokeStyle = '#0b2a6b'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1; }
+      x.globalAlpha = .04; x.strokeStyle = '#0b2a6b'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1;
+      if (lt) desenhos(x, 'rgba(30,111,232,.30)'); }
     else { const g = x.createLinearGradient(0, 0, 1240, 0); g.addColorStop(0, '#0540a0'); g.addColorStop(.26, '#06307f'); g.addColorStop(.6, '#071c55'); g.addColorStop(1, '#0a2f86'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
       x.globalAlpha = .07; x.strokeStyle = '#9fdcff'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1; }
     // logo com as bordas esfumadas no painel
