@@ -120,3 +120,7 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 #imprimir .sei-cab-tx strong,.sei-pdf .sei-cab-tx strong{font-family:'SEI Rubik',Arial Black,sans-serif;font-weight:800;line-height:1;letter-spacing:.6px}
 #imprimir .sei-cab-tx strong.duas,.sei-pdf .sei-cab-tx strong.duas{white-space:normal;line-height:1.02;letter-spacing:.2px}
 #imprimir .doc-2 .sei-cab-tx strong,.sei-pdf .doc-2 .sei-cab-tx strong{font-size:17pt!important}
+/* campos não passam da caixa em telas pequenas (datas no iPhone) */
+.ficha input,.ficha select,.ficha textarea,.ev input,.ev select{min-width:0;max-width:100%}
+.g2>*,.g3>*{min-width:0}
+input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-height:38px}

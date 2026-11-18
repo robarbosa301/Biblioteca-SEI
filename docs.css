@@ -49,3 +49,7 @@ table.grade td.hr{min-width:90px}table.grade td.hr input{width:72px}table.grade 
 .etapa.simples .es-i{font-size:38px;line-height:1}.etapa.simples b{font:800 22px system-ui,Arial;letter-spacing:-.3px}.etapa.simples small{color:#9ff0ff;font-weight:700}
 .etapa.simples .et-n{left:auto;right:10px}
 @media (max-width:899px){.etapa.simples{grid-column:1/-1;aspect-ratio:983/230;flex-direction:row;align-items:center;gap:14px}.etapa.simples small{margin-left:auto}}
+/* mesmo arranjo das etapas em celular, iPad e computador: Infantil em faixa, 4 cartões, Pré-vestibular largo */
+.etapa.simples{grid-column:1/-1;aspect-ratio:auto;min-height:74px;flex-direction:row;align-items:center;gap:14px}
+.etapa.simples small{margin-left:auto}
+@media (min-width:900px){.etapas{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}.etapa.simples{aspect-ratio:auto;min-height:84px}.etapa.larga{grid-column:1/-1;justify-self:center;width:50%}}
