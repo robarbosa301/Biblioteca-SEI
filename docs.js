@@ -287,6 +287,40 @@
     return `${cab('CARTEIRA DE ESTUDANTE')}<p class="ct-dica">✂️ Recorte nas linhas tracejadas, cole frente e verso e plastifique.</p>${Array.from({ length: n }, () => `<div class="cart-par"><div class="ct-cut">${frente}</div><div class="ct-cut">${verso}</div></div>`).join('')}`;
   }
 
+  /* ---------- avaliações: etiqueta do envelope e mapa de notas ---------- */
+  const AVS = ['1ª, 2ª, 3ª e 4ª Avaliação', '1ª Avaliação', '2ª Avaliação', '3ª Avaliação', '4ª Avaliação', '1ª Recuperação', '2ª Recuperação', 'Recuperação Final', 'Simulado'];
+  const serieGrande = t => (t || '').replace(/ \((Médio|Convênio)\)/, '').replace(/ano$/i, 'ANO').replace(/série$/i, 'SÉRIE').toUpperCase();
+  TIPOS.etiqueta = {
+    nome: 'Etiqueta das avaliações', icone: '🏷️', desc: 'Para o envelope das provas de cada turma (2 por folha)', setores: ['secretaria', 'coordenacao'], livre: true,
+    titulo: d => `Etiqueta — ${d.turma || ''}${d.classe ? ' ' + d.classe : ''} · ${d.av || ''}`,
+    novo: () => ({ ano: String(new Date().getFullYear()), turma: '6º ano', av: AVS[0], copias: '2' }),
+    form: d => `<div class="g3">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turma (opcional)', inp('classe', d.classe, 'Ex.: 601, A'))}${lab('Ano letivo', inp('ano', d.ano))}</div>
+      <div class="g3">${lab('Avaliação', sel('av', d.av || AVS[0], AVS))}${lab('Disciplina (opcional)', inp('disc', d.disc, 'Deixe em branco para todas'))}${lab('Etiquetas por folha', sel('copias', d.copias || '2', ['1', '2']))}</div>`,
+    campos: ['turma', 'classe', 'ano', 'av', 'disc', 'copias'],
+    doc: d => { const um = `<div class="etq"><div class="etq-in"><img class="etq-logo" src="assets/docs/logo-sei.png?v=3" alt=""><img class="etq-masc" src="assets/docs/mascote-sei.png?v=14" alt="">
+        <img class="etq-selo" src="assets/docs/selo-n1.png?v=1" alt=""><div class="etq-serie">${esc(serieGrande(d.turma))}${d.classe ? `<small>Turma ${esc(d.classe)}</small>` : ''}</div>
+        ${d.disc ? `<div class="etq-disc">${esc(d.disc)}</div>` : ''}<div class="etq-fita">${esc((d.av || '').toUpperCase())}</div><div class="etq-ano">ANO LETIVO ${esc(d.ano || '')}</div></div></div>`;
+      return `<div class="etq-pag">${um}${d.copias === '2' ? '<hr class="doc-corte">' + um : ''}</div>`; }
+  };
+  const COLS_MAPA = 'PROVA, TRABALHO, PROVA, TRABALHO, SIMULADO, TOTAL';
+  TIPOS.mapa = {
+    nome: 'Mapa de notas', icone: '📋', desc: 'Lista da turma para o professor lançar as notas de cada avaliação', setores: ['secretaria', 'coordenacao'],
+    titulo: d => `Mapa — ${d.av || ''} · ${d.disc || ''} · ${d.turma || ''}${d.classe ? ' ' + d.classe : ''}`,
+    novo: () => ({ ano: String(new Date().getFullYear()), turma: '6º ano', av: '1ª Avaliação', turno: 'Manhã', colunas: COLS_MAPA, data: hoje() }),
+    form: d => `<div class="g3">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turma', inp('classe', d.classe, 'Ex.: 601'))}${lab('Turno', sel('turno', d.turno || 'Manhã', ['Manhã', 'Tarde', 'Noite']))}</div>
+      <div class="g3">${lab('Avaliação', sel('av', d.av || '1ª Avaliação', AVS.slice(1)))}${lab('Disciplina', inp('disc', d.disc, 'Ex.: Matemática'))}${lab('Professor(a)', inp('prof', d.prof))}</div>
+      <div class="g2">${lab('Ano letivo', inp('ano', d.ano))}${lab('Colunas de notas (separadas por vírgula)', inp('colunas', d.colunas || COLS_MAPA))}</div>
+      ${lab('Alunos da turma (um por linha)', `<textarea id="alunos" data-ed="sem" rows="12" placeholder="AMANDA GUERREIRO DOS SANTOS&#10;ARTHUR DE ARAÚJO PEREIRA&#10;…">${esc(d.alunos || '')}</textarea>`, 1)}
+      <p class="dica">Dica: depois de fazer o mapa de uma disciplina, use <b>Duplicar</b> e troque só a disciplina e o professor — a lista de alunos já vem pronta.</p>`,
+    campos: ['turma', 'classe', 'turno', 'av', 'disc', 'prof', 'ano', 'colunas', 'alunos', 'data'],
+    doc: d => { const cols = (d.colunas || COLS_MAPA).split(',').map(x => x.trim()).filter(Boolean); const al = (d.alunos || '').split('\n').map(x => x.trim()).filter(Boolean);
+      const linhas = al.length ? al : Array(30).fill(''); const seg = (Object.values(SEGS).find(g => g.turmas.includes(d.turma)) || {}).nome || '';
+      return `${cab('MAPA DA ' + (d.av || '').toUpperCase())}<table class="mapa-top"><tr><td class="mt-a"><small>SÉRIE</small><b>${esc(serieGrande(d.turma))}</b></td><td><small>TURMA</small><b>${esc(d.classe || '—')}</b></td><td><small>TURNO</small><b>${esc(d.turno || '')}</b></td><td><small>DISCIPLINA</small><b>${esc((d.disc || '—').toUpperCase())}</b></td><td><small>PROFESSOR(A)</small><b>${esc((d.prof || '—').toUpperCase())}</b></td></tr></table>
+        <p class="mapa-sub">${esc(seg.toUpperCase())} · ${esc(d.ano || '')}</p>
+        <table class="mapa-t"><thead><tr><th class="mn">Nº</th><th class="ma">ALUNO(A)</th>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${linhas.map((n, i) => `<tr><td class="mn">${String(i + 1).padStart(2, '0')}</td><td class="ma">${esc(n.toUpperCase())}</td>${cols.map(() => '<td></td>').join('')}</tr>`).join('')}</tbody></table>
+        <div class="doc-ass"><div><span></span>Professor(a)</div><div><span></span>Coordenação</div></div>`; }
+  };
+
   /* ---------- declarações e ressalva (modelos da secretaria da escola) ---------- */
   const INEP = '15590798';
   const inep = () => `<p class="doc-inep">${FOLHA ? '' : `COD. INEP: ${INEP} · `}Autorização: Resolução nº 614, de 14 de novembro de 2024 — CEE</p>`;
@@ -369,6 +403,7 @@
     const o = { titulo: tit, curto: tit, placa: { grande: pl[0], linhas: [pl[1], sg.toUpperCase()] }, campos: faixa(d), selo: ['COD. INEP', INEP], rodape: [NOME_SETOR, sg || 'Sistema de Ensino Incentivo'], num: 'SEI', estilo: new URLSearchParams(location.search).get('cab') || 'formal' };
     if (d.copias === '2') { o.agua = 'duas'; o.campos = o.campos.filter(c => c[0] === 'Documento'); }
     if (d.tipo === 'carteirinha' && window.seiFolha.cartaoFundo) CART_BG = { f: await seiFolha.cartaoFundo(false), v: await seiFolha.cartaoFundo(true) };
+    if (TIPOS[d.tipo].livre) { const c = document.createElement('canvas'); c.width = 124; c.height = 175; const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, 124, 175); FOLHA = { fundo: c.toDataURL('image/jpeg'), cab: '', banda: '', livre: true }; nCab = 0; document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`); return; }
     if (TIPOS[d.tipo].arte) Object.assign(o, TIPOS[d.tipo].arte(d));
     FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2' }); nCab = 0;
     document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);
