@@ -360,7 +360,7 @@
     const t = TIPOS[d.tipo]; const ano = (d.data || '').slice(0, 4);
     const docN = t.nome.split(' /')[0] + (d.numero ? ` nº ${d.numero}/${ano}` : '') + (d.modelo && MOD_DEC[d.modelo] ? ' — ' + MOD_DEC[d.modelo].curto : '');
     const quem = d.aluno || d.alunoM ? ['Aluno(a)', d.aluno || d.alunoM] : d.nome ? ['Nome', d.nome] : d.resp ? ['Responsável', d.resp] : d.assunto || d.titulo ? ['Assunto', d.assunto || d.titulo] : d.tipoR ? ['Reunião', d.tipoR] : (d.publico || d.para) ? ['Para', d.publico || d.para] : ['Setor', NOME_SETOR];
-    const tur = d.turma ? ['Turma', [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '')] : ['Segmento', segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : 'Todos'];
+    const tur = d.turma && !(d.tipo === 'declaracao' && ['servico', 'liberacao', 'livre'].includes(d.modelo)) ? ['Turma', [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '')] : ['Segmento', segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : 'Todos'];
     return [['Documento', docN], quem, ['Data', fmt(d.data) || d.ano || ''], tur];
   }
   async function prepFolha(d) {
