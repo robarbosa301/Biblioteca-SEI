@@ -138,7 +138,7 @@
     if (vidro) { const g = x.createLinearGradient(0, 22, 0, 290); g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#e8f1ff'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
       x.globalAlpha = .04; x.strokeStyle = '#0b2a6b'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1;
       if (lt) desenhos(x, 'rgba(30,111,232,.30)'); }
-    else { const g = x.createLinearGradient(0, 0, 1240, 0); g.addColorStop(0, '#0540a0'); g.addColorStop(.26, '#06307f'); g.addColorStop(.6, '#071c55'); g.addColorStop(1, '#0a2f86'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
+    else { const g = x.createLinearGradient(0, 0, 1240, 0); g.addColorStop(0, '#0a2f86'); g.addColorStop(.5, '#071c55'); g.addColorStop(1, '#0a2f86'); x.fillStyle = g; x.fillRect(0, 0, 1240, 420);
       x.globalAlpha = .05; x.strokeStyle = '#9fdcff'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 300); x.lineTo(k + 280, 0); x.stroke(); } x.globalAlpha = 1;
       desenhos(x, 'rgba(120,200,255,.22)'); }
     // logo com as bordas esfumadas no painel
@@ -147,7 +147,6 @@
     if (vidro && lt) { const h = 236, w = h * lt.width / lt.height; x.save(); x.shadowColor = 'rgba(7,28,85,.35)'; x.shadowBlur = 10; x.shadowOffsetY = 3; x.drawImage(lt, 215 - w / 2, 40, w, h); x.restore(); }
     else if (vidro) { x.save(); rr(x, 50, 38, 330, 236, 20); x.clip(); x.drawImage(l, 50, 38, 330, 236); x.restore(); rr(x, 50, 38, 330, 236, 20); x.strokeStyle = '#d7b44a'; x.lineWidth = 2; x.stroke(); } else if (lt) { // escuro: logo sem fundo, com brilho azul atrás (como nas folhas)
       const h = 240, w = h * lt.width / lt.height, lx0 = 212 - w / 2, ly0 = 36, gx = 205, gy = 160;
-      halo(x, gx, gy, (window.SEI_HALO || 'curva'));
       x.save(); x.shadowColor = 'rgba(0,10,40,.6)'; x.shadowBlur = 16; x.shadowOffsetY = 5; x.drawImage(lt, lx0, ly0, w, h); x.restore(); }
     else x.drawImage(lc, 40, 32);
     x.restore();
