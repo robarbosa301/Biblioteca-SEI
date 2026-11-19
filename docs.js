@@ -64,6 +64,18 @@
   const sel = (id, val, ops) => `<select id="${id}">${ops.map(o => `<option ${o === val ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
   const ler = ids => Object.fromEntries(ids.map(i => [i, v(i).trim()]));
 
+  /* ---------- foto do aluno (3x4, guardada no próprio documento) ---------- */
+  const fotoCampo = d => `<div class="foto-campo"><div class="foto-prev" id="fotoPrev">${d.foto ? `<img src="${d.foto}" alt="Foto do aluno">` : '<span>📷<br>Sem foto</span>'}</div>
+    <div class="foto-ac"><label class="b main">📷 Escolher ou tirar foto<input type="file" id="fotoArq" accept="image/*" hidden></label><button type="button" class="b ghost" id="fotoTira"${d.foto ? '' : ' hidden'}>Tirar a foto</button><p class="dica">Use uma foto de rosto, como a de carteirinha. Ela é cortada sozinha no formato 3×4 e fica guardada neste aparelho.</p></div></div>`;
+  function ligaFoto(d) {
+    const arq = $('#fotoArq'); if (!arq) return;
+    const mostra = () => { $('#fotoPrev').innerHTML = d.foto ? `<img src="${d.foto}" alt="Foto do aluno">` : '<span>📷<br>Sem foto</span>'; $('#fotoTira').hidden = !d.foto; };
+    arq.onchange = () => { const f = arq.files[0]; if (!f) return; const im = new Image(); im.onload = () => { const W = 360, H = 480, r = Math.max(W / im.width, H / im.height); const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); const w = im.width * r, h = im.height * r; x.drawImage(im, (W - w) / 2, (H - h) / 2.6, w, h); d.foto = c.toDataURL('image/jpeg', .85); URL.revokeObjectURL(im.src); mostra(); }; im.src = URL.createObjectURL(f); arq.value = ''; };
+    $('#fotoTira').onclick = () => { d.foto = ''; mostra(); };
+  }
+  // a foto da carteirinha do mesmo aluno aparece no boletim
+  const fotoDe = d => d.foto || ((lista.find(x => x.tipo === 'carteirinha' && x.foto && normal(x.aluno) === normal(d.aluno)) || {}).foto) || '';
+
   /* ---------- tipos de documento ---------- */
   const proxNum = (l, tipo, ano) => 1 + l.filter(d => d.tipo === tipo && (d.data || '').startsWith(ano)).reduce((m, d) => Math.max(m, +d.numero || 0), 0);
   const TIPOS = {
@@ -121,9 +133,9 @@
       novo: () => ({ ano: String(new Date().getFullYear()), turma: '6º ano', notas: {} }),
       form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra / turno', inp('classe', d.classe, 'A, B, Manhã'))}</div>
         <div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Média para aprovação', inp('minima', d.minima || '6,0'))}${lab('Data de emissão', inp('data', d.data || hoje(), '', 'date'))}</div>
-        <h4>Notas</h4><div class="tab"><table class="notas" id="notas"></table></div>${lab('Observações', txt('obs', d.obs, '', 2), 1)}`,
+        <h4>Foto do aluno</h4>${fotoCampo(d)}<h4>Notas</h4><div class="tab"><table class="notas" id="notas"></table></div>${lab('Observações', txt('obs', d.obs, '', 2), 1)}`,
       campos: ['aluno', 'turma', 'classe', 'ano', 'minima', 'data', 'obs'],
-      depois: async d => { const montar = async () => { const ds = await disciplinas(v('turma')); const n = d.notas || {}; $('#notas').innerHTML = `<thead><tr><th>Disciplina</th>${COLS.map(c => `<th>${c[1]}</th>`).join('')}<th>Média</th><th>Faltas</th></tr></thead><tbody>${ds.map(x => `<tr data-d="${esc(x)}"><td>${esc(x)}</td>${COLS.map(c => `<td><input class="nt" data-c="${c[0]}" inputmode="decimal" value="${esc((n[x] || {})[c[0]] || '')}"></td>`).join('')}<td class="md">${esc(media(n[x]))}</td><td><input class="nt" data-c="faltas" inputmode="numeric" value="${esc((n[x] || {}).faltas || '')}"></td></tr>`).join('')}</tbody>`; }; await montar(); $('#turma').onchange = async () => { d.notas = lerNotas(); await montar(); }; $('#notas').oninput = e => { const tr = e.target.closest('tr'); if (tr) tr.querySelector('.md').textContent = media(lerLinha(tr)); }; },
+      depois: async d => { ligaFoto(d); const montar = async () => { const ds = await disciplinas(v('turma')); const n = d.notas || {}; $('#notas').innerHTML = `<thead><tr><th>Disciplina</th>${COLS.map(c => `<th>${c[1]}</th>`).join('')}<th>Média</th><th>Faltas</th></tr></thead><tbody>${ds.map(x => `<tr data-d="${esc(x)}"><td>${esc(x)}</td>${COLS.map(c => `<td><input class="nt" data-c="${c[0]}" inputmode="decimal" value="${esc((n[x] || {})[c[0]] || '')}"></td>`).join('')}<td class="md">${esc(media(n[x]))}</td><td><input class="nt" data-c="faltas" inputmode="numeric" value="${esc((n[x] || {}).faltas || '')}"></td></tr>`).join('')}</tbody>`; }; await montar(); $('#turma').onchange = async () => { d.notas = lerNotas(); await montar(); }; $('#notas').oninput = e => { const tr = e.target.closest('tr'); if (tr) tr.querySelector('.md').textContent = media(lerLinha(tr)); }; },
       extra: d => { d.notas = lerNotas(); },
       doc: d => docBoletim(d)
     },
@@ -175,13 +187,15 @@
     },
     convocacao: {
       nome: 'Convocação de responsáveis', icone: '📩', desc: 'Chamar os pais à escola', setores: ['coordenacao', 'secretaria', 'avisos'],
-      titulo: d => `Convocação — ${d.aluno || ''}`,
+      titulo: d => `Convocação — ${d.aluno || ''}${d.copias === '2' && d.aluno2 ? ' e ' + d.aluno2 : ''}`,
       novo: () => ({ data: hoje(), turma: '6º ano' }),
       form: d => `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra / turno', inp('classe', d.classe))}</div>
         <div class="g3">${lab('Comparecer no dia', inp('dia', d.dia, '', 'date'))}${lab('Horário', inp('hora', d.hora, '', 'time'))}${lab('Procurar por', inp('com', d.com, 'Ex.: Coordenação pedagógica'))}</div>
-        ${lab('Motivo', txt('texto', d.texto, '', 4), 1)}<div class="g2">${lab('Data do documento', inp('data', d.data, '', 'date'))}${lab('Cópias por folha', sel('copias', d.copias || '2', ['1', '2']))}</div>`,
-      campos: ['aluno', 'turma', 'classe', 'dia', 'hora', 'com', 'texto', 'data', 'copias'],
-      doc: d => { const um = `<div class="doc-aviso">${cab('CONVOCAÇÃO')}<p class="doc-para">Senhor(a) responsável pelo(a) aluno(a) <b>${esc(d.aluno)}</b>, ${esc([d.turma, d.classe].filter(Boolean).join(' '))}:</p><div class="doc-corpo grande">Solicitamos o seu comparecimento à escola no dia <b>${fmt(d.dia) || '___/___/_____'}</b>${d.hora ? ', às <b>' + esc(d.hora) + '</b>' : ''}, para conversar com ${esc(d.com || 'a coordenação')}.${d.texto ? '<br><br><b>Assunto:</b> ' + br(d.texto) : ''}<br><br>Contamos com a sua presença.</div><p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.</p><div class="doc-ass"><div><span></span>Coordenação</div><div><span></span>Ciente do responsável</div></div></div>`; return d.copias === '2' ? `<div class="doc-2">${um}<hr class="doc-corte">${um}</div>` : um; }
+        ${lab('Motivo', txt('texto', d.texto, '', 4), 1)}<div class="g2">${lab('Data do documento', inp('data', d.data, '', 'date'))}${lab('Convocações por folha', sel('copias', d.copias || '2', ['1', '2']))}</div>
+        <div class="via2"><h4>✂️ Segunda convocação da folha (metade de baixo)</h4><p class="dica">Para outro aluno, preencha abaixo. Deixe em branco para repetir a mesma convocação.</p><div class="g3">${lab('Aluno(a)', inp('aluno2', d.aluno2))}${lab('Turma', sel('turma2', d.turma2 || d.turma, turmasAtuais()))}${lab('Letra / turno', inp('classe2', d.classe2))}</div></div>`,
+      campos: ['aluno', 'turma', 'classe', 'dia', 'hora', 'com', 'texto', 'data', 'copias', 'aluno2', 'turma2', 'classe2'],
+      depois: () => { const m = () => { $('.via2').hidden = v('copias') !== '2'; }; m(); $('#copias').onchange = m; },
+      doc: d => { const via = (al, tu, cl) => `<div class="doc-aviso">${cab('CONVOCAÇÃO')}<p class="doc-para">Senhor(a) responsável pelo(a) aluno(a) <b>${esc(al)}</b>, ${esc([tu, cl].filter(Boolean).join(' '))}:</p><div class="doc-corpo grande">Solicitamos o seu comparecimento à escola no dia <b>${fmt(d.dia) || '___/___/_____'}</b>${d.hora ? ', às <b>' + esc(d.hora) + '</b>' : ''}, para conversar com ${esc(d.com || 'a coordenação')}.${d.texto ? '<br><br><b>Assunto:</b> ' + br(d.texto) : ''}<br><br>Contamos com a sua presença.</div><p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.</p><div class="doc-ass"><div><span></span>Coordenação</div><div><span></span>Ciente do responsável</div></div></div>`; const um = via(d.aluno, d.turma, d.classe); return d.copias === '2' ? `<div class="doc-2">${um}<hr class="doc-corte">${d.aluno2 ? via(d.aluno2, d.turma2 || d.turma, d.classe2) : um}</div>` : um; }
     }
   };
   Object.assign(TIPOS, {
@@ -223,6 +237,39 @@
         <div class="ress-sit"><div><b>Situação do aluno(a):</b></div>${SIT_RES.map(s => `<div>( ${s === d.sit ? '<b>X</b>' : '&nbsp;&nbsp;&nbsp;'} ) ${s}</div>`).join('')}</div><p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>${assina(d.assinante, d.cargo)}`
     }
   });
+  /* ---------- carteirinha de estudante (frente e verso, tamanho de cartão) ---------- */
+  TIPOS.carteirinha = {
+    nome: 'Carteirinha de estudante', icone: '🪪', desc: 'Com foto, frente e verso, no tamanho de cartão para recortar e plastificar', setores: ['secretaria'],
+    titulo: d => `Carteirinha — ${d.aluno || ''}`,
+    novo: () => { const y = new Date().getFullYear(); return { data: hoje(), ano: String(y), turma: '6º ano', turno: 'Manhã', validade: y + '-12-31', vias: '1' }; },
+    form: d => `<h4>Foto</h4>${fotoCampo(d)}
+      <div class="g2">${lab('Nome do aluno(a)', inp('aluno', d.aluno))}${lab('Data de nascimento', inp('nasc', d.nasc, '', 'date'))}</div>
+      <div class="g3">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turma (letra)', inp('classe', d.classe, 'A, B…'))}${lab('Turno', sel('turno', d.turno || 'Manhã', ['Manhã', 'Tarde', 'Noite', 'Integral']))}</div>
+      <div class="g3">${lab('Nº de matrícula', inp('matricula', d.matricula))}${lab('Ano letivo', inp('ano', d.ano))}${lab('Válida até', inp('validade', d.validade, '', 'date'))}</div>
+      <h4>Verso</h4><div class="g3">${lab('Responsável', inp('resp', d.resp))}${lab('Telefone do responsável', inp('tel', d.tel, '(91) 9 0000-0000', 'tel'))}${lab('Tipo sanguíneo (opcional)', inp('sangue', d.sangue, 'Ex.: O+'))}</div>
+      <div class="g2">${lab('Quem assina (Direção)', inp('assinante', d.assinante))}${lab('Quantas carteirinhas na folha', sel('vias', d.vias || '1', ['1', '2', '3', '4']))}</div>`,
+    campos: ['aluno', 'nasc', 'turma', 'classe', 'turno', 'matricula', 'ano', 'validade', 'resp', 'tel', 'sangue', 'assinante', 'vias'],
+    depois: d => ligaFoto(d),
+    doc: d => docCarteirinha(d)
+  };
+  function docCarteirinha(d) {
+    const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : (Object.values(SEGS).find(g => g.turmas.includes(d.turma)) || {}).nome || '';
+    const tur = [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '');
+    const linha = (r, v) => `<div class="ct-l"><small>${r}</small><b>${esc(v || '—')}</b></div>`;
+    const frente = `<div class="cart cart-f"><div class="ct-fx"></div><div class="ct-top"><img class="ct-logo" src="assets/docs/logo-sei.png?v=3" alt=""><div class="ct-tit"><small>SISTEMA DE ENSINO INCENTIVO</small><b>CARTEIRA DE ESTUDANTE</b></div><em class="ct-ano">${esc(d.ano || '')}</em></div>
+      <div class="ct-foto">${d.foto ? `<img src="${d.foto}" alt="">` : '<span>FOTO<br>3×4</span>'}</div>
+      <div class="ct-dados"><div class="ct-nome">${esc(d.aluno || '')}</div>${linha('Turma', tur)}<div class="ct-2">${linha('Turno', d.turno)}${linha('Matrícula', d.matricula)}</div>${linha('Nascimento', fmt(d.nasc))}</div>
+      <div class="ct-rod"><span>${esc(sg.toUpperCase())}</span><span>VÁLIDA ATÉ ${fmt(d.validade) || '31/12/' + (d.ano || '')}</span></div></div>`;
+    const verso = `<div class="cart cart-v"><div class="ct-vtop">IDENTIFICAÇÃO ESCOLAR</div>
+      <div class="ct-vd">${linha('Responsável', d.resp)}<div class="ct-2">${linha('Telefone', d.tel)}${linha('Tipo sanguíneo', d.sangue)}</div>
+      <p class="ct-aviso">Documento pessoal e intransferível. Apresente sempre que solicitado. Em caso de perda, comunique a secretaria.</p>
+      <div class="ct-ass"><span></span>${esc(d.assinante || 'Direção')}<br><small>Direção</small></div></div>
+      <img class="ct-qr" src="assets/docs/qr-whatsapp.png" alt="">
+      <div class="ct-vrod">Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA · (91) 9 8124-8323 · INEP ${INEP}</div></div>`;
+    const n = Math.max(1, Math.min(4, +d.vias || 1));
+    return `${cab('CARTEIRA DE ESTUDANTE')}<p class="ct-dica">✂️ Recorte nas linhas tracejadas, cole frente e verso e plastifique.</p>${Array.from({ length: n }, () => `<div class="cart-par"><div class="ct-cut">${frente}</div><div class="ct-cut">${verso}</div></div>`).join('')}`;
+  }
+
   /* ---------- declarações e ressalva (modelos da secretaria da escola) ---------- */
   const INEP = '15590798';
   const inep = () => `<p class="doc-inep">${FOLHA ? '' : `COD. INEP: ${INEP} · `}Autorização: Resolução nº 614, de 14 de novembro de 2024 — CEE</p>`;
@@ -303,6 +350,7 @@
     segDoc = d.seg || null; FOLHA = null; titCap = null; nCab = 0; TIPOS[d.tipo].doc(d); const tit = tituloCaso(titCap || TIPOS[d.tipo].nome);
     const pl = PLACA[SETOR] || PLACA.secretaria; const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : '';
     const o = { titulo: tit, curto: tit, placa: { grande: pl[0], linhas: [pl[1], sg.toUpperCase()] }, campos: faixa(d), selo: ['COD. INEP', INEP], rodape: [NOME_SETOR, sg || 'Sistema de Ensino Incentivo'], num: 'SEI', estilo: new URLSearchParams(location.search).get('cab') || 'formal' };
+    if (d.copias === '2') { o.agua = 'duas'; o.campos = o.campos.filter(c => c[0] === 'Documento'); }
     if (TIPOS[d.tipo].arte) Object.assign(o, TIPOS[d.tipo].arte(d));
     FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2' }); nCab = 0;
     document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);
@@ -383,7 +431,7 @@
       return x === null ? '<td class="bn vazio">—</td>' : `<td class="bn" style="background:${tintaHex(c, .16)};color:${c}"><b>${esc(String(v).replace('.', ','))}</b></td>`; };
     const tur = [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '');
     return `${cab('BOLETIM ESCOLAR')}
-      <table class="bol-aluno"><tr><td class="bol-av" rowspan="2"><span>${esc(iniciais(d.aluno))}</span></td><td class="bol-nome"><small>ALUNO(A)</small><b>${esc(d.aluno || '')}</b></td>
+      <table class="bol-aluno"><tr><td class="bol-av" rowspan="2">${fotoDe(d) ? `<img class="bol-foto" src="${fotoDe(d)}" alt="">` : `<span>${esc(iniciais(d.aluno))}</span>`}</td><td class="bol-nome"><small>ALUNO(A)</small><b>${esc(d.aluno || '')}</b></td>
         <td class="bol-st" rowspan="2"><small>MÉDIA GERAL</small><b style="color:${mg === null ? '#7a869a' : mg >= min ? '#0a9d74' : '#e53935'}">${mg === null ? '—' : mg.toFixed(1).replace('.', ',')}</b></td>
         <td class="bol-st" rowspan="2"><small>FALTAS</small><b>${faltas}</b></td>
         <td class="bol-st" rowspan="2"><small>SITUAÇÃO</small><em style="background:${sit[1]}">${sit[0]}</em></td></tr>

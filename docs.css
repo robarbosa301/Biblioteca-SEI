@@ -210,3 +210,35 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .cm-t td{height:6.1mm}.cm-ev{font-size:6.9pt;line-height:1.25}.calp{gap:3.6mm 3.2mm}
 .cm-ev p{display:grid;grid-template-columns:auto 1fr;align-items:start}
 .cm-h img.cm-ic{display:block}
+/* ===== Foto do aluno ===== */
+.foto-campo{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.foto-prev{width:90px;height:120px;border-radius:10px;border:2px dashed #b9cce6;background:#f3f7fd;display:flex;align-items:center;justify-content:center;overflow:hidden;text-align:center;color:#6b7fa8;font:600 12px system-ui}
+.foto-prev img{width:100%;height:100%;object-fit:cover}
+.foto-ac{flex:1;min-width:200px}.foto-ac .b{margin:0 6px 6px 0}
+.bol-foto{width:15mm;height:20mm;object-fit:cover;border-radius:2mm;border:.8mm solid #fff;box-shadow:0 0 0 .4mm #ffd34d;display:block;margin:0 auto}
+/* ===== Carteirinha ===== */
+.ct-dica{text-align:center;font:700 8.5pt Arial,sans-serif;color:#0b2a6b;margin:0 0 4mm}
+.cart-par{display:flex;justify-content:center;gap:5mm;margin:0 0 5mm;break-inside:avoid}
+.ct-cut{padding:1.5mm;border:.3mm dashed #8a97ad;border-radius:4mm}
+.cart{position:relative;width:85.6mm;height:54mm;border-radius:3.2mm;overflow:hidden;font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cart-f{background:linear-gradient(135deg,#061642 0%,#0a2f86 55%,#1e5fd8 100%);color:#fff}
+.ct-fx{position:absolute;right:-14mm;top:-10mm;width:52mm;height:52mm;border-radius:50%;background:radial-gradient(circle,rgba(120,200,255,.28),rgba(120,200,255,0) 70%)}
+.ct-top{position:absolute;left:3mm;right:3mm;top:2.4mm;display:flex;align-items:center;gap:2mm}
+.ct-logo{height:11mm;filter:drop-shadow(0 .4mm .6mm rgba(0,0,0,.5))}
+.ct-tit{flex:1;line-height:1.05}.ct-tit small{display:block;font:700 4.6pt Arial,sans-serif;letter-spacing:.9px;color:#9fdcff}.ct-tit b{display:block;font:800 8.2pt 'SEI Rubik',Arial Black,sans-serif;color:#ffd34d;letter-spacing:.3px}
+.ct-ano{font:800 8pt 'SEI Rubik',Arial,sans-serif;font-style:normal;background:#ffd34d;color:#0b2a5b;border-radius:99px;padding:.6mm 2.2mm}
+.ct-foto{position:absolute;left:3.5mm;top:16mm;width:22mm;height:29.3mm;border-radius:2mm;background:#fff;border:.7mm solid #fff;box-shadow:0 0 0 .4mm #ffd34d,0 1mm 2mm rgba(0,0,0,.4);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#8a97ad;font:700 6pt Arial,sans-serif;text-align:center}
+.ct-foto img{width:100%;height:100%;object-fit:cover}
+.ct-dados{position:absolute;left:28.5mm;right:3mm;top:15.5mm}
+.ct-nome{font:800 8.6pt/1.1 'SEI Rubik',Arial,sans-serif;margin-bottom:1.4mm;text-transform:uppercase;letter-spacing:.2px}
+.ct-l{margin-bottom:1mm;line-height:1.05}.ct-l small{display:block;font:700 4.4pt Arial,sans-serif;letter-spacing:.6px;color:#9fdcff;text-transform:uppercase}.ct-l b{font:700 6.8pt Arial,sans-serif}
+.ct-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm}
+.ct-rod{position:absolute;left:0;right:0;bottom:0;height:5mm;display:flex;align-items:center;justify-content:space-between;padding:0 3.5mm;background:linear-gradient(90deg,#e6b422,#ffe58a,#e6b422);color:#0b2a5b;font:800 5pt Arial,sans-serif;letter-spacing:.5px}
+.cart-v{background:#fff;color:#0b2a5b;box-shadow:inset 0 0 0 .4mm #d5def0}
+.ct-vtop{background:linear-gradient(90deg,#0b2a6b,#1e4fb8);color:#ffd34d;font:800 6.6pt 'SEI Rubik',Arial,sans-serif;letter-spacing:1.2px;text-align:center;padding:1.6mm 0}
+.ct-vd{position:absolute;left:3.5mm;right:24mm;top:9.5mm}.ct-vd .ct-l small{color:#6b7fa8}.ct-vd .ct-l b{color:#0b1f5c;border-bottom:.2mm solid #d5def0;display:block;padding-bottom:.4mm}
+.ct-aviso{font:5pt/1.25 Arial,sans-serif;color:#33415f;margin:1mm 0 0}
+.ct-ass{margin-top:4mm;text-align:center;font:700 5.4pt Arial,sans-serif;width:36mm}.ct-ass span{display:block;border-top:.25mm solid #0b2a5b;margin-bottom:.4mm}.ct-ass small{font-weight:400;color:#6b7fa8}
+.ct-qr{position:absolute;right:3.5mm;top:12mm;width:18mm;height:18mm}
+.ct-vrod{position:absolute;left:0;right:0;bottom:0;height:5mm;display:flex;align-items:center;justify-content:center;background:#0b2a6b;color:#fff;font:700 4.4pt Arial,sans-serif}
+.via2{border:1px dashed #b9cce6;border-radius:12px;padding:8px 12px;margin-top:8px;background:#f7faff}.via2 h4{margin:2px 0}
