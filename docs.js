@@ -529,7 +529,8 @@
   // célula do horário no estilo do cabeçalho: escura com moldura dourada (A), cor da disciplina (B) ou cartão com aba (C)
   const ART_D = { mat: 'matematica', port: 'lingua-portuguesa', ing: 'ingles', hist: 'historia', geo: 'geografia', ef: 'educacao-fisica', arte: 'arte', rel: 'ensino-religioso', cien: 'ciencias', esp: 'espanhol', bio: 'biologia', fis: 'fisica', quim: 'quimica', fil: 'filosofia', soc: 'sociologia', lit: 'literatura', red: 'redacao' };
   // cores dos títulos nos cabeçalhos das folhas de cada disciplina
-  const COR_HEAD = { mat: '#0a6de5', port: '#850f10', ing: '#a10d0f', hist: '#7b1308', geo: '#164526', ef: '#0d450f', arte: '#680564', rel: '#b8860b', cien: '#0e4cd8', esp: '#a30819', bio: '#07501e', fis: '#044cc5', quim: '#6b05a0', fil: '#6d1608', soc: '#1f4d1f', lit: '#67220b', red: '#70071a' };
+  const GRAD_HEAD = { mat: ['#118ce7', '#0f6fdc', '#1548ac'], port: ['#a41112', '#850f0f', '#6e0c0c'], ing: ['#cd1b22', '#a31215', '#961115'], hist: ['#a83622', '#7f1a0f', '#5e0d0b'], geo: ['#2a6334', '#194a29', '#113d22'], ef: ['#167016', '#0e4d0f', '#0a3e0c'], arte: ['#a40b98', '#71076e', '#540f51'], rel: ['#e0b54a', '#b8860b', '#8a6208'], cien: ['#1f7ae6', '#0e4cd8', '#0a3aa8'], esp: ['#da3d19', '#ad0f19', '#91171f'], bio: ['#268728', '#0d581f', '#0b3e1f'], fis: ['#0b81e1', '#0852c5', '#0e42aa'], quim: ['#8a14bd', '#6b089e', '#560f85'], fil: ['#ab4212', '#77210a', '#5e1810'], soc: ['#2f6a1e', '#1a4110', '#173b0e'], lit: ['#89370e', '#67240a', '#4e1c08'], red: ['#980d2b', '#780920', '#5a0a17'] };
+  const COR_HEAD = Object.fromEntries(Object.entries(GRAD_HEAD).map(([k, g]) => [k, g[1]]));
   const corHead = n => COR_HEAD[icoDe(n || '')] || corDisc(n);
   const escurece = (hex, k) => { const m = /^#(..)(..)(..)$/.exec(hex); return m ? '#' + [1, 2, 3].map(i => Math.round(parseInt(m[i], 16) * k).toString(16).padStart(2, '0')).join('') : hex; };
   function celHor(c, est) {
@@ -541,7 +542,7 @@
     if (est === 'C') return `<td class="hc hcC"><div class="hcx"><div class="hcC-h" style="background:${cor}"><img src="${icoSrc(c.d || c.p, '#ffffff', 1.8)}" alt=""><b>${nome}</b></div>${prof ? `<small>${prof}</small>` : '<small>&nbsp;</small>'}</div></td>`;
     const ch = corHead(c.d || c.p), arteK = icoDe(c.d || '') === 'arte', ingK = icoDe(c.d || '') === 'ing';
     const tira = arteK ? 'linear-gradient(180deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#8e24aa)' : ingK ? 'linear-gradient(180deg,#0648d0 0 50%,#ffffff 50% 60%,#d90e12 60%)' : '#ffd34d';
-    return `<td class="hc hcA"><div class="hcx" style="background:${arteK ? 'linear-gradient(135deg,#8e1f8a,#680564 60%,#4a0347)' : `linear-gradient(135deg,${tintaHex(ch, .78)} 0%,${ch} 55%,${escurece(ch, .8)} 100%)`}">${ART_D[icoDe(c.d || '')] ? `<img class="hc-tr" src="assets/horario/tracos-${ART_D[icoDe(c.d || '')]}.png?v=1" alt="">` : `<img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt="">`}<i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+    return `<td class="hc hcA"><div class="hcx" style="background:${(g => g ? `linear-gradient(180deg,${g[0]} 0%,${g[1]} 55%,${g[2]} 100%)` : `linear-gradient(180deg,${tintaHex(ch, .78)},${ch})`)(GRAD_HEAD[icoDe(c.d || '')])}">${ART_D[icoDe(c.d || '')] ? `<img class="hc-tr" src="assets/horario/tracos-${ART_D[icoDe(c.d || '')]}.png?v=1" alt="">` : `<img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt="">`}<i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
   }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
