@@ -129,3 +129,20 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .calp-tot b{background:#ffd34d;color:#0b2a5b;border-radius:99px;padding:.8mm 3mm;font:800 12pt 'SEI Rubik',Arial Black,sans-serif}
 .calp-sem{margin:0 0 2mm;font:800 12pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b}
 .calp-ano{text-align:right;font:700 9pt Arial,sans-serif;color:#0b2a6b;margin-top:3mm}
+/* ===== Editor de texto (Wordzinho) ===== */
+.ed-caixa{border:1px solid #b9cce6;border-radius:10px;background:#fff;overflow:hidden}
+.ed-barra{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px;background:#eef4fd;border-bottom:1px solid #d3e0f3;position:sticky;top:0;z-index:2}
+.ed-barra select{font:600 13px system-ui;padding:5px 4px;border:1px solid #b9cce6;border-radius:7px;background:#fff;color:#0b2a5b;max-width:118px}
+.ed-barra button{font:600 14px system-ui;min-width:32px;height:32px;padding:0 7px;border:1px solid #b9cce6;border-radius:7px;background:#fff;color:#0b2a5b;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.ed-barra button:hover,.ed-barra select:hover{border-color:#1e6fe8;background:#f5f9ff}
+.ed-g{display:inline-flex;gap:2px}
+.ed-cor{position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:32px;border:1px solid #b9cce6;border-radius:7px;background:#fff;cursor:pointer;font:800 14px system-ui;color:#0b2a5b}
+.ed-cor input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ed-texto{padding:10px 12px;font:15px/1.5 Arial,sans-serif;color:#111;outline:none;overflow-wrap:anywhere}
+.ed-texto:focus{box-shadow:inset 0 0 0 2px #9cc2f5}
+.ed-texto p{margin:0 0 .5em}.ed-texto ul,.ed-texto ol{margin:.2em 0 .5em;padding-left:1.6em}
+.ed-texto:empty::before{content:attr(data-ph);color:#8a97ad}
+@media (max-width:600px){.ed-barra select{max-width:96px;font-size:12px}.ed-barra button{min-width:30px;height:30px}}
+/* texto formatado nos documentos */
+.rt p{margin:0 0 2.5mm}.rt p:last-child{margin-bottom:0}.rt ul,.rt ol{margin:0 0 2.5mm;padding-left:7mm}.rt blockquote{margin:0 0 2.5mm 10mm}
+.doc-corpo.dec p:has(+ *){}

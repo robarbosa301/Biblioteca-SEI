@@ -85,9 +85,13 @@
     'doc-hor': { borda: '777777', th: '0A3A9C', thCor: 'FFFFFF', jc: 'center', sz: 9 } };
   function docx(html) {
     const d = document.createElement('div'); d.innerHTML = html; const imgs = []; let id = 1;
-    const rPr = r => `<w:rPr><w:rFonts w:ascii="${r.font || 'Arial'}" w:hAnsi="${r.font || 'Arial'}" w:cs="${r.font || 'Arial'}"/>${r.b ? '<w:b/>' : ''}${r.i ? '<w:i/>' : ''}${r.caps ? '<w:caps/>' : ''}${r.cor ? `<w:color w:val="${r.cor}"/>` : ''}<w:sz w:val="${Math.round((r.sz || 10.5) * 2)}"/><w:szCs w:val="${Math.round((r.sz || 10.5) * 2)}"/></w:rPr>`;
+    const rPr = r => `<w:rPr><w:rFonts w:ascii="${r.font || 'Arial'}" w:hAnsi="${r.font || 'Arial'}" w:cs="${r.font || 'Arial'}"/>${r.b ? '<w:b/>' : ''}${r.i ? '<w:i/>' : ''}${r.caps ? '<w:caps/>' : ''}${r.cor ? `<w:color w:val="${r.cor}"/>` : ''}${r.u ? '<w:u w:val="single"/>' : ''}${r.hl ? `<w:shd w:val="clear" w:color="auto" w:fill="${r.hl}"/>` : ''}<w:sz w:val="${Math.round((r.sz || 10.5) * 2)}"/><w:szCs w:val="${Math.round((r.sz || 10.5) * 2)}"/></w:rPr>`;
     const estiloEl = (el, r) => { r = Object.assign({}, r); const t = el.tagName; if (t === 'B' || t === 'STRONG' || t === 'TH' || t === 'H2' || t === 'H4' || t === 'H5') r.b = 1; if (t === 'I' || t === 'EM') r.i = 1; if (t === 'SMALL') r.sz = (r.sz || 10.5) * 0.85;
-      if (t === 'H2') { r.sz = 17; r.cor = '0A3A9C'; } for (const c of el.classList || []) if (P[c] && P[c].r) Object.assign(r, P[c].r); const cor = hex(el.style && el.style.color); if (cor) r.cor = cor; return r; };
+      if (t === 'H2') { r.sz = 17; r.cor = '0A3A9C'; } for (const c of el.classList || []) if (P[c] && P[c].r) Object.assign(r, P[c].r); const cor = hex(el.style && el.style.color); if (cor) r.cor = cor;
+      if (t === 'U') r.u = 1; const st = el.style; if (st) { if (/underline/.test(st.textDecoration || st.textDecorationLine || '')) r.u = 1; if (/bold|[6-9]00/.test(st.fontWeight || '')) r.b = 1; if (st.fontStyle === 'italic') r.i = 1;
+        const fs = /([\d.]+)(pt|px)/.exec(st.fontSize || ''); if (fs) r.sz = fs[2] === 'px' ? +fs[1] * .75 : +fs[1]; if (st.fontFamily) r.font = st.fontFamily.split(',')[0].replace(/["']/g, '').trim();
+        const hl = el.tagName === 'SPAN' && hex(st.backgroundColor); if (hl) r.hl = hl; }
+      return r; };
     function runs(node, r) {
       let out = '';
       for (const n of node.childNodes) {
@@ -110,11 +114,15 @@
       for (const c of cls) if (P[c]) { if (P[c].jc) jc = P[c].jc; if (P[c].fill) fill = P[c].fill; if (P[c].esp) esp = P[c].esp; if (P[c].linha) linha = P[c].linha; }
       if (el.tagName === 'H2' || el.tagName === 'H5') jc = 'center'; if (el.tagName === 'H5') fill = '0A3A9C'; const bgc = el.style && hex(el.style.background || el.style.backgroundColor); if (bgc && el.tagName === 'P') fill = bgc;
       if (extra) { if (extra.jc && !jc) jc = extra.jc; if (extra.linha && !linha) linha = extra.linha; }
+      const sty = el.style; let ind = 0, pre = '';
+      if (sty) { const ta = sty.textAlign; if (ta) jc = ta === 'justify' ? 'both' : ta; const lh = parseFloat(sty.lineHeight); if (lh && lh < 4) linha = lh; const ml = /([\d.]+)px/.exec(sty.marginLeft || sty.paddingLeft || ''); if (ml) ind = Math.round(+ml[1] * 15); }
+      if (el.tagName === 'BLOCKQUOTE') ind = ind || 600;
+      if (el.tagName === 'LI') { const ol = el.parentNode && el.parentNode.tagName === 'OL'; pre = ol ? ([...el.parentNode.children].indexOf(el) + 1) + '. ' : '• '; ind = ind || 360; }
       const rr = estiloEl(el, r); if (el.tagName === 'H5') { rr.cor = 'FFFFFF'; rr.sz = 7.5; }
-      const conteudo = runs(el, rr);
-      return `<w:p><w:pPr><w:spacing w:before="${esp ? esp[0] : 0}" w:after="${esp ? esp[1] : 80}"${linha ? ` w:line="${Math.round(240 * linha)}" w:lineRule="auto"` : ''}/>${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}${jc ? `<w:jc w:val="${jc === 'right' ? 'right' : jc}"/>` : ''}</w:pPr>${conteudo}</w:p>`;
+      const conteudo = (pre ? `<w:r>${rPr(rr)}<w:t xml:space="preserve">${pre}</w:t></w:r>` : '') + runs(el, rr);
+      return `<w:p><w:pPr><w:spacing w:before="${esp ? esp[0] : 0}" w:after="${esp ? esp[1] : 80}"${linha ? ` w:line="${Math.round(240 * linha)}" w:lineRule="auto"` : ''}/>${ind ? `<w:ind w:left="${ind}"/>` : ''}${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}${jc ? `<w:jc w:val="${jc === 'right' ? 'right' : jc}"/>` : ''}</w:pPr>${conteudo}</w:p>`;
     }
-    const BLOCO = /^(P|DIV|H1|H2|H3|H4|H5|TABLE|UL|OL|SECTION|ARTICLE|HR)$/;
+    const BLOCO = /^(P|DIV|H1|H2|H3|H4|H5|TABLE|UL|OL|LI|BLOCKQUOTE|SECTION|ARTICLE|HR)$/;
     function blocos(node, r, extra) {
       let out = '', inl = document.createElement('span');
       const flush = () => { if (inl.childNodes.length && (inl.textContent.trim() || inl.querySelector('img,br'))) out += par(inl, r, extra); inl = document.createElement('span'); };
@@ -123,7 +131,7 @@
           flush();
           if (n.tagName === 'TABLE') out += tabela(n, r);
           else if (n.tagName === 'HR') out += '<w:p/>';
-          else if (n.querySelector && n.querySelector('p,div,table,h1,h2,h3,h4,h5')) { const pj = [...n.classList].map(c => P[c]).filter(Boolean); const ex = Object.assign({}, extra, ...pj.map(x => ({ ...(x.jc ? { jc: x.jc } : {}), ...(x.linha ? { linha: x.linha } : {}) }))); out += blocos(n, estiloEl(n, r), ex); }
+          else if (n.querySelector && n.querySelector('p,div,table,h1,h2,h3,h4,h5,li,ul,ol,blockquote')) { const pj = [...n.classList].map(c => P[c]).filter(Boolean); const ex = Object.assign({}, extra, ...pj.map(x => ({ ...(x.jc ? { jc: x.jc } : {}), ...(x.linha ? { linha: x.linha } : {}) }))); out += blocos(n, estiloEl(n, r), ex); }
           else out += par(n, r, extra);
         } else inl.appendChild(n.cloneNode(true));
       }

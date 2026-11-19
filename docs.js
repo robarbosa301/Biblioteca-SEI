@@ -5,7 +5,8 @@
   const SETOR = document.body.dataset.setor; // 'secretaria' | 'coordenacao'
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const br = s => esc(s).replace(/\n/g, '<br>');
+  const rico = s => window.seiTexto && seiTexto.ehHTML(s);
+  const br = s => rico(s) ? `<div class="rt">${seiTexto.limpar(s)}</div>` : esc(s).replace(/\n/g, '<br>');
   const hoje = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
   const fmt = d => (d || '').split('-').reverse().join('/');
   const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
@@ -198,14 +199,14 @@
         <div class="g3 m-liberacao">${lab('Motivo / evento', inp('motivo', d.motivo, 'Ex.: XVI Jogos Internos do SEI'))}${lab('Dia(s)', inp('quando', d.quando, 'Ex.: 01, 02 e 03 de outubro de 2025'))}${lab('Turno(s)', inp('turno', d.turno, 'Ex.: tarde e noite'))}</div>
         <div class="g3 m-matricula">${lab('Aluno(a)', inp('alunoM', d.alunoM))}${lab('Nascimento', inp('nasc', d.nasc, '', 'date'))}${lab('Turno', inp('turnoM', d.turnoM, 'Manhã'))}</div>
         <div class="g3 m-pagamento m-matricula">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}<span class="m-matricula">${lab('Ano letivo', inp('anoM', d.anoM || String(new Date().getFullYear())))}</span></div>
-        ${lab('Texto da declaração <small>(montado sozinho a partir dos campos; pode ajustar. Palavras entre *asteriscos* saem em negrito)</small>', txt('texto', d.texto, '', 7), 1)}<button type="button" class="b ghost" id="refazTx">↻ Montar o texto de novo a partir dos campos</button>
+        ${lab('Texto da declaração <small>(montado sozinho a partir dos campos; pode ajustar e formatar com a barra)</small>', txt('texto', d.texto, '', 7), 1)}<button type="button" class="b ghost" id="refazTx">↻ Montar o texto de novo a partir dos campos</button>
         <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Quem assina', inp('assinante', d.assinante))}${lab('Cargo', inp('cargo', d.cargo))}</div>`,
       campos: ['modelo', 'resp', 'rg', 'cpf', 'valor', 'aluno', 'anoRef', 'nome', 'rg2', 'cpf2', 'funcao', 'desde', 'ate', 'ativ', 'gestor', 'escola', 'motivo', 'quando', 'turno', 'alunoM', 'nasc', 'turnoM', 'turma', 'anoM', 'texto', 'data', 'assinante', 'cargo'],
       depois: d => { const f = $('#fDoc'); const mostra = () => { const m = v('modelo'); f.querySelectorAll('[class*="m-"]').forEach(x => { x.hidden = ![...x.classList].includes('m-' + m); }); };
         const monta = () => { const o = ler(TIPOS.declaracao.campos); $('#texto').value = textoDec(o); };
         mostra(); if (!d.texto) monta();
         let manual = !!d.manual; $('#texto').oninput = () => { manual = d.manual = true; };
-        f.addEventListener('input', e => { if (e.target.id !== 'texto' && !manual) monta(); });
+        f.addEventListener('input', e => { if (e.target.id !== 'texto' && !e.target.closest('.ed-caixa') && !manual) monta(); });
         $('#modelo').onchange = () => { mostra(); manual = d.manual = false; monta(); };
         $('#refazTx').onclick = () => { manual = d.manual = false; monta(); }; },
       doc: d => `${cab('DECLARAÇÃO')}${inep()}${d.modelo === 'liberacao' && d.gestor ? `<p class="doc-dest">Ao gestor(a) da escola${d.escola ? ' ' + esc(d.escola) : ''}<br>${esc(d.gestor)}</p>` : ''}<div class="doc-corpo dec">${neg(d.texto)}</div><p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>${assina(d.assinante, d.cargo)}`
@@ -225,7 +226,7 @@
   /* ---------- declarações e ressalva (modelos da secretaria da escola) ---------- */
   const INEP = '15590798';
   const inep = () => `<p class="doc-inep">${FOLHA ? '' : `COD. INEP: ${INEP} · `}Autorização: Resolução nº 614, de 14 de novembro de 2024 — CEE</p>`;
-  const neg = s => esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+  const neg = s => rico(s) ? seiTexto.limpar(s).replace(/\*([^*<\n]+)\*/g, '<b>$1</b>') : esc(s).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').split(/\n\s*\n/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
   const SIT_RES = ['Aprovado(a)', 'Reprovado(a)', 'Desistente', 'Cancelou', 'Cursando', 'Dependência'];
   const serieNome = t => { t = t || ''; if (/Médio|Convênio/.test(t)) return t.replace(/ \(.*\)/, '') + ' do Ensino Médio'; if (/º ano/.test(t)) return t + ' do Ensino Fundamental'; if (/Maternal|Pré I/.test(t)) return t + ' da Educação Infantil'; return t; };
   const MOD_DEC = {
@@ -673,6 +674,7 @@
     $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-volta="2">‹ ${t.nome}</button></nav><form class="ficha" id="fDoc"><h3>${t.icone} ${edit.id ? 'Editar' : 'Novo'}: ${t.nome}</h3>${t.form(edit)}
       <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b" type="button" id="salvaImp">💾 Salvar e imprimir</button><button class="b" type="button" id="salvaWord">💾 Salvar e baixar Word</button><button class="b" type="button" id="salvaPdf">💾 Salvar e baixar PDF</button><button class="b ghost" type="button" data-volta="2">Cancelar</button></div></form>`;
     if (t.depois) await t.depois(edit);
+    if (window.seiEditor) seiEditor.ligarTodos($('#fDoc'));
     const salvar = async () => {
       if (edit.tipo === 'horario') { const n = document.querySelectorAll('#grade td.conflito').length; if (n && !confirm(`Este horário tem ${n} conflito(s) marcado(s) em vermelho. Salvar mesmo assim?`)) throw new Error('cancelado'); }
       Object.assign(edit, ler(t.campos)); if (t.extra) t.extra(edit); if (!edit.id) { edit.id = novoId(); edit.criado = Date.now(); } await gravar(edit); const d = edit; aviso('Documento salvo.'); edit = null; await carregar(); return d; };
