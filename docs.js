@@ -274,9 +274,9 @@
       <img class="ct-logo" src="assets/docs/logo-sei.png?v=3" alt="">
       <div class="ct-cab"><img class="ct-selo" src="assets/docs/selo-n1.png?v=1" alt="Número 1 em aprovação"><b>CARTEIRA DE ESTUDANTE</b><em class="ct-ano">${esc(d.ano || '')}</em></div>
       <div class="ct-foto">${d.foto ? `<img src="${d.foto}" alt="">` : '<span>FOTO<br>3×4</span>'}</div>
-      <div class="ct-dados"><div class="ct-nome">${esc(d.aluno || '')}</div>${linha('Turma', tur)}<div class="ct-2">${linha('Turno', d.turno)}${linha('Matrícula', d.matricula)}</div>${linha('Nascimento', fmt(d.nasc))}</div>
-      <div class="ct-luz"></div><img class="ct-masc" src="assets/docs/mascote-sei.png?v=10" alt="">
-      <div class="ct-rod"><span>${esc(sg.toUpperCase())}</span><span>VÁLIDA ATÉ ${fmt(d.validade) || '31/12/' + (d.ano || '')}</span></div></div>`;
+      <div class="ct-dados"><div class="ct-nome">${esc(d.aluno || '')}</div>${linha('Turma', tur)}<div class="ct-2">${linha('Turno', d.turno)}${linha('Matrícula', d.matricula)}</div><div class="ct-2">${linha('Nascimento', fmt(d.nasc))}${linha('Válida até', fmt(d.validade) || '31/12/' + (d.ano || ''))}</div></div>
+      <div class="ct-luz"></div><img class="ct-masc" src="assets/docs/mascote-sei.png?v=11" alt="">
+      <div class="ct-rod"><span>${esc(sg.toUpperCase())} · ANO LETIVO ${esc(d.ano || '')}</span></div></div>`;
     const verso = `<div class="cart cart-f cart-v">${CART_BG ? `<img class="ct-bg" src="${CART_BG.v}" alt="">` : ic(4, 70, 30, 12, 5) + ic(9, 3, 41, -10, 4.5)}<div class="ct-fx ct-fx2"></div><div class="ct-vtop"><img src="assets/docs/logo-sei.png?v=3" alt=""><span>IDENTIFICAÇÃO ESCOLAR</span></div>
       <div class="ct-vd">${linha('Responsável', d.resp)}<div class="ct-2">${linha('Telefone', d.tel)}${linha('Tipo sanguíneo', d.sangue)}</div>
       <p class="ct-aviso">Documento pessoal e intransferível. Apresente sempre que solicitado. Em caso de perda, comunique a secretaria.</p>
