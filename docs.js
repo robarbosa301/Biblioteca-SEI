@@ -529,7 +529,7 @@
   // célula do horário no estilo do cabeçalho: escura com moldura dourada (A), cor da disciplina (B) ou cartão com aba (C)
   const ART_D = { mat: 'matematica', port: 'lingua-portuguesa', ing: 'ingles', hist: 'historia', geo: 'geografia', ef: 'educacao-fisica', arte: 'arte', rel: 'ensino-religioso', cien: 'ciencias', esp: 'espanhol', bio: 'biologia', fis: 'fisica', quim: 'quimica', fil: 'filosofia', soc: 'sociologia', lit: 'literatura', red: 'redacao' };
   // cores dos títulos nos cabeçalhos das folhas de cada disciplina
-  const COR_HEAD = { mat: '#1565d8', port: '#b0121b', ing: '#c4161c', hist: '#9b2216', geo: '#1f7a3a', ef: '#1e7a24', arte: '#9c1c94', rel: '#b8860b', cien: '#0e4cd8', esp: '#c8102e', bio: '#1b7a2a', fis: '#0a58c7', quim: '#7b1fa2', fil: '#8a3a1a', soc: '#3d6b2a', lit: '#7a3412', red: '#9b1022' };
+  const COR_HEAD = { mat: '#0a6de5', port: '#850f10', ing: '#a10d0f', hist: '#7b1308', geo: '#164526', ef: '#0d450f', arte: '#680564', rel: '#b8860b', cien: '#0e4cd8', esp: '#a30819', bio: '#07501e', fis: '#044cc5', quim: '#6b05a0', fil: '#6d1608', soc: '#1f4d1f', lit: '#67220b', red: '#70071a' };
   const corHead = n => COR_HEAD[icoDe(n || '')] || corDisc(n);
   const escurece = (hex, k) => { const m = /^#(..)(..)(..)$/.exec(hex); return m ? '#' + [1, 2, 3].map(i => Math.round(parseInt(m[i], 16) * k).toString(16).padStart(2, '0')).join('') : hex; };
   function celHor(c, est) {
@@ -541,7 +541,7 @@
     if (est === 'C') return `<td class="hc hcC"><div class="hcx"><div class="hcC-h" style="background:${cor}"><img src="${icoSrc(c.d || c.p, '#ffffff', 1.8)}" alt=""><b>${nome}</b></div>${prof ? `<small>${prof}</small>` : '<small>&nbsp;</small>'}</div></td>`;
     const ch = corHead(c.d || c.p), arteK = icoDe(c.d || '') === 'arte', ingK = icoDe(c.d || '') === 'ing';
     const tira = arteK ? 'linear-gradient(180deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#8e24aa)' : ingK ? 'linear-gradient(180deg,#0648d0 0 50%,#ffffff 50% 60%,#d90e12 60%)' : '#ffd34d';
-    return `<td class="hc hcA"><div class="hcx" style="background:${arteK ? 'linear-gradient(135deg,#c2189b,#7b1fa2 70%)' : `linear-gradient(135deg,${ch} 0%,${escurece(ch, .62)} 100%)`}">${ART_D[icoDe(c.d || '')] ? `<img class="hc-tr" src="assets/horario/tracos-${ART_D[icoDe(c.d || '')]}.png?v=1" alt="">` : `<img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt="">`}<i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+    return `<td class="hc hcA"><div class="hcx" style="background:${arteK ? 'linear-gradient(135deg,#8e1f8a,#680564 60%,#4a0347)' : `linear-gradient(135deg,${tintaHex(ch, .78)} 0%,${ch} 55%,${escurece(ch, .8)} 100%)`}">${ART_D[icoDe(c.d || '')] ? `<img class="hc-tr" src="assets/horario/tracos-${ART_D[icoDe(c.d || '')]}.png?v=1" alt="">` : `<img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt="">`}<i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
   }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
