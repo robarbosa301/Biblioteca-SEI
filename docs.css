@@ -294,3 +294,4 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .ct-masc{bottom:3.6mm;height:30.5mm;right:-.8mm}.ct-luz{position:absolute;right:-6mm;bottom:2mm;width:40mm;height:34mm;border-radius:50%;background:radial-gradient(ellipse at center,rgba(90,180,255,.55) 0,rgba(60,140,255,.25) 40%,rgba(60,140,255,0) 70%);z-index:0}
 .ct-masc{bottom:2.15mm;height:30mm;right:.2mm;z-index:3}.ct-rod{z-index:2}.ct-luz{z-index:1}
 .ct-masc{bottom:2.43mm;height:27mm;right:-.6mm}.ct-dados{right:28mm}.ct-2{gap:.8mm}
+.ct-masc{bottom:5mm;height:25mm;right:-.4mm;z-index:1}.ct-luz{display:none}
