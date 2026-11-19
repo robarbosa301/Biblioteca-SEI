@@ -155,7 +155,7 @@
       titulo: d => `Horário — ${d.turma || ''}${d.classe ? ' ' + d.classe : ''}${d.turno ? ' (' + d.turno + ')' : ''}`,
       novo: () => ({ turma: '6º ano', turno: 'Manhã', dias: 'Segunda a sexta', aulas: [['07:00', '07:50'], ['07:50', '08:40'], ['08:40', '09:30'], ['INTERVALO', ''], ['09:50', '10:40'], ['10:40', '11:30']], grade: {} }),
       form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
-        <div class="g3">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}${lab('Estilo das aulas', `<select id="estiloCel">${[['D', 'Arte da disciplina (como nas folhas)'], ['A', 'A — escuro com moldura dourada'], ['B', 'B — na cor da disciplina'], ['C', 'C — cartão com aba colorida']].map(([k, t]) => `<option value="${k}" ${(d.estiloCel || 'D') === k ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}</div>
+        <div class="g3">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}${lab('Estilo das aulas', `<select id="estiloCel">${[['A', 'Escuro com moldura dourada (cor de cada disciplina)'], ['D', 'Arte da disciplina (como nas folhas)'], ['B', 'B — na cor da disciplina'], ['C', 'C — cartão com aba colorida']].map(([k, t]) => `<option value="${k}" ${(d.estiloCel || 'A') === k ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}</div>
         <p class="dica">Em cada horário, escolha a disciplina e o professor. Para o intervalo, escreva <b>INTERVALO</b> no início. O site avisa quando o professor não pode naquele dia e turno, ou já está em outra turma no mesmo horário.</p><div id="alertas" class="alertas"></div><datalist id="profsDL"></datalist>
         <div class="tab"><table class="grade" id="grade"></table></div><button type="button" class="b" id="maisAula">➕ Mais um horário</button>`,
       campos: ['turma', 'classe', 'turno', 'dias', 'data', 'estiloCel'],
@@ -528,6 +528,10 @@
   const icoSrc = (n, cor, sw) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='64' height='64' fill='none' stroke='${cor}' stroke-width='${sw || 1.5}' stroke-linecap='round' stroke-linejoin='round'>${ICO_D[icoDe(n)].replace(/fill="C"/g, `fill="${cor}"`).replace(/"/g, "'")}</svg>`);
   // célula do horário no estilo do cabeçalho: escura com moldura dourada (A), cor da disciplina (B) ou cartão com aba (C)
   const ART_D = { mat: 'matematica', port: 'lingua-portuguesa', ing: 'ingles', hist: 'historia', geo: 'geografia', ef: 'educacao-fisica', arte: 'arte', rel: 'ensino-religioso', cien: 'ciencias', esp: 'espanhol', bio: 'biologia', fis: 'fisica', quim: 'quimica', fil: 'filosofia', soc: 'sociologia', lit: 'literatura', red: 'redacao' };
+  // cores dos títulos nos cabeçalhos das folhas de cada disciplina
+  const COR_HEAD = { mat: '#0d54d7', port: '#d2114c', ing: '#0648d0', hist: '#0a4dda', geo: '#0c4fd0', ef: '#0b4fcd', arte: '#c9057e', rel: '#b8860b', cien: '#0e4cd8', esp: '#db1e3b', bio: '#1b7a2a', fis: '#0a58c7', quim: '#7b1fa2', fil: '#a04a1a', soc: '#1f6b3a', lit: '#8a3a12', red: '#b0182a' };
+  const corHead = n => COR_HEAD[icoDe(n || '')] || corDisc(n);
+  const escurece = (hex, k) => { const m = /^#(..)(..)(..)$/.exec(hex); return m ? '#' + [1, 2, 3].map(i => Math.round(parseInt(m[i], 16) * k).toString(16).padStart(2, '0')).join('') : hex; };
   function celHor(c, est) {
     const cor = corDisc(c.d || c.p), nome = esc(c.d || ''), prof = c.p ? esc(c.p) : '';
     const art = ART_D[icoDe(c.d || '')];
@@ -535,7 +539,9 @@
     if ((est || 'D') === 'D') est = 'A';
     if (est === 'B') return `<td class="hc hcB" style="background:linear-gradient(135deg,${cor},${tintaHex(cor, .7)})"><div class="hcx"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(255,255,255,.55)', 1.6)}" alt=""><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
     if (est === 'C') return `<td class="hc hcC"><div class="hcx"><div class="hcC-h" style="background:${cor}"><img src="${icoSrc(c.d || c.p, '#ffffff', 1.8)}" alt=""><b>${nome}</b></div>${prof ? `<small>${prof}</small>` : '<small>&nbsp;</small>'}</div></td>`;
-    return `<td class="hc hcA"><div class="hcx"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(140,210,255,.5)', 1.5)}" alt=""><i style="background:${cor}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+    const ch = corHead(c.d || c.p), arteK = icoDe(c.d || '') === 'arte', ingK = icoDe(c.d || '') === 'ing';
+    const tira = arteK ? 'linear-gradient(180deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#8e24aa)' : ingK ? 'linear-gradient(180deg,#0648d0 0 50%,#d90e12 50%)' : ch;
+    return `<td class="hc hcA"><div class="hcx" style="background:linear-gradient(135deg,${escurece(ch, .72)} 0%,#0a2370 60%,#071c55 100%)"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt=""><i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
   }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
@@ -546,8 +552,8 @@
       <table class="hor-top"><tr><td class="ht-tur"><small>TURMA</small><b>${esc(tur || '—')}</b></td><td class="ht-i"><small>TURNO</small><b>${esc(d.turno || '—')}</b></td><td class="ht-i"><small>DIAS</small><b>${esc(d.dias || '')}</b></td><td class="ht-i"><small>VÁLIDO A PARTIR DE</small><b>${fmt(d.data) || '—'}</b></td><td class="ht-i"><small>AULAS POR SEMANA</small><b>${Object.values(g).filter(c => c.d).length}</b></td></tr></table>
       <table class="hor-t"><thead><tr><th class="hh">Horário</th>${dias.map((x, i) => `<th style="background:${['#1e6fe8', '#0a9d74', '#5b3cc4', '#f0671f', '#d6336c', '#0d8f8f'][i]}">${x}</th>`).join('')}</tr></thead><tbody>
       ${(d.aulas || []).map((a, i) => { if (/^interv/i.test(a[0])) return `<tr class="hiv"><td colspan="${dias.length + 1}">☕ INTERVALO${a[1] ? ' · ' + esc(a[1]) : ''}</td></tr>`; n++;
-        return `<tr><td class="hh"><em>${n}º</em><b>${esc(a[0])}</b>${a[1] ? `<small>${esc(a[1])}</small>` : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; if (!c.d && !c.p) return '<td class="hc vazio"></td>'; return celHor(c, d.estiloCel || window.SEI_HCEL || 'D'); }).join('')}</tr>`; }).join('')}</tbody></table>
-      ${usados.size ? `<div class="hor-leg"><h4>Professores da turma</h4><div>${[...usados].map(([dsc, ps]) => `<span style="border-color:${corDisc(dsc)}"><i style="background:${corDisc(dsc)}"></i><b>${esc(dsc)}</b>${ps.size ? ' — ' + esc([...ps].join(', ')) : ''}</span>`).join('')}</div></div>` : ''}`;
+        return `<tr><td class="hh"><em>${n}º</em><b>${esc(a[0])}</b>${a[1] ? `<small>${esc(a[1])}</small>` : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; if (!c.d && !c.p) return '<td class="hc vazio"></td>'; return celHor(c, d.estiloCel || window.SEI_HCEL || 'A'); }).join('')}</tr>`; }).join('')}</tbody></table>
+      ${usados.size ? `<div class="hor-leg"><h4>Professores da turma</h4><div>${[...usados].map(([dsc, ps]) => `<span style="border-color:${corHead(dsc)}"><i style="background:${corHead(dsc)}"></i><b>${esc(dsc)}</b>${ps.size ? ' — ' + esc([...ps].join(', ')) : ''}</span>`).join('')}</div></div>` : ''}`;
   }
 
   /* ---------- Horários: professores, disponibilidade e conflitos ---------- */
