@@ -3,7 +3,7 @@
    no próprio aparelho. Devolve imagens prontas para a impressão, o PDF e o Word. */
 (function () {
   'use strict';
-  const BASE = { cab: 'assets/docs/folha-cab.jpg?v=1', fundo: 'assets/docs/folha-fundo.jpg?v=1', logo: 'assets/docs/logo-sei.jpg?v=1', logoT: 'assets/docs/logo-sei.png?v=1' };
+  const BASE = { cab: 'assets/docs/folha-cab.jpg?v=1', fundo: 'assets/docs/folha-fundo.jpg?v=1', logo: 'assets/docs/logo-sei.jpg?v=1', logoT: 'assets/docs/logo-sei.png?v=3' };
   const FONTES = [['SEI Rubik', 'assets/fonts/Rubik-ExtraBold.ttf', '800'], ['SEI Barlow', 'assets/fonts/BarlowCondensed-SemiBold.ttf', '600'], ['SEI Poppins', 'assets/fonts/Poppins-Bold.ttf', '700']];
   let pronto = null;
   const img = src => new Promise((ok, er) => { const i = new Image(); i.onload = () => ok(i); i.onerror = er; i.src = src; });
@@ -154,10 +154,10 @@
     rr(x, 34, 22, 1172, 268, 26); const gd = x.createLinearGradient(0, 0, 1240, 0); gd.addColorStop(0, '#b8860b'); gd.addColorStop(.5, '#ffe58a'); gd.addColorStop(1, '#b8860b'); x.strokeStyle = gd; x.lineWidth = 3; x.stroke();
     rr(x, 44, 32, 1152, 248, 20); x.strokeStyle = 'rgba(255,229,138,.35)'; x.lineWidth = 1.2; x.stroke();
     // centro: instituição, título, setor
-    const cx = 690, w = 470; x.textAlign = 'center'; x.textBaseline = 'middle';
+    const cx = 660, w = 470, wt = 530; x.textAlign = 'center'; x.textBaseline = 'middle';
     x.font = F(600, 25, 'SEI Barlow'); x.fillStyle = vidro ? '#a07812' : '#ffd34d'; const inst = 'S I S T E M A   D E   E N S I N O   I N C E N T I V O'; cabe(x, inst, w, 25, 'SEI Barlow', 600, 14); x.fillText(inst, cx, 66);
-    const T = o.titulo.toUpperCase(); let linhas = [T]; let p = cabe(x, T, w, 60, 'SEI Rubik', 800, 30);
-    if (p < 40 && T.includes(' ')) { linhas = duas(T); p = Math.min(...linhas.map(t => cabe(x, t, w, 44, 'SEI Rubik', 800, 22))); }
+    const T = o.titulo.toUpperCase(); let linhas = [T]; let p = cabe(x, T, wt, 80, 'SEI Rubik', 800, 30);
+    if (p < 52 && T.includes(' ')) { linhas = duas(T); p = Math.min(...linhas.map(t => cabe(x, t, wt, 52, 'SEI Rubik', 800, 22))); }
     x.font = F(800, p, 'SEI Rubik'); const lh = p * 1.05; const y0 = 140 - (linhas.length - 1) * lh / 2;
     linhas.forEach((t, i) => { const y = y0 + i * lh; x.save(); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 8; x.shadowOffsetY = 3; const gt = x.createLinearGradient(0, y - p / 2, 0, y + p / 2); if (vidro) { x.shadowColor = 'rgba(11,42,107,.25)'; x.shadowBlur = 4; x.shadowOffsetY = 2; gt.addColorStop(0, '#0d47d9'); gt.addColorStop(1, '#071c55'); } else { gt.addColorStop(0, '#ffffff'); gt.addColorStop(1, '#cfe6ff'); } x.fillStyle = gt; x.fillText(t, cx, y); x.restore(); });
     // divisor com losango
