@@ -266,3 +266,19 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .calg-tot{flex:none;display:flex;align-items:center;gap:2.4mm;background:linear-gradient(90deg,#0b2a6b,#1e6fe8);color:#fff;border-radius:99px;padding:1.2mm 1.4mm 1.2mm 3.5mm;font:700 7.4pt Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .calg-tot b{font:800 10pt 'SEI Rubik',Arial,sans-serif;color:#ffd34d}.calg-tot .t{background:#ffd34d;color:#0b2a5b;border-radius:99px;padding:.6mm 2.4mm}.calg-tot .t b{color:#0b2a5b}.calg-tot small{font-size:6pt;color:#9fdcff;margin-right:1.5mm}
 .calg-pag .cm.mini .cm-t td{height:5.2mm;font-size:7.4pt}.calg{gap:3.4mm 2.8mm}.calg-ev>div{font-size:7pt}
+/* calendário por bimestre / trimestre */
+.cm-t td.fora{opacity:.22;box-shadow:none!important}
+.calp.c2{grid-template-columns:repeat(2,1fr);gap:4mm}.calp.c1{grid-template-columns:1fr;max-width:120mm;margin:0 auto}
+.calp.c2 .cm-t td,.calp.c1 .cm-t td{height:8mm;font-size:10.5pt}.calp.c2 .cm-h,.calp.c1 .cm-h{font-size:13pt;padding:2.4mm 3mm}.calp.c2 .cm-ev,.calp.c1 .cm-ev{font-size:7.8pt}
+.calg-div{width:100%;border-collapse:separate;border-spacing:0;min-width:0;margin:3mm 0 0;background:#fff;border-radius:3mm;box-shadow:0 .6mm 1.6mm rgba(11,42,107,.12)}
+.calg-div th,.calg-div td{border:0;position:static;background:none;padding:1.6mm 2.4mm;font:700 7.2pt Arial,sans-serif;color:#0b2a6b;text-align:left}
+.calg-div td span{display:inline-block;margin-right:2.5mm;color:#33415f}.calg-div td b{font:800 9pt 'SEI Rubik',Arial,sans-serif;color:#0a9d74}
+.dv-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.dv-t{width:100%;border-collapse:collapse;min-width:0;background:#f7faff;border-radius:10px;overflow:hidden}
+.dv-t th,.dv-t td{padding:4px 6px;border:0;font:600 13px system-ui;text-align:left;position:static;background:none}.dv-t thead th{background:#0b2a6b;color:#fff}
+.dv-t input{font:14px system-ui;padding:5px;border:1px solid #b9cce6;border-radius:7px;width:100%;max-width:150px}
+.calp.c4{grid-template-columns:repeat(2,1fr);gap:3mm 4mm}.calp.c4 .cm-t td{height:5.6mm;font-size:8.6pt}.calp.c4 .cm-ev{font-size:6.8pt}
+.calg-pag .cm.mini .cm-t td{height:4.5mm;font-size:7pt}.calg{gap:2.6mm 2.6mm}.calg-ev{margin-top:2mm;padding:1.6mm 3mm}.calg-ev>div{font-size:6.6pt}.calg-div{margin-top:2mm}
+.calg-pag .cm.mini .cm-t td{height:4.25mm}.calg-pag .calp-rod{margin-top:2mm}
+.calp.c3 .cm-t td{height:8.4mm;font-size:10pt}.calp.c3 .cm-h{font-size:12.5pt;padding:2.4mm 2.8mm}.calp.c3 .cm-ev{font-size:7.6pt}
+.dv-g{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}.dv-t input{max-width:140px}.dv-t th:first-child{white-space:nowrap}
