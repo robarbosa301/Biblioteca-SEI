@@ -315,3 +315,4 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .hor-t td.hcD{height:auto}
 .hor-t{table-layout:fixed}.hor-t th.hh,.hor-t td.hh{width:17mm}
 .hcA .hcx i{width:1.6mm}
+.hor-t td.hcA small{color:#ffe58a;text-shadow:0 .3mm .5mm rgba(0,0,0,.4)}.hcA b{text-shadow:0 .3mm .6mm rgba(0,0,0,.35)}

@@ -541,7 +541,7 @@
     if (est === 'C') return `<td class="hc hcC"><div class="hcx"><div class="hcC-h" style="background:${cor}"><img src="${icoSrc(c.d || c.p, '#ffffff', 1.8)}" alt=""><b>${nome}</b></div>${prof ? `<small>${prof}</small>` : '<small>&nbsp;</small>'}</div></td>`;
     const ch = corHead(c.d || c.p), arteK = icoDe(c.d || '') === 'arte', ingK = icoDe(c.d || '') === 'ing';
     const tira = arteK ? 'linear-gradient(180deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#8e24aa)' : ingK ? 'linear-gradient(180deg,#0648d0 0 50%,#d90e12 50%)' : ch;
-    return `<td class="hc hcA"><div class="hcx" style="background:linear-gradient(135deg,${escurece(ch, .72)} 0%,#0a2370 60%,#071c55 100%)"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt=""><i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+    return `<td class="hc hcA"><div class="hcx" style="background:${arteK ? 'linear-gradient(135deg,#c9057e,#7b1fa2 45%,#1e6fe8)' : `linear-gradient(135deg,${ch} 0%,${escurece(ch, .62)} 100%)`}"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt=""><i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
   }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
