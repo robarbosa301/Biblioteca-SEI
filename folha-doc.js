@@ -129,7 +129,12 @@
     const lc = document.createElement('canvas'); lc.width = 380; lc.height = 248; const lx = lc.getContext('2d'); lx.drawImage(l, 0, 0, 380, 248);
     lx.globalCompositeOperation = 'destination-in'; const rg = lx.createRadialGradient(190, 124, 70, 190, 124, 200); rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(.62, 'rgba(0,0,0,1)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); lx.fillStyle = rg; lx.fillRect(0, 0, 380, 248);
     if (vidro && lt) { const h = 236, w = h * lt.width / lt.height; x.save(); x.shadowColor = 'rgba(7,28,85,.35)'; x.shadowBlur = 10; x.shadowOffsetY = 3; x.drawImage(lt, 215 - w / 2, 40, w, h); x.restore(); }
-    else if (vidro) { x.save(); rr(x, 50, 38, 330, 236, 20); x.clip(); x.drawImage(l, 50, 38, 330, 236); x.restore(); rr(x, 50, 38, 330, 236, 20); x.strokeStyle = '#d7b44a'; x.lineWidth = 2; x.stroke(); } else x.drawImage(lc, 40, 32);
+    else if (vidro) { x.save(); rr(x, 50, 38, 330, 236, 20); x.clip(); x.drawImage(l, 50, 38, 330, 236); x.restore(); rr(x, 50, 38, 330, 236, 20); x.strokeStyle = '#d7b44a'; x.lineWidth = 2; x.stroke(); } else if (lt) { // escuro: logo sem fundo, com brilho azul atrás (como nas folhas)
+      const h = 240, w = h * lt.width / lt.height, lx0 = 212 - w / 2, ly0 = 36, gx = 205, gy = 160;
+      let g = x.createRadialGradient(gx, gy, 10, gx, gy, 210); g.addColorStop(0, 'rgba(70,170,255,.75)'); g.addColorStop(.45, 'rgba(30,111,232,.40)'); g.addColorStop(1, 'rgba(30,111,232,0)'); x.fillStyle = g; x.beginPath(); x.ellipse(gx, gy, 230, 150, 0, 0, Math.PI * 2); x.fill();
+      x.save(); x.globalAlpha = .35; x.strokeStyle = '#8fd4ff'; x.lineWidth = 2; for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; x.beginPath(); x.moveTo(gx + Math.cos(a) * 120, gy + Math.sin(a) * 78); x.lineTo(gx + Math.cos(a) * 200, gy + Math.sin(a) * 130); x.stroke(); } x.restore();
+      x.save(); x.shadowColor = 'rgba(0,10,40,.6)'; x.shadowBlur = 16; x.shadowOffsetY = 5; x.drawImage(lt, lx0, ly0, w, h); x.restore(); }
+    else x.drawImage(lc, 40, 32);
     x.restore();
     // moldura dourada fina do painel
     rr(x, 34, 22, 1172, 268, 26); const gd = x.createLinearGradient(0, 0, 1240, 0); gd.addColorStop(0, '#b8860b'); gd.addColorStop(.5, '#ffe58a'); gd.addColorStop(1, '#b8860b'); x.strokeStyle = gd; x.lineWidth = 3; x.stroke();
@@ -169,7 +174,7 @@
     const { c, f, l, lt } = await preparar();
     const cv = document.createElement('canvas'); cv.width = 1240; cv.height = 420; let x = cv.getContext('2d'); x.drawImage(c, 0, 0);
     if (o.estilo === 'folha') { placa(x, o.placa.grande, o.placa.linhas || []); titulo(x, o.titulo, 790, 210, 330, 90); barra(x, o.campos || []); seloF(x, ...(o.selo || [])); }
-    else cabFormal(x, o, l, o.estilo === 'claro' || o.estilo === 'claro2', o.estilo === 'claro2' ? lt : null);
+    else cabFormal(x, o, l, o.estilo === 'claro' || o.estilo === 'claro2', o.estilo === 'claro' ? null : lt);
     const cab = cv.toDataURL('image/jpeg', .9);
     const fv = document.createElement('canvas'); fv.width = 1240; fv.height = 1754; x = fv.getContext('2d'); x.drawImage(f, 0, 0);
     banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2));
