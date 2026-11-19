@@ -125,3 +125,14 @@ header h1 small{display:block;font-size:13px;font-weight:600;opacity:.8}
 .g2>*,.g3>*{min-width:0}
 input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-height:38px}
 @media (max-width:700px){body>header{position:static}}
+/* ===== Folha no estilo das folhas de aula ===== */
+.folha-cab,.folha-banda{display:block;max-width:none}
+.folha-banda{width:100%;border-radius:2.5mm;margin:0 0 3mm}
+@media print{
+ body.folha::before{background-image:var(--fundo-doc)!important}
+ body.folha #imprimir{padding:27mm 12mm 14mm}
+ body.folha #imprimir .folha-cab{width:210mm;margin:-27mm -12mm 3mm}
+}
+body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
+.doc-inep:empty{display:none}
+.doc-inep:empty{display:none}

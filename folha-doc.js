@@ -60,7 +60,7 @@
   function seloF(x, a, b) { x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillStyle = '#7fe3ff'; x.font = F(700, 15, 'SEI Poppins'); x.fillText(a || '', 1022, 326); if (b) { const p = cabe(x, b, 168, 26, 'SEI Poppins', 700, 12); x.font = F(700, p, 'SEI Poppins'); x.fillStyle = '#fff'; x.fillText(b, 1022, 357); } }
   function rodape(x, a, b, num, y, bx) {
     x.textBaseline = 'middle'; x.textAlign = 'left'; let xx = 36;
-    x.font = F(600, 27, 'SEI Barlow'); x.fillStyle = '#fff'; x.fillText(a, xx, y); xx += x.measureText(a).width + 14;
+    { const pa = cabe(x, a, 250, 27, 'SEI Barlow', 600, 14); x.font = F(600, pa, 'SEI Barlow'); } x.fillStyle = '#fff'; x.fillText(a, xx, y); xx += x.measureText(a).width + 14;
     if (b) { x.strokeStyle = '#2a8fe0'; x.lineWidth = 2; x.beginPath(); x.moveTo(xx, y - 15); x.lineTo(xx, y + 15); x.stroke(); xx += 14; const q = cabe(x, b, 445 - xx, 27, 'SEI Barlow', 600, 16); x.font = F(600, q, 'SEI Barlow'); x.fillStyle = '#45d4ff'; x.fillText(b, xx, y); }
     if (num) { x.textAlign = 'center'; const p = cabe(x, num, 46, 30, 'SEI Rubik', 800, 14); x.font = F(800, p, 'SEI Rubik'); x.fillStyle = '#0d47d9'; x.fillText(num, bx, y + 1); }
   }
@@ -202,7 +202,7 @@
       if (v) { const pp = cabe(x, v, b - a - wr, 19, 'SEI Poppins', 700, 10); x.font = F(700, pp, 'SEI Poppins'); x.fillStyle = '#0b1f5c'; x.fillText(v, a + wr, y); }
       else { x.strokeStyle = '#9aa9c8'; x.lineWidth = 1.2; x.beginPath(); x.moveTo(a + wr, y + 9); x.lineTo(b, y + 9); x.stroke(); } });
     // 3ª coluna: Nº de protocolo / via
-    x.textAlign = 'left'; x.font = F(700, 13, 'SEI Poppins'); x.fillStyle = '#6b7fa8'; x.fillText('EMITIDO POR', 906, 325); x.font = F(700, 17, 'SEI Poppins'); x.fillStyle = '#0b1f5c'; x.fillText(o.rodape ? o.rodape[0] : '', 906, 352 + 4);
+    x.textAlign = 'left'; x.font = F(700, 13, 'SEI Poppins'); x.fillStyle = '#6b7fa8'; x.fillText('EMITIDO POR', 906, 325); { const em = o.rodape ? o.rodape[0] : ''; const pe = cabe(x, em, 280, 17, 'SEI Poppins', 700, 10); x.font = F(700, pe, 'SEI Poppins'); x.fillStyle = '#0b1f5c'; x.fillText(em, 906, 352 + 4); }
   }
 
 

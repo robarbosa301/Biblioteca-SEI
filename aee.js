@@ -234,7 +234,19 @@
   /* ---------- impressão no formato da escola ---------- */
   // Cabeçalho: a arte aprovada do site (mascote, Nº 1 em aprovação e logo) com o título na faixa
   const tamTit = t => t.length <= 24 ? Math.min(22, Math.round(330 / Math.max(8, t.length) * 10) / 10) : Math.max(8.5, Math.min(11.5, Math.round(600 / t.length * 10) / 10));
-  const cab = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ATENDIMENTO EDUCACIONAL ESPECIALIZADO</div>`;
+  const cab0 = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ATENDIMENTO EDUCACIONAL ESPECIALIZADO</div>`;
+  // cabeçalho institucional (o mesmo da Secretaria e da Coordenação); o parecer mantém a capa própria
+  let FOLHA = null, nCabA = 0;
+  const cab = titulo => !FOLHA ? cab0(titulo) : (nCabA++ ? `<img class="folha-banda" src="${FOLHA.banda}" alt="">` : `<img class="folha-cab" src="${FOLHA.cab}" alt="">`);
+  const NOME_DOC = { perfil: 'Ficha do Aluno', atend: 'Ficha de Atendimento', 'atend-todos': 'Ficha de Atendimento', pei: 'Plano Educacional Individualizado' };
+  async function prepFolha(tipo, x) {
+    FOLHA = null; nCabA = 0; document.body.classList.remove('folha');
+    if (!window.seiFolha || !NOME_DOC[tipo] || !atual) return;
+    const tit = NOME_DOC[tipo], dt = x && x.data ? fmt(x.data) : x && x.ano ? (x.periodo || '') + ' ' + x.ano : fmt(new Date().toISOString().slice(0, 10));
+    const o = { estilo: 'formal', titulo: tit, curto: tit, placa: { grande: 'AEE', linhas: ['ATENDIMENTO', 'EDUCACIONAL'] }, campos: [['Documento', tit], ['Aluno(a)', atual.nome || ''], ['Data', dt], ['Turma', [atual.serie, atual.classe].filter(Boolean).join(' ')]], selo: ['COD. INEP', '15590798'], rodape: ['AEE', 'Atendimento Educacional Especializado'], num: 'SEI' };
+    FOLHA = await window.seiFolha.compor(o); nCabA = 0;
+    document.body.classList.add('folha'); document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);
+  }
   const rodape = () => `<div class="sei-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span><span class="rod-qr"><img src="assets/docs/qr-whatsapp.png" width="62" alt="QR Code do WhatsApp da escola"><br>Fale com a escola</span></div>`;
   const linha = (r, v) => `<tr><th>${r}</th><td>${v || '&nbsp;'}</td></tr>`;
   const bloco = (t, v, alto) => `<div class="doc-b"><h4>${t}</h4><div class="doc-t${alto ? ' alto' : ''}">${v ? br(v) : '&nbsp;'}</div></div>`;
@@ -268,11 +280,12 @@
     return '';
   }
   async function baixarAee(fmt, tipo, id) {
-    const h = await montarDoc(tipo, id); const nome = ({ perfil: 'Ficha do aluno', atend: 'Ficha de atendimento', pei: 'PEI', parecer: 'Parecer neuropsicopedagógico', 'atend-todos': 'Atendimentos' })[tipo] + ' - ' + atual.nome;
-    return fmt === 'pdf' ? seiBaixar.pdf(h, nome) : seiBaixar.word(h, nome);
+    const xs = tipo === 'atend' ? (await todos('atend')).find(x => x.id === id) : tipo === 'pei' ? (await todos('pei')).find(x => x.id === id) : null;
+    await prepFolha(tipo, xs); const h = await montarDoc(tipo, id); const nome = ({ perfil: 'Ficha do aluno', atend: 'Ficha de atendimento', pei: 'PEI', parecer: 'Parecer neuropsicopedagógico', 'atend-todos': 'Atendimentos' })[tipo] + ' - ' + atual.nome;
+    return fmt === 'pdf' ? seiBaixar.pdf(h, nome, FOLHA) : seiBaixar.word(h, nome);
   }
   async function imprimir(tipo, id) {
-    let h = '';
+    let h = ''; await prepFolha(tipo, tipo === 'atend' ? (await todos('atend')).find(x => x.id === id) : tipo === 'pei' ? (await todos('pei')).find(x => x.id === id) : null);
     if (tipo === 'perfil') h = docPerfil(atual);
     if (tipo === 'atend') h = docAtend(atual, (await todos('atend')).find(x => x.id === id));
     if (tipo === 'atend-todos') h = (await todos('atend')).filter(x => x.aluno === atual.id).sort((a, b) => (a.data || '').localeCompare(b.data || '')).map(x => docAtend(atual, x)).join('');
