@@ -51,7 +51,7 @@
   function paraWord(html) {
     const d = document.createElement('div'); d.innerHTML = html;
     d.querySelectorAll('.par-agua').forEach(x => x.remove()); // o Word não põe imagem atrás do texto
-    d.querySelectorAll('img.folha-cab,img.folha-banda').forEach(im => { const p = document.createElement('p'); p.setAttribute('align', 'center'); const h = im.classList.contains('folha-cab') ? 420 : 146; p.innerHTML = `<img src="${im.getAttribute('src')}" width="680" data-w="1240" data-h="${h}">`; im.replaceWith(p); });
+    d.querySelectorAll('img.folha-cab,img.folha-banda').forEach(im => { const p = document.createElement('p'); p.setAttribute('align', 'center'); const cabI = im.classList.contains('folha-cab'); const nw = im.naturalWidth || (cabI ? 1240 : 1172), nh = im.naturalHeight || (cabI ? 420 : 132); p.innerHTML = `<img src="${im.getAttribute('src')}" width="680" data-w="${nw}" data-h="${nh}">`; im.replaceWith(p); });
     d.querySelectorAll('.sei-cab').forEach(c => {
       const st = c.querySelector('strong'); const t = document.createElement('div');
       t.innerHTML = `<p align="center"><img src="assets/docs/cab-doc.jpg?v=3" width="680"></p><p class="w-tit-c">${st.innerHTML}</p>`;

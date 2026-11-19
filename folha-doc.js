@@ -132,6 +132,29 @@
       [[-150, -85, 34, .5], [175, -95, 26, .55], [190, 75, 40, .4], [-175, 70, 24, .55], [70, -118, 18, .6], [-50, 122, 28, .45], [240, -10, 16, .65], [-210, -5, 18, .6], [120, 128, 20, .5], [280, 60, 12, .6], [-100, -120, 12, .6]].forEach(([dx, dy, r, a]) => { const g = x.createRadialGradient(gx + dx, gy + dy, 0, gx + dx, gy + dy, r); g.addColorStop(0, `rgba(170,225,255,${a})`); g.addColorStop(1, 'rgba(170,225,255,0)'); x.fillStyle = g; x.beginPath(); x.arc(gx + dx, gy + dy, r, 0, Math.PI * 2); x.fill(); });
     }
   }
+
+  // faixa compacta no cabeçalho escuro (páginas 2 em diante e cada via dos avisos em 2 vias)
+  function bandaFormal(x, o, lt) {
+    const fv = x.canvas; x.drawImage(fv, 0, 1742, 1240, 10, 0, 0, 1240, 9); x.drawImage(fv, 0, 420, 34, 146, 0, 0, 34, 146); x.drawImage(fv, 1206, 420, 34, 146, 1206, 0, 34, 146); x.drawImage(fv, 34, 1742, 1172, 10, 34, 138, 1172, 8);
+    x.save(); rr(x, 34, 8, 1172, 132, 20); x.clip();
+    const g = x.createLinearGradient(0, 0, 1240, 0); g.addColorStop(0, '#0a2f86'); g.addColorStop(.5, '#071c55'); g.addColorStop(1, '#0a2f86'); x.fillStyle = g; x.fillRect(0, 0, 1240, 150);
+    x.globalAlpha = .05; x.strokeStyle = '#9fdcff'; x.lineWidth = 2; for (let k = -400; k < 1400; k += 22) { x.beginPath(); x.moveTo(k, 150); x.lineTo(k + 150, 0); x.stroke(); } x.globalAlpha = 1;
+    x.save(); x.translate(0, -6); x.scale(1, .5); desenhos(x, 'rgba(120,200,255,.20)'); x.restore();
+    if (lt) { const h = 118, w = h * lt.width / lt.height; x.save(); x.shadowColor = 'rgba(0,10,40,.6)'; x.shadowBlur = 10; x.shadowOffsetY = 3; x.drawImage(lt, 145 - w / 2, 14, w, h); x.restore(); }
+    x.restore();
+    rr(x, 34, 8, 1172, 132, 20); const gd = x.createLinearGradient(0, 0, 1240, 0); gd.addColorStop(0, '#b8860b'); gd.addColorStop(.5, '#ffe58a'); gd.addColorStop(1, '#b8860b'); x.strokeStyle = gd; x.lineWidth = 3; x.stroke();
+    const cx = 610, w = 560; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.font = F(600, 17, 'SEI Barlow'); x.fillStyle = '#ffd34d'; x.fillText('S I S T E M A   D E   E N S I N O   I N C E N T I V O', cx, 30);
+    const T = o.titulo.toUpperCase(); const p = cabe(x, T, w, 46, 'SEI Rubik', 800, 20); x.font = F(800, p, 'SEI Rubik');
+    x.save(); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 6; x.shadowOffsetY = 2; const gt = x.createLinearGradient(0, 50, 0, 92); gt.addColorStop(0, '#fff'); gt.addColorStop(1, '#cfe6ff'); x.fillStyle = gt; x.fillText(T, cx, 70); x.restore();
+    const cs = (o.campos || []).filter(c => c[1]).slice(0, 2).map(([r, v]) => `${r}: ${v}`); const sub = [((o.rodape || [])[0] || '').toUpperCase(), ...cs].filter(Boolean).join('   ·   ');
+    const q = cabe(x, sub, w + 40, 16, 'SEI Poppins', 700, 10); x.font = F(700, q, 'SEI Poppins'); x.fillStyle = '#9fdcff'; x.fillText(sub, cx, 112);
+    // selo pequeno
+    const sx = 1100, sy = 74, R = 52; const gs = x.createLinearGradient(sx - R, sy - R, sx + R, sy + R); gs.addColorStop(0, '#fff1a8'); gs.addColorStop(.35, '#e6b422'); gs.addColorStop(.7, '#fff0a0'); gs.addColorStop(1, '#b8860b');
+    x.beginPath(); x.arc(sx, sy, R, 0, Math.PI * 2); x.fillStyle = gs; x.fill(); x.beginPath(); x.arc(sx, sy, R - 6, 0, Math.PI * 2); x.fillStyle = '#0b2363'; x.fill();
+    x.beginPath(); x.arc(sx, sy, R - 12, 0, Math.PI * 2); x.strokeStyle = 'rgba(230,180,34,.9)'; x.lineWidth = 1.5; x.stroke();
+    x.font = F(700, 11, 'SEI Poppins'); x.fillStyle = '#9fdcff'; x.fillText('COD. INEP', sx, sy - 13); x.font = F(800, 17, 'SEI Rubik'); x.fillStyle = '#fff'; x.fillText('15590798', sx, sy + 5); x.font = F(700, 9, 'SEI Poppins'); x.fillStyle = '#ffd34d'; x.fillText('CEE · 614/2024', sx, sy + 23);
+  }
   function cabFormal(x, o, l, vidro, lt) {
     // painel
     x.save(); rr(x, 34, 22, 1172, 268, 26); x.clip();
@@ -193,11 +216,12 @@
     const fv = document.createElement('canvas'); fv.width = 1240; fv.height = 1754; x = fv.getContext('2d'); x.drawImage(f, 0, 0);
     // marca-d'água: a logo da escola, bem clara, no centro da área branca (todas as páginas)
     if (o.agua !== false && lt) { const w = 760, h = w * lt.height / lt.width; x.save(); x.globalAlpha = .07; x.drawImage(lt, 620 - w / 2, 1000 - h / 2, w, h); x.restore(); }
-    banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2));
+    if (o.estilo === 'folha') banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2));
+    else bandaFormal(x, o, lt);
     rodape(x, ...(o.rodape || ['', '']), o.num || '', 1715, 1175);
     const fundo = fv.toDataURL('image/jpeg', .88);
     // faixa de cima da folha 2 (para os avisos com 2 cópias por folha)
-    const bv = document.createElement('canvas'); bv.width = 1240; bv.height = 146; bv.getContext('2d').drawImage(fv, 0, 0);
+    const bv = document.createElement('canvas'); if (o.estilo === 'folha') { bv.width = 1240; bv.height = 146; bv.getContext('2d').drawImage(fv, 0, 0); } else { bv.width = 1172; bv.height = 132; bv.getContext('2d').drawImage(fv, 34, 8, 1172, 132, 0, 0, 1172, 132); }
     const r = { cab, fundo, banda: bv.toDataURL('image/jpeg', .9) }; cache.set(k, r); return r;
   }
   window.seiFolha = { compor, preparar };
