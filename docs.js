@@ -260,20 +260,21 @@
     depois: d => ligaFoto(d),
     doc: d => docCarteirinha(d)
   };
+  let CART_BG = null;
   function docCarteirinha(d) {
     const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : (Object.values(SEGS).find(g => g.turmas.includes(d.turma)) || {}).nome || '';
     const tur = [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '');
     const linha = (r, v) => `<div class="ct-l"><small>${r}</small><b>${esc(v || '—')}</b></div>`;
     const ic = (k, x, y, r, sz) => `<img class="ct-ic" style="left:${x}mm;top:${y}mm;width:${sz}mm;transform:rotate(${r}deg)" alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='48' height='48' fill='none' stroke='#9fdcff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'>${ICO_MES[k]}</svg>`)}">`;
     const fundoIc = ic(3, 30, 7, -12, 6) + ic(10, 61, 28, 10, 6) + ic(11, 49, 3.5, 15, 4) + ic(0, 4, 47, 0, 4.5) + ic(6, 25, 44, -20, 4);
-    const frente = `<div class="cart cart-f">${fundoIc}<div class="ct-fx"></div>
+    const frente = `<div class="cart cart-f">${CART_BG ? `<img class="ct-bg" src="${CART_BG.f}" alt="">` : fundoIc}<div class="ct-fx"></div>
       <img class="ct-logo" src="assets/docs/logo-sei.png?v=3" alt="">
       <div class="ct-cab"><img class="ct-selo" src="assets/docs/selo-n1.png?v=1" alt="Número 1 em aprovação"><b>CARTEIRA DE ESTUDANTE</b><em class="ct-ano">${esc(d.ano || '')}</em></div>
       <div class="ct-foto">${d.foto ? `<img src="${d.foto}" alt="">` : '<span>FOTO<br>3×4</span>'}</div>
       <div class="ct-dados"><div class="ct-nome">${esc(d.aluno || '')}</div>${linha('Turma', tur)}<div class="ct-2">${linha('Turno', d.turno)}${linha('Matrícula', d.matricula)}</div>${linha('Nascimento', fmt(d.nasc))}</div>
       <img class="ct-masc" src="assets/docs/mascote-sei.png?v=1" alt="">
       <div class="ct-rod"><span>${esc(sg.toUpperCase())}</span><span>VÁLIDA ATÉ ${fmt(d.validade) || '31/12/' + (d.ano || '')}</span></div></div>`;
-    const verso = `<div class="cart cart-f cart-v">${ic(4, 70, 30, 12, 5) + ic(9, 3, 41, -10, 4.5)}<div class="ct-fx ct-fx2"></div><div class="ct-vtop"><img src="assets/docs/logo-sei.png?v=3" alt=""><span>IDENTIFICAÇÃO ESCOLAR</span></div>
+    const verso = `<div class="cart cart-f cart-v">${CART_BG ? `<img class="ct-bg" src="${CART_BG.v}" alt="">` : ic(4, 70, 30, 12, 5) + ic(9, 3, 41, -10, 4.5)}<div class="ct-fx ct-fx2"></div><div class="ct-vtop"><img src="assets/docs/logo-sei.png?v=3" alt=""><span>IDENTIFICAÇÃO ESCOLAR</span></div>
       <div class="ct-vd">${linha('Responsável', d.resp)}<div class="ct-2">${linha('Telefone', d.tel)}${linha('Tipo sanguíneo', d.sangue)}</div>
       <p class="ct-aviso">Documento pessoal e intransferível. Apresente sempre que solicitado. Em caso de perda, comunique a secretaria.</p>
       <div class="ct-ass"><span></span>${esc(d.assinante || '')}<br><small>Direção</small></div></div>
@@ -364,6 +365,7 @@
     const pl = PLACA[SETOR] || PLACA.secretaria; const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : '';
     const o = { titulo: tit, curto: tit, placa: { grande: pl[0], linhas: [pl[1], sg.toUpperCase()] }, campos: faixa(d), selo: ['COD. INEP', INEP], rodape: [NOME_SETOR, sg || 'Sistema de Ensino Incentivo'], num: 'SEI', estilo: new URLSearchParams(location.search).get('cab') || 'formal' };
     if (d.copias === '2') { o.agua = 'duas'; o.campos = o.campos.filter(c => c[0] === 'Documento'); }
+    if (d.tipo === 'carteirinha' && window.seiFolha.cartaoFundo) CART_BG = { f: await seiFolha.cartaoFundo(false), v: await seiFolha.cartaoFundo(true) };
     if (TIPOS[d.tipo].arte) Object.assign(o, TIPOS[d.tipo].arte(d));
     FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2' }); nCab = 0;
     document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);

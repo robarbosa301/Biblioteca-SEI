@@ -204,6 +204,33 @@
     // 3ª coluna: Nº de protocolo / via
     x.textAlign = 'left'; x.font = F(700, 13, 'SEI Poppins'); x.fillStyle = '#6b7fa8'; x.fillText('EMITIDO POR', 906, 325); x.font = F(700, 17, 'SEI Poppins'); x.fillStyle = '#0b1f5c'; x.fillText(o.rodape ? o.rodape[0] : '', 906, 352 + 4);
   }
+
+  /* fundo da carteirinha: azul com desenhos de traço, faixas de luz, brilhos e pontinhos */
+  const fundoCart = {};
+  function cartaoFundo(verso) {
+    const k = verso ? 'v' : 'f'; if (fundoCart[k]) return fundoCart[k];
+    const W = 1011, H = 638, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    let sd = verso ? 7 : 3; const rnd = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+    let g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#051238'); g.addColorStop(.5, '#0a2f86'); g.addColorStop(1, '#1652c9'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    const glow = (cx, cy, r, cor) => { const gg = x.createRadialGradient(cx, cy, 0, cx, cy, r); gg.addColorStop(0, cor); gg.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gg; x.fillRect(0, 0, W, H); };
+    glow(verso ? 180 : 820, verso ? 520 : 170, 420, 'rgba(60,150,255,.45)'); glow(verso ? 900 : 90, verso ? 90 : 560, 300, 'rgba(255,211,77,.10)');
+    // linhas diagonais finas
+    x.save(); x.globalAlpha = .06; x.strokeStyle = '#bfe6ff'; x.lineWidth = 1.5; for (let i = -H; i < W; i += 16) { x.beginPath(); x.moveTo(i, H); x.lineTo(i + H, 0); x.stroke(); } x.restore();
+    // trama de pontinhos num canto
+    x.save(); x.fillStyle = '#9fdcff'; for (let yy = 0; yy < 220; yy += 14) for (let xx = 0; xx < 260; xx += 14) { const d = Math.hypot(xx, yy) / 330; if (d > 1) continue; x.globalAlpha = .28 * (1 - d); x.beginPath(); x.arc(verso ? W - 20 - xx : W - 20 - xx, verso ? H - 60 - yy : 20 + yy, 2.6 * (1 - d) + .6, 0, Math.PI * 2); x.fill(); } x.restore();
+    // desenhos de traço espalhados
+    const nomes = Object.keys(ICONES); x.save(); x.strokeStyle = 'rgba(150,215,255,.26)'; x.fillStyle = 'rgba(150,215,255,.26)'; x.lineWidth = 2.4; x.lineJoin = 'round'; x.lineCap = 'round';
+    for (let yy = 40; yy < H; yy += 105) for (let xx = 40 + (yy / 105 % 2) * 60; xx < W; xx += 130) { const n = nomes[Math.floor(rnd() * nomes.length)]; x.save(); x.translate(xx + rnd() * 30 - 15, yy + rnd() * 24 - 12); x.rotate(rnd() * .8 - .4); const sc = .75 + rnd() * .5; x.scale(sc, sc); ICONES[n](x); x.restore(); }
+    x.restore();
+    // faixas de luz curvas
+    [[0, .9, 6], [30, .55, 3], [-26, .4, 2.2]].forEach(([d, a, w]) => { const lg = x.createLinearGradient(0, 0, W, 0); lg.addColorStop(0, 'rgba(140,215,255,0)'); lg.addColorStop(.35, `rgba(170,230,255,${a})`); lg.addColorStop(.7, `rgba(255,220,120,${a * .7})`); lg.addColorStop(1, 'rgba(255,220,120,0)');
+      x.strokeStyle = lg; x.lineWidth = w; x.beginPath(); if (verso) { x.moveTo(-40, 470 + d); x.bezierCurveTo(300, 600 + d, 650, 380 + d, W + 40, 520 + d); } else { x.moveTo(-40, 600 + d); x.bezierCurveTo(260, 540 + d, 600, 660 + d, W + 40, 470 + d); } x.stroke(); });
+    // brilhos
+    const brilho = (bx, by, r, a) => { x.save(); x.globalAlpha = a; x.fillStyle = '#fff'; x.beginPath(); x.moveTo(bx, by - r); x.quadraticCurveTo(bx, by, bx + r, by); x.quadraticCurveTo(bx, by, bx, by + r); x.quadraticCurveTo(bx, by, bx - r, by); x.quadraticCurveTo(bx, by, bx, by - r); x.fill(); x.restore(); };
+    for (let i = 0; i < 16; i++) brilho(rnd() * W, rnd() * H, 6 + rnd() * 12, .25 + rnd() * .45);
+    x.save(); x.fillStyle = '#fff'; for (let i = 0; i < 60; i++) { x.globalAlpha = .15 + rnd() * .35; x.beginPath(); x.arc(rnd() * W, rnd() * H, .8 + rnd() * 1.8, 0, Math.PI * 2); x.fill(); } x.restore();
+    return (fundoCart[k] = c.toDataURL('image/jpeg', .9));
+  }
   const cache = new Map();
   /* o: { titulo, placa: {grande, linhas[]}, campos: [[rótulo, valor] x4], selo: [a, b], rodape: [a, b], num, curto } */
   async function compor(o) {
@@ -225,5 +252,5 @@
     const bv = document.createElement('canvas'); if (o.estilo === 'folha') { bv.width = 1240; bv.height = 146; bv.getContext('2d').drawImage(fv, 0, 0); } else { bv.width = 1172; bv.height = 132; bv.getContext('2d').drawImage(fv, 34, 8, 1172, 132, 0, 0, 1172, 132); }
     const r = { cab, fundo, banda: bv.toDataURL('image/jpeg', .9) }; cache.set(k, r); return r;
   }
-  window.seiFolha = { compor, preparar };
+  window.seiFolha = { compor, preparar, cartaoFundo: v => preparar().then(() => cartaoFundo(v)) };
 })();
