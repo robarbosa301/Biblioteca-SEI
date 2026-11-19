@@ -542,7 +542,7 @@
     if (est === 'C') return `<td class="hc hcC"><div class="hcx"><div class="hcC-h" style="background:${cor}"><img src="${icoSrc(c.d || c.p, '#ffffff', 1.8)}" alt=""><b>${nome}</b></div>${prof ? `<small>${prof}</small>` : '<small>&nbsp;</small>'}</div></td>`;
     const ch = corHead(c.d || c.p), arteK = icoDe(c.d || '') === 'arte', ingK = icoDe(c.d || '') === 'ing';
     const tira = arteK ? 'linear-gradient(180deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#8e24aa)' : ingK ? 'linear-gradient(180deg,#0648d0 0 50%,#ffffff 50% 60%,#d90e12 60%)' : '#ffd34d';
-    return `<td class="hc hcA"><div class="hcx" style="background:${(g => g ? `linear-gradient(180deg,${g[0]} 0%,${g[1]} 55%,${g[2]} 100%)` : `linear-gradient(180deg,${tintaHex(ch, .78)},${ch})`)(GRAD_HEAD[icoDe(c.d || '')])}">${ART_D[icoDe(c.d || '')] ? `<img class="hc-tr" src="assets/horario/tracos-${ART_D[icoDe(c.d || '')]}.png?v=1" alt="">` : `<img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt="">`}<i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+    return `<td class="hc hcA"><div class="hcx" style="background:${ART_D[icoDe(c.d || '')] ? `url(assets/horario/post-${ART_D[icoDe(c.d || '')]}.jpg?v=1) center/cover,` : ''}${(g => g ? `linear-gradient(180deg,${g[0]} 0%,${g[1]} 55%,${g[2]} 100%)` : `linear-gradient(180deg,${tintaHex(ch, .78)},${ch})`)(GRAD_HEAD[icoDe(c.d || '')])}">${ART_D[icoDe(c.d || '')] ? '' : `<img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(190,230,255,.5)', 1.5)}" alt="">`}<i style="background:${tira}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
   }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
