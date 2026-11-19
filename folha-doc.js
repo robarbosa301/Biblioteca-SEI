@@ -205,6 +205,31 @@
     x.textAlign = 'left'; x.font = F(700, 13, 'SEI Poppins'); x.fillStyle = '#6b7fa8'; x.fillText('EMITIDO POR', 906, 325); x.font = F(700, 17, 'SEI Poppins'); x.fillStyle = '#0b1f5c'; x.fillText(o.rodape ? o.rodape[0] : '', 906, 352 + 4);
   }
 
+
+  // desenhos de traço por disciplina (carteirinha)
+  const DISC = {
+    mat: x => { x.font = F(800, 46, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('π', -48, 0); x.beginPath(); x.moveTo(-10, 6); x.lineTo(0, 22); x.lineTo(16, -22); x.lineTo(56, -22); x.stroke(); x.font = F(700, 26, 'SEI Rubik'); x.strokeText('x²', 38, 2);
+      x.beginPath(); x.moveTo(-70, 48); x.lineTo(-20, 48); x.lineTo(-70, 12); x.closePath(); x.stroke(); x.font = F(800, 30, 'SEI Rubik'); x.strokeText('∑', 30, 48); },
+    port: x => { x.beginPath(); x.moveTo(0, -30); x.quadraticCurveTo(-26, -40, -52, -30); x.lineTo(-52, 30); x.quadraticCurveTo(-26, 20, 0, 30); x.quadraticCurveTo(26, 20, 52, 30); x.lineTo(52, -30); x.quadraticCurveTo(26, -40, 0, -30); x.lineTo(0, 30); x.stroke();
+      x.font = F(800, 24, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('Aa', -26, -4); x.beginPath(); for (const yy of [-10, 2, 14]) { x.moveTo(10, yy); x.lineTo(42, yy); } x.stroke();
+      x.beginPath(); x.moveTo(40, -60); x.quadraticCurveTo(70, -80, 78, -46); x.quadraticCurveTo(58, -40, 46, -26); x.closePath(); x.moveTo(46, -26); x.lineTo(34, -12); x.stroke(); },
+    cien: x => { x.beginPath(); x.moveTo(-18, -50); x.lineTo(-18, -8); x.lineTo(-44, 40); x.quadraticCurveTo(-46, 50, -36, 50); x.lineTo(36, 50); x.quadraticCurveTo(46, 50, 44, 40); x.lineTo(18, -8); x.lineTo(18, -50); x.moveTo(-26, -50); x.lineTo(26, -50); x.moveTo(-34, 22); x.lineTo(34, 22); x.stroke();
+      [[-12, 34, 4], [8, 30, 3], [0, 10, 3]].forEach(([a, b, r]) => { x.beginPath(); x.arc(a, b, r, 0, Math.PI * 2); x.stroke(); });
+      x.save(); x.translate(70, -10); for (let i = 0; i < 2; i++) { x.beginPath(); for (let t = 0; t <= 1.001; t += .05) { const yy = -40 + t * 80, xx = Math.sin(t * Math.PI * 2 + i * Math.PI) * 12; t ? x.lineTo(xx, yy) : x.moveTo(xx, yy); } x.stroke(); } for (let t = .1; t < 1; t += .2) { const yy = -40 + t * 80; x.beginPath(); x.moveTo(Math.sin(t * Math.PI * 2) * 12, yy); x.lineTo(Math.sin(t * Math.PI * 2 + Math.PI) * 12, yy); x.stroke(); } x.restore(); },
+    geo: x => { x.beginPath(); x.arc(0, 0, 40, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.ellipse(0, 0, 18, 40, 0, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.moveTo(-40, 0); x.lineTo(40, 0); x.moveTo(-35, -20); x.lineTo(35, -20); x.moveTo(-35, 20); x.lineTo(35, 20); x.stroke();
+      x.save(); x.translate(70, 30); x.beginPath(); x.arc(0, 0, 22, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.moveTo(0, -16); x.lineTo(5, 0); x.lineTo(0, 16); x.lineTo(-5, 0); x.closePath(); x.fill(); x.font = F(800, 11, 'SEI Poppins'); x.textAlign = 'center'; x.fillText('N', 0, -26); x.restore(); },
+    arte: x => { x.beginPath(); x.moveTo(0, -40); x.bezierCurveTo(46, -42, 62, 4, 40, 26); x.bezierCurveTo(24, 40, 22, 18, 6, 26); x.bezierCurveTo(-8, 34, 2, 48, -18, 44); x.bezierCurveTo(-54, 38, -56, -38, 0, -40); x.stroke();
+      [[-24, -14], [-4, -24], [18, -18], [-28, 12]].forEach(([a, b]) => { x.beginPath(); x.arc(a, b, 6, 0, Math.PI * 2); x.stroke(); }); x.beginPath(); x.moveTo(50, -50); x.lineTo(14, 4); x.moveTo(56, -44); x.lineTo(46, -56); x.stroke(); },
+    hist: x => { x.beginPath(); x.moveTo(-40, -36); x.lineTo(40, -36); x.lineTo(32, -46); x.lineTo(-32, -46); x.closePath(); x.moveTo(-36, 40); x.lineTo(36, 40); x.moveTo(-40, 48); x.lineTo(40, 48); for (const xx of [-26, -9, 9, 26]) { x.moveTo(xx - 5, -36); x.lineTo(xx - 5, 40); x.moveTo(xx + 5, -36); x.lineTo(xx + 5, 40); } x.stroke();
+      x.save(); x.translate(72, 4); x.beginPath(); x.moveTo(-14, -26); x.lineTo(14, -26); x.lineTo(-14, 26); x.lineTo(14, 26); x.closePath(); x.stroke(); x.restore(); },
+    quim: x => { [[-30, 0], [0, -18], [30, 0], [30, 34], [0, 52], [-30, 34]].forEach((p, i, l) => { const q = l[(i + 1) % 6]; x.beginPath(); x.moveTo(p[0], p[1]); x.lineTo(q[0], q[1]); x.stroke(); }); x.beginPath(); x.arc(0, 17, 16, 0, Math.PI * 2); x.stroke();
+      x.font = F(700, 20, 'SEI Rubik'); x.textAlign = 'center'; x.strokeText('H₂O', 70, -10); },
+    ingles: x => { x.beginPath(); x.moveTo(-60, -26); x.lineTo(60, -26); x.quadraticCurveTo(68, -26, 68, -18); x.lineTo(68, 18); x.quadraticCurveTo(68, 26, 60, 26); x.lineTo(-20, 26); x.lineTo(-36, 42); x.lineTo(-34, 26); x.lineTo(-60, 26); x.quadraticCurveTo(-68, 26, -68, 18); x.lineTo(-68, -18); x.quadraticCurveTo(-68, -26, -60, -26); x.stroke();
+      x.font = F(800, 24, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('Hello!', 0, 0); },
+    ef: x => { x.beginPath(); x.arc(0, 0, 36, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.moveTo(0, -12); for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; x.lineTo(Math.cos(a) * 13, Math.sin(a) * 13); } x.closePath(); x.fill();
+      for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; x.beginPath(); x.moveTo(Math.cos(a) * 13, Math.sin(a) * 13); x.lineTo(Math.cos(a) * 36, Math.sin(a) * 36); x.stroke(); } },
+    fis: x => { x.font = F(800, 30, 'SEI Rubik'); x.textAlign = 'center'; x.textBaseline = 'middle'; x.strokeText('E=mc²', 0, 0); x.beginPath(); x.ellipse(0, 0, 70, 24, -.2, 0, Math.PI * 2); x.stroke(); }
+  };
   /* fundo da carteirinha: azul com desenhos de traço, faixas de luz, brilhos e pontinhos */
   const fundoCart = {};
   function cartaoFundo(verso) {
@@ -218,9 +243,11 @@
     x.save(); x.globalAlpha = .06; x.strokeStyle = '#bfe6ff'; x.lineWidth = 1.5; for (let i = -H; i < W; i += 16) { x.beginPath(); x.moveTo(i, H); x.lineTo(i + H, 0); x.stroke(); } x.restore();
     // trama de pontinhos num canto
     x.save(); x.fillStyle = '#9fdcff'; for (let yy = 0; yy < 220; yy += 14) for (let xx = 0; xx < 260; xx += 14) { const d = Math.hypot(xx, yy) / 330; if (d > 1) continue; x.globalAlpha = .28 * (1 - d); x.beginPath(); x.arc(verso ? W - 20 - xx : W - 20 - xx, verso ? H - 60 - yy : 20 + yy, 2.6 * (1 - d) + .6, 0, Math.PI * 2); x.fill(); } x.restore();
-    // desenhos de traço espalhados
-    const nomes = Object.keys(ICONES); x.save(); x.strokeStyle = 'rgba(150,215,255,.26)'; x.fillStyle = 'rgba(150,215,255,.26)'; x.lineWidth = 2.4; x.lineJoin = 'round'; x.lineCap = 'round';
-    for (let yy = 40; yy < H; yy += 105) for (let xx = 40 + (yy / 105 % 2) * 60; xx < W; xx += 130) { const n = nomes[Math.floor(rnd() * nomes.length)]; x.save(); x.translate(xx + rnd() * 30 - 15, yy + rnd() * 24 - 12); x.rotate(rnd() * .8 - .4); const sc = .75 + rnd() * .5; x.scale(sc, sc); ICONES[n](x); x.restore(); }
+    // desenhos das disciplinas (poucos, maiores e bem definidos)
+    x.save(); x.strokeStyle = 'rgba(170,225,255,.5)'; x.fillStyle = 'rgba(170,225,255,.5)'; x.lineWidth = 3.4; x.lineJoin = 'round'; x.lineCap = 'round';
+    const L = verso ? [['ingles', 610, 330, -.06, .85], ['fis', 590, 470, -.05, .85], ['quim', 905, 455, -.1, .8], ['hist', 110, 455, 0, .75], ['ef', 300, 470, 0, .8]]
+      : [['mat', 900, 212, -.1, .95], ['cien', 590, 250, .08, .7], ['port', 520, 322, -.06, .7]];
+    for (const [n, a, b, r, k] of L) { x.save(); x.translate(a, b); x.rotate(r); x.scale(k, k); DISC[n](x); x.restore(); }
     x.restore();
     // faixas de luz curvas
     [[0, .9, 6], [30, .55, 3], [-26, .4, 2.2]].forEach(([d, a, w]) => { const lg = x.createLinearGradient(0, 0, W, 0); lg.addColorStop(0, 'rgba(140,215,255,0)'); lg.addColorStop(.35, `rgba(170,230,255,${a})`); lg.addColorStop(.7, `rgba(255,220,120,${a * .7})`); lg.addColorStop(1, 'rgba(255,220,120,0)');
