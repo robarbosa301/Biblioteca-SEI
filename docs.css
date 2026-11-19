@@ -343,3 +343,48 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .mapa-t tr:nth-child(even) td{background:#eef4fd!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .mapa-t .mn{width:8mm;text-align:center;font-weight:700;color:#0b2a6b}.mapa-t .ma{text-align:left;width:68mm}
 .etq-serie{right:50mm;left:4mm;top:44mm;font-size:58pt}.etq-disc{right:50mm;left:4mm}.etq-masc{height:58mm;right:2mm;top:16mm}
+/* ===== Contrato ===== */
+.ct-adm{text-align:center;font:700 7.5pt Arial,sans-serif;color:#0b2a6b;letter-spacing:.4px;margin:0 0 3mm}
+.cfs{display:flex;gap:2mm;margin:0 0 1.2mm}.cf{flex:1;border-bottom:.3mm solid #9aa9c8;padding:.6mm 0;min-width:0}.cf small{display:block;font:700 6pt Arial,sans-serif;color:#6b7fa8;letter-spacing:.4px;text-transform:uppercase}.cf b{font:700 9pt Arial,sans-serif;color:#0b1f5c}
+.doc-b .cfs{padding:0 2mm}.doc-b>.cfs:first-of-type{margin-top:1.5mm}
+.ct-req{font-size:10pt;margin:2mm 0 3mm;text-align:justify}
+.ct-cl{font-size:9.6pt!important;line-height:1.45!important}.ct-cl p{text-indent:0!important;margin:0 0 2mm!important}
+.ct-val{margin:1mm 0 1mm}.ct-val td,.ct-val th{font-size:8pt!important}
+.ct-aviso{font:700 7.6pt/1.35 Arial,sans-serif;color:#7a1010;border:.4mm solid #c62828;border-radius:2mm;padding:2mm 3mm;margin:3mm 0;text-align:justify;break-inside:avoid}
+/* ===== Recibo ===== */
+.rec{display:flex;height:76mm;border:.4mm solid #0b2a6b;border-radius:3mm;overflow:hidden;break-inside:avoid;font-family:Arial,sans-serif;box-sizing:border-box}
+.rec-can{width:42mm;padding:2mm;border-right:.5mm dashed #0b2a6b;background:#eef4fd;font-size:7pt;color:#0b1f5c;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rec-can img{height:9mm;display:block;margin:0 auto 1mm}.rec-can>b{display:block;text-align:center;font:800 8pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b;letter-spacing:1px}.rec-can>small{display:block;text-align:center;font-weight:700}
+.rec-can p{margin:1.4mm 0 0;font-weight:700;border-bottom:.25mm solid #9aa9c8;min-height:6mm}.rec-can p small{display:block;font:700 5.6pt Arial,sans-serif;color:#6b7fa8;text-transform:uppercase}.rec-can i{display:block;height:3mm}
+.rec-main{flex:1;position:relative;padding:2mm 3mm 6mm;box-sizing:border-box}
+.rec-top{display:flex;align-items:center;gap:2mm;border-bottom:.5mm solid #e6b422;padding-bottom:1.2mm;margin-bottom:1.6mm}.rec-top img{height:11mm}.rec-top>div{flex:1}.rec-top b{display:block;font:800 15pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b;letter-spacing:2px}.rec-top small{font:700 5.8pt Arial,sans-serif;color:#6b7fa8}
+.rec-top em{font:700 8pt Arial,sans-serif;font-style:normal;color:#0b2a6b;margin-right:2mm}
+.rec-val{background:linear-gradient(90deg,#0b2a6b,#1e4fb8);color:#ffd34d;font:800 12pt 'SEI Rubik',Arial,sans-serif;padding:1.4mm 3mm;border-radius:2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rec-l{display:flex;align-items:flex-end;gap:2mm;margin:0 0 1.6mm;font:700 9pt Arial,sans-serif;color:#0b1f5c}.rec-l small{flex:none;font:700 6.6pt Arial,sans-serif;color:#6b7fa8}.rec-l span{flex:1;border-bottom:.3mm solid #9aa9c8;min-height:4.5mm}
+.rec-ref{display:flex;flex-wrap:wrap;gap:1mm 4mm;font:700 8.4pt Arial,sans-serif;color:#0b1f5c;margin:1mm 0}.rec-ref small{width:100%;font:700 6.6pt Arial,sans-serif;color:#6b7fa8}
+.rec-aviso{font:6.4pt/1.3 Arial,sans-serif;color:#33415f;margin:1.4mm 0}
+.rec-fim{display:flex;justify-content:space-between;align-items:flex-end;font:8pt Arial,sans-serif;color:#0b1f5c}.rec-ass{width:52mm;text-align:center;font-weight:700}.rec-ass i{display:block;border-top:.3mm solid #0b2a6b;margin-bottom:.6mm}
+.rec-rod{position:absolute;left:0;right:0;bottom:0;background:#0b2a6b;color:#fff;font:700 6pt Arial,sans-serif;text-align:center;padding:1mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rec-pag .doc-corte{margin:2.5mm 0}
+/* ===== Frequência ===== */
+.fq-t{width:100%;border-collapse:collapse;min-width:0}
+.fq-t th{background:#0b2a6b!important;color:#fff!important;font:800 6.6pt Arial,sans-serif;padding:1mm .6mm;border:.3mm solid #0b2a6b;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.fq-t td{border:.3mm solid #b9c6dd;height:5.05mm;padding:0 1mm;font:7.4pt Arial,sans-serif;position:static;background:#fff}
+.fq-t td.fd{width:6mm;text-align:center;font-weight:800;color:#0b2a6b}.fq-t td.fw{width:7mm;text-align:center;font:700 6pt Arial,sans-serif;color:#6b7fa8}.fq-t td.fa{width:30mm}
+.fq-t tr.fq-x td{background:#eef4fd!important;text-align:center;font:800 6.8pt Arial,sans-serif;letter-spacing:1.5px;color:#1e4fb8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.fq-t tr.fq-r td{color:#c62828;background:#fdeceb!important}.fq-t tr.fq-x td.fd{color:#0b2a6b}
+.fq-pag .doc-ass{margin-top:6mm}
+/* ===== Histórico ===== */
+.hist-f{min-width:900px}.hist-f input{width:52px;font:13px system-ui;padding:4px;border:1px solid #b9cce6;border-radius:6px;text-align:center}.hist-f th{text-align:left;font-size:12px;white-space:nowrap}.hist-f tr.hg td{background:#0b2a6b;color:#fff;font-weight:700;font-size:12px}
+.hist-e input{width:100%;text-align:left}
+.hist-t{width:100%;border-collapse:collapse;min-width:0;margin:2mm 0}
+.hist-t th{background:#0b2a6b!important;color:#fff!important;font:800 6.4pt Arial,sans-serif;padding:.9mm .4mm;border:.3mm solid #0b2a6b;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hist-t td{border:.3mm solid #b9c6dd;padding:.3mm .6mm;font:7pt Arial,sans-serif;text-align:center;position:static;background:#fff;height:3.9mm}
+.hist-t td.hd,.hist-t th.hd{text-align:left;width:46mm}
+.hist-t tr.hg td{background:#dbe9ff!important;color:#0b2a6b;font:800 6.4pt Arial,sans-serif;letter-spacing:1px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hist-e2 td:nth-child(3){text-align:left}
+.hist-t td{height:3.3mm;padding:.1mm .6mm;font-size:6.8pt}.hist-t{margin:1.2mm 0}.hist-e2 td{height:3.2mm}
+.fq-pag+.fq-pag{padding-top:3mm}
+.hist-t td{height:3.05mm;font-size:6.6pt}.hist-t th{padding:.6mm .4mm}
+#imprimir .hist-ass,.sei-pdf .hist-ass,.hist-ass{margin-top:7mm}
+.hist-t td{height:2.95mm}
