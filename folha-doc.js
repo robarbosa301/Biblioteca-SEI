@@ -116,6 +116,22 @@
     for (const [n, a, b, r, k] of ONDE) { x.save(); x.translate(a, b); x.rotate(r); x.scale(k, k); ICONES[n](x); x.restore(); }
     x.restore();
   }
+
+  // efeito atrás da logo no cabeçalho escuro
+  function halo(x, gx, gy, tipo) {
+    const brilho = (r, a) => { const g = x.createRadialGradient(gx, gy, 5, gx, gy, r); g.addColorStop(0, `rgba(80,180,255,${a})`); g.addColorStop(.5, `rgba(30,111,232,${a * .5})`); g.addColorStop(1, 'rgba(30,111,232,0)'); x.fillStyle = g; x.beginPath(); x.ellipse(gx, gy, r * 1.15, r * .78, 0, 0, Math.PI * 2); x.fill(); };
+    if (tipo === 'suave') { brilho(260, .95); brilho(140, .5); return; }
+    if (tipo === 'curva') { // faixas de luz curvas, como o "swoosh" da logo, seguindo para o título
+      brilho(210, .7);
+      [[0, 1, .9, 9], [24, .85, .6, 5], [-22, .7, .45, 3.5]].forEach(([d, k, a, w]) => {
+        const g = x.createLinearGradient(gx - 160, 0, gx + 330, 0); g.addColorStop(0, 'rgba(120,210,255,0)'); g.addColorStop(.3, `rgba(150,220,255,${a})`); g.addColorStop(.75, `rgba(90,180,255,${a * .6})`); g.addColorStop(1, 'rgba(90,180,255,0)');
+        x.strokeStyle = g; x.lineWidth = w; x.lineCap = 'round'; x.beginPath(); x.moveTo(gx - 170, gy + 95 + d); x.quadraticCurveTo(gx + 40, gy + 150 * k + d, gx + 330, gy + 40 + d); x.stroke(); });
+      return; }
+    if (tipo === 'bolhas') { // pontos de luz desfocados
+      brilho(210, .65);
+      [[-150, -85, 34, .5], [175, -95, 26, .55], [190, 75, 40, .4], [-175, 70, 24, .55], [70, -118, 18, .6], [-50, 122, 28, .45], [240, -10, 16, .65], [-210, -5, 18, .6], [120, 128, 20, .5], [280, 60, 12, .6], [-100, -120, 12, .6]].forEach(([dx, dy, r, a]) => { const g = x.createRadialGradient(gx + dx, gy + dy, 0, gx + dx, gy + dy, r); g.addColorStop(0, `rgba(170,225,255,${a})`); g.addColorStop(1, 'rgba(170,225,255,0)'); x.fillStyle = g; x.beginPath(); x.arc(gx + dx, gy + dy, r, 0, Math.PI * 2); x.fill(); });
+    }
+  }
   function cabFormal(x, o, l, vidro, lt) {
     // painel
     x.save(); rr(x, 34, 22, 1172, 268, 26); x.clip();
@@ -131,8 +147,7 @@
     if (vidro && lt) { const h = 236, w = h * lt.width / lt.height; x.save(); x.shadowColor = 'rgba(7,28,85,.35)'; x.shadowBlur = 10; x.shadowOffsetY = 3; x.drawImage(lt, 215 - w / 2, 40, w, h); x.restore(); }
     else if (vidro) { x.save(); rr(x, 50, 38, 330, 236, 20); x.clip(); x.drawImage(l, 50, 38, 330, 236); x.restore(); rr(x, 50, 38, 330, 236, 20); x.strokeStyle = '#d7b44a'; x.lineWidth = 2; x.stroke(); } else if (lt) { // escuro: logo sem fundo, com brilho azul atrás (como nas folhas)
       const h = 240, w = h * lt.width / lt.height, lx0 = 212 - w / 2, ly0 = 36, gx = 205, gy = 160;
-      let g = x.createRadialGradient(gx, gy, 10, gx, gy, 210); g.addColorStop(0, 'rgba(70,170,255,.75)'); g.addColorStop(.45, 'rgba(30,111,232,.40)'); g.addColorStop(1, 'rgba(30,111,232,0)'); x.fillStyle = g; x.beginPath(); x.ellipse(gx, gy, 230, 150, 0, 0, Math.PI * 2); x.fill();
-      x.save(); x.globalAlpha = .35; x.strokeStyle = '#8fd4ff'; x.lineWidth = 2; for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; x.beginPath(); x.moveTo(gx + Math.cos(a) * 120, gy + Math.sin(a) * 78); x.lineTo(gx + Math.cos(a) * 200, gy + Math.sin(a) * 130); x.stroke(); } x.restore();
+      halo(x, gx, gy, (window.SEI_HALO || 'curva'));
       x.save(); x.shadowColor = 'rgba(0,10,40,.6)'; x.shadowBlur = 16; x.shadowOffsetY = 5; x.drawImage(lt, lx0, ly0, w, h); x.restore(); }
     else x.drawImage(lc, 40, 32);
     x.restore();
