@@ -118,11 +118,19 @@
       titulo: d => `Calendário pedagógico ${d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre + ' ' : ''}${d.ano || ''}`,
       novo: () => { const y = new Date().getFullYear(); return { ano: String(y), semestre: '1º semestre', inicio: y + '-02-03', fim: y + '-12-12', eventos: [] }; },
       form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Período', sel('semestre', d.semestre || 'Ano inteiro', ['1º semestre', '2º semestre', 'Ano inteiro']))}</div><div class="g2">${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
-        <h4>Datas do ano</h4><div id="evs">${(d.eventos || []).map(linhaEv).join('')}</div><button type="button" class="b" id="maisEv">➕ Adicionar data</button>
+        <h4>Datas do ano</h4><div class="ev-leg">${TIPOS_EV.map(t => `<span><i style="background:${COR_EV[t]}"></i>${t}</span>`).join('')}</div>
+        <p class="dica">Cada data tem: o dia (e, se durar mais de um dia, até quando), o <b>tipo</b> — que define a cor no calendário — e a descrição que aparece embaixo do mês.</p>
+        <div id="evs">${(d.eventos || []).map(linhaEv).join('')}</div><div class="acoes"><button type="button" class="b main" id="maisEv">➕ Adicionar data</button><button type="button" class="b" id="feriados">🇧🇷 Pôr os feriados do ano</button><button type="button" class="b ghost" id="ordenaEv">↕ Pôr em ordem</button></div>
         <p class="dica">Dias letivos: contados de segunda a sexta entre o início e o fim, tirando feriados, pontos facultativos e recessos. Marque “Letivo (sábado)” para sábados letivos. Cada mês mostra os seus dias letivos e as datas embaixo.</p>`,
       campos: ['ano', 'semestre', 'inicio', 'fim'],
       extra: d => { d.eventos = [...document.querySelectorAll('.ev')].map(r => ({ de: r.querySelector('.ev-de').value, ate: r.querySelector('.ev-ate').value, tipo: r.querySelector('.ev-tipo').value, desc: r.querySelector('.ev-desc').value.trim() })).filter(e => e.de); },
-      depois: () => { $('#maisEv').onclick = () => $('#evs').insertAdjacentHTML('beforeend', linhaEv({})); $('#evs').onclick = e => { if (e.target.matches('.ev-x')) e.target.closest('.ev').remove(); }; },
+      depois: () => { const pinta = () => document.querySelectorAll('.ev').forEach(r => { r.style.borderLeftColor = COR_EV[r.querySelector('.ev-tipo').value] || '#ccc'; }); pinta();
+        const lerEv = () => [...document.querySelectorAll('.ev')].map(r => ({ de: r.querySelector('.ev-de').value, ate: r.querySelector('.ev-ate').value, tipo: r.querySelector('.ev-tipo').value, desc: r.querySelector('.ev-desc').value.trim() }));
+        $('#maisEv').onclick = () => { $('#evs').insertAdjacentHTML('beforeend', linhaEv({ tipo: 'Evento' })); pinta(); const u = [...document.querySelectorAll('.ev-de')].pop(); u && u.focus(); };
+        $('#evs').onclick = e => { if (e.target.matches('.ev-x')) e.target.closest('.ev').remove(); }; $('#evs').onchange = pinta;
+        $('#ordenaEv').onclick = () => { const l = lerEv().filter(e => e.de).sort((a, b) => a.de.localeCompare(b.de)); $('#evs').innerHTML = l.map(linhaEv).join(''); pinta(); };
+        $('#feriados').onclick = () => { const y = +v('ano') || new Date().getFullYear(); const tem = new Set(lerEv().map(e => e.de)); const novos = feriadosDe(y).filter(e => !tem.has(e.de));
+          if (!novos.length) return alert('Os feriados de ' + y + ' já estão na lista.'); $('#evs').insertAdjacentHTML('beforeend', novos.map(linhaEv).join('')); $('#ordenaEv').click(); alert(novos.length + ' feriado(s) de ' + y + ' colocados. Confira e ajuste se a escola tiver outra programação.'); }; },
       // arte das folhas (mascote e placa), mais alegre que os documentos de secretaria
       arte: d => { const sem = d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre : 'Ano letivo'; const nl = letivos(d, mesesDe(d)); return { estilo: 'folha', titulo: 'Calendário Pedagógico', curto: `Calendário Pedagógico — ${sem} ${d.ano || ''}`, placa: { grande: d.ano || '', linhas: [sem.toUpperCase(), 'ANO LETIVO'] }, campos: [['Documento', 'Calendário pedagógico'], ['Período', `${sem} de ${d.ano || ''}`], ['Aulas', `${fmt(d.inicio)} a ${fmt(d.fim)}`], ['Dias letivos', nl === null ? '' : String(nl)]] }; },
       doc: d => docCalendario(d)
@@ -368,6 +376,15 @@
     return n;
   }
   const mesesDe = d => d.semestre === '1º semestre' ? [0, 1, 2, 3, 4, 5] : d.semestre === '2º semestre' ? [6, 7, 8, 9, 10, 11] : [...Array(12).keys()];
+  // feriados nacionais (e do Pará) do ano, com Carnaval, Páscoa e Corpus Christi calculados
+  function feriadosDe(y) {
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100, dd = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - dd - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1; const pascoa = new Date(y, mes - 1, dia, 12);
+    const rel = n => { const x = new Date(pascoa); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); }; const F = (md, desc, tipo) => ({ de: `${y}-${md}`, ate: '', tipo: tipo || 'Feriado', desc });
+    return [F('01-01', 'Confraternização Universal'), { de: rel(-48), ate: '', tipo: 'Ponto facultativo', desc: 'Segunda-feira de Carnaval' }, { de: rel(-47), ate: '', tipo: 'Feriado', desc: 'Carnaval' }, { de: rel(-46), ate: '', tipo: 'Ponto facultativo', desc: 'Quarta-feira de Cinzas' },
+      { de: rel(-3), ate: '', tipo: 'Ponto facultativo', desc: 'Quinta-feira Santa' }, { de: rel(-2), ate: '', tipo: 'Feriado', desc: 'Sexta-feira Santa' }, F('04-21', 'Tiradentes'), F('05-01', 'Dia do Trabalhador'), { de: rel(60), ate: '', tipo: 'Feriado', desc: 'Corpus Christi' },
+      F('08-15', 'Adesão do Pará'), F('09-07', 'Independência do Brasil'), F('10-12', 'Nossa Senhora Aparecida / Dia das Crianças'), F('11-02', 'Finados'), F('11-15', 'Proclamação da República'), F('11-20', 'Dia da Consciência Negra'), F('12-25', 'Natal')];
+  }
   const COR_MES = ['#1e6fe8', '#7b3fd6', '#0a9d74', '#f0671f', '#2f47c4', '#d6336c', '#0d8f8f', '#f29f05', '#5b3cc4', '#c62828', '#0b8ed1', '#2e8b3e'];
   const ICO_MES = [
     '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',

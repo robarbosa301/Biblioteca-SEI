@@ -242,3 +242,11 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .ct-qr{position:absolute;right:3.5mm;top:12mm;width:18mm;height:18mm}
 .ct-vrod{position:absolute;left:0;right:0;bottom:0;height:5mm;display:flex;align-items:center;justify-content:center;background:#0b2a6b;color:#fff;font:700 4.4pt Arial,sans-serif}
 .via2{border:1px dashed #b9cce6;border-radius:12px;padding:8px 12px;margin-top:8px;background:#f7faff}.via2 h4{margin:2px 0}
+/* calendário: fundo azul-claro e formulário mais fácil */
+.calp-pag{background:linear-gradient(180deg,#dbe9ff,#eaf2ff);border-radius:4mm;padding:3.2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.calp-pag .cm{box-shadow:0 .6mm 1.6mm rgba(11,42,107,.16)}
+.cal-res2 td{background:#dbe9ff}
+.ev-leg{display:flex;flex-wrap:wrap;gap:6px 12px;margin:4px 0 6px;font:600 13px system-ui;color:#0b2a5b}.ev-leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.ev{border-left:5px solid #ccc;padding-left:6px;border-radius:4px}
+.calp-pag{padding:2.4mm}.cm-t td{height:5.8mm}.calp{gap:3.2mm 3mm}
+@media (max-width:700px){.ev{grid-template-columns:1fr 1fr 40px;grid-template-areas:"de ate x" "tipo tipo tipo" "desc desc desc";gap:5px;margin-bottom:10px}.ev .ev-de{grid-area:de}.ev .ev-ate{grid-area:ate}.ev .ev-tipo{grid-area:tipo}.ev .ev-desc{grid-area:desc}.ev .ev-x{grid-area:x;padding:0;min-width:0}}
