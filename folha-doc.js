@@ -191,6 +191,8 @@
     else cabFormal(x, o, l, o.estilo === 'claro' || o.estilo === 'claro2', o.estilo === 'claro' ? null : lt);
     const cab = cv.toDataURL('image/jpeg', .9);
     const fv = document.createElement('canvas'); fv.width = 1240; fv.height = 1754; x = fv.getContext('2d'); x.drawImage(f, 0, 0);
+    // marca-d'água: a logo da escola, bem clara, no centro da área branca (todas as páginas)
+    if (o.agua !== false && lt) { const w = 760, h = w * lt.height / lt.width; x.save(); x.globalAlpha = .07; x.drawImage(lt, 620 - w / 2, 1000 - h / 2, w, h); x.restore(); }
     banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2));
     rodape(x, ...(o.rodape || ['', '']), o.num || '', 1715, 1175);
     const fundo = fv.toDataURL('image/jpeg', .88);
