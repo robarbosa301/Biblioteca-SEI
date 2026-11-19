@@ -115,9 +115,9 @@
     },
     calendario: {
       nome: 'Calendário pedagógico', icone: '🗓️', desc: 'Por semestre: dias letivos, feriados, avaliações e eventos', setores: ['secretaria', 'coordenacao', 'calendario'],
-      titulo: d => `Calendário pedagógico ${d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre + ' ' : ''}${d.ano || ''}`,
+      titulo: d => `Calendário pedagógico ${/semestre$/.test(d.semestre || '') ? d.semestre + ' ' : /^Completo/.test(d.semestre || '') ? 'completo ' : 'geral '}${d.ano || ''}`,
       novo: () => { const y = new Date().getFullYear(); return { ano: String(y), semestre: '1º semestre', inicio: y + '-02-03', fim: y + '-12-12', eventos: [] }; },
-      form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Período', sel('semestre', d.semestre || 'Ano inteiro', ['1º semestre', '2º semestre', 'Ano inteiro']))}</div><div class="g2">${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
+      form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Período', sel('semestre', d.semestre === 'Ano inteiro' ? PER_CAL[2] : d.semestre || PER_CAL[3], PER_CAL))}</div><div class="g2">${lab('Início das aulas', inp('inicio', d.inicio, '', 'date'))}${lab('Fim das aulas', inp('fim', d.fim, '', 'date'))}</div>
         <h4>Datas do ano</h4><div class="ev-leg">${TIPOS_EV.map(t => `<span><i style="background:${COR_EV[t]}"></i>${t}</span>`).join('')}</div>
         <p class="dica">Cada data tem: o dia (e, se durar mais de um dia, até quando), o <b>tipo</b> — que define a cor no calendário — e a descrição que aparece embaixo do mês.</p>
         <div id="evs">${(d.eventos || []).map(linhaEv).join('')}</div><div class="acoes"><button type="button" class="b main" id="maisEv">➕ Adicionar data</button><button type="button" class="b" id="feriados">🇧🇷 Pôr os feriados do ano</button><button type="button" class="b ghost" id="ordenaEv">↕ Pôr em ordem</button></div>
@@ -132,7 +132,7 @@
         $('#feriados').onclick = () => { const y = +v('ano') || new Date().getFullYear(); const tem = new Set(lerEv().map(e => e.de)); const novos = feriadosDe(y).filter(e => !tem.has(e.de));
           if (!novos.length) return alert('Os feriados de ' + y + ' já estão na lista.'); $('#evs').insertAdjacentHTML('beforeend', novos.map(linhaEv).join('')); $('#ordenaEv').click(); alert(novos.length + ' feriado(s) de ' + y + ' colocados. Confira e ajuste se a escola tiver outra programação.'); }; },
       // arte das folhas (mascote e placa), mais alegre que os documentos de secretaria
-      arte: d => { const sem = d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre : 'Ano letivo'; const nl = letivos(d, mesesDe(d)); return { estilo: 'folha', titulo: 'Calendário Pedagógico', curto: `Calendário Pedagógico — ${sem} ${d.ano || ''}`, placa: { grande: d.ano || '', linhas: [sem.toUpperCase(), 'ANO LETIVO'] }, campos: [['Documento', 'Calendário pedagógico'], ['Período', `${sem} de ${d.ano || ''}`], ['Aulas', `${fmt(d.inicio)} a ${fmt(d.fim)}`], ['Dias letivos', nl === null ? '' : String(nl)]] }; },
+      arte: d => { const sem = /semestre$/.test(d.semestre || '') ? d.semestre : 'Ano letivo'; const nl = letivos(d, mesesDe(d)); return { estilo: 'folha', titulo: 'Calendário Pedagógico', curto: `Calendário Pedagógico — ${sem} ${d.ano || ''}`, placa: { grande: d.ano || '', linhas: sem === 'Ano letivo' ? [/^Completo/.test(d.semestre || '') ? 'COMPLETO' : 'VISÃO GERAL', 'ANO LETIVO'] : [sem.toUpperCase(), 'ANO LETIVO'] }, campos: [['Documento', 'Calendário pedagógico'], ['Período', `${sem} de ${d.ano || ''}`], ['Aulas', `${fmt(d.inicio)} a ${fmt(d.fim)}`], ['Dias letivos', nl === null ? '' : String(nl)]] }; },
       doc: d => docCalendario(d)
     },
     boletim: {
@@ -382,6 +382,7 @@
     let n = 0; for (let x = new Date(d.inicio + 'T12:00'); x <= new Date(d.fim + 'T12:00'); x.setDate(x.getDate() + 1)) { const k = x.toISOString().slice(0, 10), w = x.getDay(); if (meses && !meses.includes(x.getMonth())) continue; if ((w >= 1 && w <= 5 && !fora.has(k)) || sab.has(k)) n++; }
     return n;
   }
+  const PER_CAL = ['1º semestre', '2º semestre', 'Ano inteiro (visão geral)', 'Completo (1º + 2º semestre + geral)'];
   const mesesDe = d => d.semestre === '1º semestre' ? [0, 1, 2, 3, 4, 5] : d.semestre === '2º semestre' ? [6, 7, 8, 9, 10, 11] : [...Array(12).keys()];
   // feriados nacionais (e do Pará) do ano, com Carnaval, Páscoa e Corpus Christi calculados
   function feriadosDe(y) {
@@ -413,7 +414,7 @@
     (d.eventos || []).forEach(e => diasDe(e).forEach(x => { if (!marca[x] || NAO_LETIVO.has(e.tipo)) marca[x] = e.tipo; }));
     const ini = d.inicio, fim = d.fim; const evs = [...(d.eventos || [])].sort((a, b) => a.de.localeCompare(b.de));
     const dd = k => k.slice(8, 10);
-    const mes = m => {
+    const mes = (m, mini) => {
       const c = COR_MES[m]; const p = new Date(y, m, 1).getDay(); const n = new Date(y, m + 1, 0).getDate(); const nl = letivos(d, [m]);
       let h = '<tr>' + '<td></td>'.repeat(p);
       for (let i = 1; i <= n; i++) { const k = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`; const t = marca[k]; const w = (p + i - 1) % 7; const cls = w === 0 ? 'dom' : w === 6 ? 'sab' : '';
@@ -422,20 +423,28 @@
       const me = evs.filter(e => (+e.de.slice(5, 7) - 1) === m && +e.de.slice(0, 4) === y);
       const extra = []; if (ini && +ini.slice(5, 7) - 1 === m && +ini.slice(0, 4) === y) extra.push({ de: ini, tipo: '_ini', desc: 'Início das aulas' }); if (fim && +fim.slice(5, 7) - 1 === m && +fim.slice(0, 4) === y) extra.push({ de: fim, tipo: '_fim', desc: 'Encerramento das aulas' });
       const lista = me.concat(extra).sort((a, b) => a.de.localeCompare(b.de));
-      return `<div class="cm"><div class="cm-h" style="background:linear-gradient(120deg,${c},${tintaHex(c, .62)})">${svgMes(m)}<b>${MESES[m].toUpperCase()}</b><em>${String(m + 1).padStart(2, '0')}</em>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
+      return `<div class="cm${mini ? ' mini' : ''}"><div class="cm-h" style="background:linear-gradient(120deg,${c},${tintaHex(c, .62)})">${svgMes(m)}<b>${MESES[m].toUpperCase()}</b><em>${String(m + 1).padStart(2, '0')}</em>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
         <table class="cm-t"><tr>${['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((x, i) => `<th class="${i === 0 ? 'dom' : ''}" style="color:${i === 0 ? '#e53935' : c}">${x}</th>`).join('')}</tr>${h}</tr></table>
-        <div class="cm-ev">${lista.map(e => `<p style="border-left-color:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}"><i style="background:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}">${dd(e.de)}${e.ate && e.ate !== e.de ? '–' + dd(e.ate) : ''}</i><span>${esc(e.desc || e.tipo)}${CURTO_EV[e.tipo] ? ` <em>(${CURTO_EV[e.tipo]})</em>` : ''}</span></p>`).join('') || '<p class="vazio">—</p>'}</div></div>`;
+        ${mini ? '' : `<div class="cm-ev">${lista.map(e => `<p style="border-left-color:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}"><i style="background:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}">${dd(e.de)}${e.ate && e.ate !== e.de ? '–' + dd(e.ate) : ''}</i><span>${esc(e.desc || e.tipo)}${CURTO_EV[e.tipo] ? ` <em>(${CURTO_EV[e.tipo]})</em>` : ''}</span></p>`).join('') || '<p class="vazio">—</p>'}</div>`}</div>`;
     };
-    const blocos = d.semestre === '1º semestre' ? [[0, 1, 2, 3, 4, 5]] : d.semestre === '2º semestre' ? [[6, 7, 8, 9, 10, 11]] : [[0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11]];
+    const S1 = [0, 1, 2, 3, 4, 5], S2 = [6, 7, 8, 9, 10, 11], TODOS = [...S1, ...S2];
+    const blocos = d.semestre === '1º semestre' ? [S1] : d.semestre === '2º semestre' ? [S2] : /^Completo/.test(d.semestre || '') ? [S1, S2, 'G'] : ['G'];
     const usados = new Set(evs.map(e => e.tipo));
     const leg = `<div class="cal-leg2">${Object.entries(COR_EV).filter(([t]) => usados.has(t)).map(([t, c]) => `<span><i style="background:${c}"></i>${t}</span>`).join('')}<span><i style="background:#ffd34d"></i>Início / fim das aulas</span><span><i class="dom"></i>Domingo</span></div>`;
-    const todosM = blocos.flat(); const doPer = e => todosM.includes(+e.de.slice(5, 7) - 1) && +e.de.slice(0, 4) === y;
-    const qtd = t => evs.filter(e => doPer(e) && t.includes(e.tipo)).length;
-    const resumo = `<table class="cal-res2"><tr><td class="cr-a"><small>${d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre.toUpperCase() : 'ANO LETIVO'}</small><b>${y}</b></td><td><small>INÍCIO DAS AULAS</small><b>${fmt(ini) || '—'}</b></td><td><small>ENCERRAMENTO</small><b>${fmt(fim) || '—'}</b></td><td><small>DIAS LETIVOS</small><b style="color:#0a9d74">${letivos(d, todosM) ?? '—'}</b></td><td><small>AVALIAÇÕES</small><b style="color:#1e6fe8">${qtd(['Avaliação', 'Recuperação'])}</b></td><td><small>FERIADOS</small><b style="color:#e53935">${qtd(['Feriado', 'Ponto facultativo'])}</b></td></tr></table>`;
-    return `${cab('CALENDÁRIO PEDAGÓGICO')}${resumo}${blocos.map((b, i) => { const nl = letivos(d, b); const sem = b[0] ? '2º semestre' : '1º semestre';
-      return `<div class="calp-pag"${i ? ' style="page-break-before:always;break-before:page"' : ''}>${blocos.length > 1 ? `<h3 class="calp-sem">${sem} · ${y}</h3>` : ''}<div class="calp">${b.map(mes).join('')}</div>
-      <div class="calp-rod">${leg}<div class="calp-tot"><span>Dias letivos ${blocos.length > 1 ? 'no ' + sem : d.semestre ? 'no ' + d.semestre : ''}</span><b>${nl === null ? '—' : nl}</b></div></div></div>`; }).join('')}
-      ${blocos.length > 1 ? `<p class="calp-ano">Total de dias letivos no ano: <b>${letivos(d)}</b></p>` : ''}`;
+    const resumo = (ms, rot) => { const doPer = e => ms.includes(+e.de.slice(5, 7) - 1) && +e.de.slice(0, 4) === y; const qtd = t => evs.filter(e => doPer(e) && t.includes(e.tipo)).length;
+      return `<table class="cal-res2"><tr><td class="cr-a"><small>${rot.toUpperCase()}</small><b>${y}</b></td><td><small>INÍCIO DAS AULAS</small><b>${fmt(ini) || '—'}</b></td><td><small>ENCERRAMENTO</small><b>${fmt(fim) || '—'}</b></td><td><small>DIAS LETIVOS</small><b style="color:#0a9d74">${letivos(d, ms) ?? '—'}</b></td><td><small>AVALIAÇÕES</small><b style="color:#1e6fe8">${qtd(['Avaliação', 'Recuperação'])}</b></td><td><small>FERIADOS</small><b style="color:#e53935">${qtd(['Feriado', 'Ponto facultativo'])}</b></td></tr></table>`; };
+    const PRINC = ['Feriado', 'Ponto facultativo', 'Recesso / férias', 'Avaliação', 'Recuperação'];
+    const pagina = (b, i) => {
+      const quebra = i ? ' style="page-break-before:always;break-before:page"' : '';
+      if (b === 'G') { const princ = evs.filter(e => PRINC.includes(e.tipo) && +e.de.slice(0, 4) === y).concat(ini ? [{ de: ini, tipo: '_ini', desc: 'Início das aulas' }] : [], fim ? [{ de: fim, tipo: '_fim', desc: 'Encerramento das aulas' }] : []).sort((a, b2) => a.de.localeCompare(b2.de));
+        const s1 = letivos(d, S1), s2 = letivos(d, S2);
+        return `<div class="calp-pag calg-pag"${quebra}>${i ? '' : ''}${resumo(TODOS, 'Ano letivo')}<h3 class="calp-sem">Visão geral do ano letivo ${y}</h3><div class="calg">${TODOS.map(m => mes(m, true)).join('')}</div>
+          ${princ.length ? `<div class="calg-ev"><h4>Datas principais</h4><div>${princ.map(e => { const c = e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo]; return `<p><i style="background:${c}">${fmt(e.de).slice(0, 5)}${e.ate && e.ate !== e.de ? '–' + fmt(e.ate).slice(0, 5) : ''}</i>${esc(e.desc || e.tipo)}</p>`; }).join('')}</div></div>` : ''}
+          <div class="calp-rod">${leg}<div class="calg-tot"><span>1º sem. <b>${s1 ?? '—'}</b></span><span>2º sem. <b>${s2 ?? '—'}</b></span><span class="t">Ano <b>${letivos(d) ?? '—'}</b></span><small>dias letivos</small></div></div></div>`; }
+      const sem = b[0] ? '2º semestre' : '1º semestre'; const nl = letivos(d, b);
+      return `<div class="calp-pag"${quebra}>${resumo(b, sem)}<div class="calp">${b.map(m => mes(m)).join('')}</div>
+        <div class="calp-rod">${leg}<div class="calp-tot"><span>Dias letivos no ${sem}</span><b>${nl === null ? '—' : nl}</b></div></div></div>`; };
+    return `${cab('CALENDÁRIO PEDAGÓGICO')}${blocos.map(pagina).join('')}`;
   }
   // cor de cada disciplina (a mesma no boletim e no horário)
   const COR_DISC = { 'língua portuguesa': '#1e6fe8', 'português': '#1e6fe8', 'matemática': '#e53935', 'ciências': '#0a9d74', 'biologia': '#2e8b3e', 'física': '#5b3cc4', 'química': '#d6336c', 'história': '#b8860b', 'geografia': '#0d8f8f', 'inglês': '#3949ab', 'espanhol': '#f0671f', 'arte': '#8e24aa', 'artes': '#8e24aa', 'educação física': '#f29f05', 'ensino religioso': '#6d4c41', 'filosofia': '#546e7a', 'sociologia': '#00838f', 'redação': '#c62828', 'literatura': '#ad1457' };
