@@ -146,3 +146,67 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 /* texto formatado nos documentos */
 .rt p{margin:0 0 2.5mm}.rt p:last-child{margin-bottom:0}.rt ul,.rt ol{margin:0 0 2.5mm;padding-left:7mm}.rt blockquote{margin:0 0 2.5mm 10mm}
 .doc-corpo.dec p:has(+ *){}
+/* ===== Boletim ===== */
+.bol-aluno{width:100%;border-collapse:separate;border-spacing:0;min-width:0;margin:0 0 4mm;background:linear-gradient(90deg,#0b2a6b,#1e4fb8);border-radius:4mm;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;overflow:hidden}
+.bol-aluno td{border:0;background:none;position:static;padding:2mm 3mm;vertical-align:middle;color:#fff}
+.bol-av{width:20mm;text-align:center}.bol-av span{display:inline-flex;align-items:center;justify-content:center;width:15mm;height:15mm;border-radius:50%;background:#ffd34d;color:#0b2a5b;font:800 15pt 'SEI Rubik',Arial Black,sans-serif;box-shadow:0 0 0 1mm rgba(255,255,255,.25)}
+.bol-nome{padding-bottom:0!important}.bol-nome small,.bol-st small{display:block;font:700 6.5pt Arial,sans-serif;letter-spacing:.8px;color:#9fdcff}
+.bol-nome b{display:block;font:800 14pt 'SEI Rubik',Arial,sans-serif;letter-spacing:.2px}
+.bol-tags{padding-top:1mm!important}.bol-tags i{display:inline-block;font:700 7.5pt Arial,sans-serif;font-style:normal;background:rgba(255,255,255,.16);border-radius:99px;padding:.6mm 2.4mm;margin:0 1.5mm 0 0}
+.bol-st{width:25mm;text-align:center;border-left:.3mm solid rgba(255,255,255,.18)!important}
+.bol-st b{display:block;font:800 18pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b;background:#fff;border-radius:2.5mm;padding:.8mm 0;margin-top:1mm}
+.bol-st em{display:inline-block;font:800 8pt Arial,sans-serif;font-style:normal;color:#fff;border-radius:99px;padding:1.4mm 2.6mm;margin-top:1.5mm}
+.bol-t{width:100%;border-collapse:separate;border-spacing:0 .8mm;min-width:0;margin-bottom:2mm}
+.bol-t th{background:#0b2a6b!important;color:#fff!important;font:800 7.5pt Arial,sans-serif;padding:1.8mm 1mm;text-align:center;border:0;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bol-t th:first-child{border-radius:2mm 0 0 2mm;text-align:left;padding-left:3mm}.bol-t th:last-child{border-radius:0 2mm 2mm 0}
+.bol-t td{border:0;position:static;background:#f4f7fc;text-align:center;font:9pt Arial,sans-serif;padding:1.15mm 1mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bol-t td.bd{text-align:left;font-weight:700;color:#1d2b4f;border-radius:2mm 0 0 2mm;padding-left:3mm;white-space:nowrap}.bol-t td.bd i{display:inline-block;width:2.6mm;height:2.6mm;border-radius:50%;margin-right:2mm;vertical-align:-.2mm}
+.bol-t td.bn b{font-size:9.5pt}.bol-t td.vazio{color:#b4bccb}
+.bol-t td.bm{font:800 11pt 'SEI Rubik',Arial,sans-serif;color:#7a869a}.bol-t td.bs{border-radius:0 2mm 2mm 0}
+.bol-t td.bs em{font:800 6.8pt Arial,sans-serif;font-style:normal;border:.35mm solid;border-radius:99px;padding:.4mm 1.8mm;white-space:nowrap}
+.bol-graf{border:.35mm solid #d5def0;border-radius:3mm;padding:2.5mm 4mm 1.5mm;margin:3mm 0;break-inside:avoid}
+.bol-graf h4{margin:0 0 2mm;font:800 9.5pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b}
+.bg-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 7mm}.bg-l{display:grid;grid-template-columns:27mm 1fr 8mm;align-items:center;gap:2.5mm;margin-bottom:1.3mm;font:700 7.8pt Arial,sans-serif;color:#1d2b4f}
+.bg-l>b{text-align:right;font:800 9pt Arial,sans-serif}
+.bg-b{position:relative;height:3.6mm;background:#eef2f8;border-radius:99px;overflow:visible}.bg-b i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bg-b u{position:absolute;top:-1mm;bottom:-1mm;width:0;border-left:.5mm dashed #0b2a6b}
+.bg-leg{margin:1.5mm 0 0;font:7pt Arial,sans-serif;color:#556}.bg-leg u{display:inline-block;width:4mm;border-top:.5mm dashed #0b2a6b;vertical-align:middle;margin-right:1mm}
+.bol-leg span{display:inline-block;border-radius:99px;padding:.3mm 2mm;margin-right:1.5mm;font-weight:700}
+/* ===== Horário ===== */
+.hor-top{width:100%;border-collapse:separate;border-spacing:1.5mm 0;min-width:0;margin:0 -1.5mm 3.5mm;width:calc(100% + 3mm)}
+.hor-top td{border:0;position:static;background:#f1f5fc;border-radius:2.5mm;padding:1.8mm 2.5mm;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hor-top small{display:block;font:700 6.3pt Arial,sans-serif;letter-spacing:.7px;color:#6b7fa8}.hor-top b{font:800 10pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b}
+.hor-top td.ht-tur{background:linear-gradient(90deg,#0b2a6b,#1e4fb8)!important;width:34mm}.hor-top td.ht-tur small{color:#9fdcff}.hor-top td.ht-tur b{color:#ffd34d;font-size:15pt}
+.hor-t{width:100%;border-collapse:separate;border-spacing:1.2mm;min-width:0;margin:0 -1.2mm;width:calc(100% + 2.4mm)}
+.hor-t th{color:#fff!important;font:800 8.5pt 'SEI Rubik',Arial,sans-serif;letter-spacing:.4px;text-transform:uppercase;border-radius:2mm;padding:1.8mm 1mm;border:0;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hor-t th.hh{background:#0b2a6b!important}
+.hor-t td{border:0;position:static;background:none}
+.hor-t td.hh{background:#0b2a6b;color:#fff;border-radius:2mm;text-align:center;width:19mm;padding:1.2mm .5mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hor-t td.hh em{display:block;font:800 6.5pt Arial,sans-serif;font-style:normal;color:#ffd34d}.hor-t td.hh b{display:block;font:800 9pt Arial,sans-serif}.hor-t td.hh small{display:block;font:7pt Arial,sans-serif;color:#9fdcff}
+.hor-t td.hc{height:20mm;border-radius:2mm;border-left:1.2mm solid #ccc;padding:1mm 2mm;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hor-t td.hc b{display:block;font:800 9.6pt Arial,sans-serif;line-height:1.15}.hor-t td.hc small{display:block;font:7.8pt Arial,sans-serif;color:#33415f;margin-top:.5mm}
+.hor-t td.vazio{background:#f4f6fa;border-left-color:#e3e8f2}
+.hor-t tr.hiv td{background:#ffe17a!important;border:.4mm dashed #e0a800!important;color:#0b2a5b;text-align:center;font:800 8.5pt Arial,sans-serif;letter-spacing:2px;border-radius:2mm;padding:1.6mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hor-leg{margin-top:4mm;border:.35mm solid #d5def0;border-radius:3mm;padding:2.5mm 3.5mm;break-inside:avoid}
+.hor-leg h4{margin:0 0 2mm;font:800 9.5pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b}
+.hor-leg div{display:flex;flex-wrap:wrap;gap:1.5mm 2mm}.hor-leg span{font:7.8pt Arial,sans-serif;border:.35mm solid;border-radius:99px;padding:.6mm 2.6mm .6mm 1.6mm;color:#1d2b4f}
+.hor-leg span i{display:inline-block;width:2.6mm;height:2.6mm;border-radius:50%;margin-right:1.4mm;vertical-align:-.3mm}
+#imprimir .bol-ass,.sei-pdf .bol-ass,.bol-ass{margin-top:9mm}.bol-fim{margin-top:2mm}
+.bol-aluno td{padding:1.4mm 3mm}.bol-graf{margin:2mm 0;padding:2mm 4mm 1mm}.bol-leg{margin:1mm 0}
+/* calendário com mais personalidade */
+.cm{border:0;box-shadow:0 0 0 .35mm #d5def0;border-radius:3.5mm}
+.cm-h{position:relative;justify-content:flex-start;gap:1.8mm;padding:2mm 2.6mm;overflow:hidden}
+.cm-h .cm-ic{width:5.6mm;height:5.6mm;flex:none}
+.cm-h em{position:absolute;right:-1mm;top:-3.2mm;font:800 22pt 'SEI Rubik',Arial Black,sans-serif;font-style:normal;color:rgba(255,255,255,.18);letter-spacing:-1px}
+.cm-h span{margin-left:auto;position:relative}
+.cm-t td{border-radius:50%;height:6.6mm}
+.cm-t td[style]{box-shadow:0 .4mm .8mm rgba(0,0,0,.18)}
+.cm-ev{border-top:0;background:#f7f9fd;margin:1mm 1.6mm 1.6mm;border-radius:2mm}
+.cm-ev p{border-left:.8mm solid #d5def0;padding-left:1.2mm}
+.cal-res2{width:calc(100% + 3mm);margin:0 -1.5mm 3.2mm;border-collapse:separate;border-spacing:1.5mm 0;min-width:0}
+.cal-res2 td{border:0;position:static;background:#f1f5fc;border-radius:2.5mm;padding:1.6mm 2mm;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cal-res2 small{display:block;font:700 6.2pt Arial,sans-serif;letter-spacing:.6px;color:#6b7fa8}.cal-res2 b{font:800 11pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b}
+.cal-res2 td.cr-a{background:linear-gradient(90deg,#0b2a6b,#1e4fb8)!important}.cal-res2 td.cr-a small{color:#9fdcff}.cal-res2 td.cr-a b{color:#ffd34d;font-size:15pt}
+.cm-t td{height:6.1mm}.cm-ev{font-size:6.9pt;line-height:1.25}.calp{gap:3.6mm 3.2mm}
+.cm-ev p{display:grid;grid-template-columns:auto 1fr;align-items:start}
+.cm-h img.cm-ic{display:block}

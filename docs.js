@@ -321,6 +321,20 @@
   }
   const mesesDe = d => d.semestre === '1º semestre' ? [0, 1, 2, 3, 4, 5] : d.semestre === '2º semestre' ? [6, 7, 8, 9, 10, 11] : [...Array(12).keys()];
   const COR_MES = ['#1e6fe8', '#7b3fd6', '#0a9d74', '#f0671f', '#2f47c4', '#d6336c', '#0d8f8f', '#f29f05', '#5b3cc4', '#c62828', '#0b8ed1', '#2e8b3e'];
+  const ICO_MES = [
+    '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+    '<path d="M3 9c0-2 2-3 4.5-3S12 7.5 12 7.5 14.5 6 16.5 6 21 7 21 9c0 4-3 7-5 7s-2.5-2-4-2-2 2-4 2-5-3-5-7z"/><circle cx="8" cy="10" r="1.3"/><circle cx="16" cy="10" r="1.3"/>',
+    '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9 15a3 3 0 0 0 3 3"/>',
+    '<path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/>',
+    '<circle cx="12" cy="10" r="2.5"/><path d="M12 7.5c0-3 3-4 3-4s1 3-1.5 4.5M14.5 10c3 0 4 3 4 3s-3 1-4.5-1.5M12 12.5c0 3-3 4-3 4s-1-3 1.5-4.5M9.5 10c-3 0-4-3-4-3s3-1 4.5 1.5M12 13v8"/>',
+    '<path d="M2 5h20M3 5l2.5 5L8 5l2.5 5L13 5l2.5 5L18 5l2.5 5L22 5M8 21l4-7 4 7M10 18h4"/>',
+    '<path d="M12 2 19 9 12 16 5 9z"/><path d="M12 16c0 3 2 3 1 6M5 9h14M12 2v14"/>',
+    '<path d="M4 20c4-1 6-6 6-11 3 2 5 5 5 9M15 18c2-3 2-7 0-11 3 1 5 4 5 8"/><path d="M3 20h18"/>',
+    '<path d="M5 21V4M5 4h13l-3 4 3 4H5"/>',
+    '<ellipse cx="12" cy="9" rx="5" ry="6"/><path d="M12 15l-1 2h2zM12 17c0 2-2 2-1 5"/>',
+    '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M20 10v6"/>',
+    '<path d="M12 2l2.4 5 5.6.8-4 3.9.9 5.6L12 14.6 7.1 17.3 8 11.7 4 7.8 9.6 7z"/><path d="M12 17v5M9 22h6"/>'];
+  const svgMes = m => `<img class="cm-ic" alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='48' height='48' fill='none' stroke='#ffffff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'>${ICO_MES[m]}</svg>`)}">`;
   const CURTO_EV = { 'Feriado': 'Feriado', 'Ponto facultativo': 'Facultativo', 'Recesso / férias': 'Recesso' };
   function docCalendario(d) {
     const y = +d.ano || new Date().getFullYear(); const marca = {};
@@ -336,29 +350,65 @@
       const me = evs.filter(e => (+e.de.slice(5, 7) - 1) === m && +e.de.slice(0, 4) === y);
       const extra = []; if (ini && +ini.slice(5, 7) - 1 === m && +ini.slice(0, 4) === y) extra.push({ de: ini, tipo: '_ini', desc: 'Início das aulas' }); if (fim && +fim.slice(5, 7) - 1 === m && +fim.slice(0, 4) === y) extra.push({ de: fim, tipo: '_fim', desc: 'Encerramento das aulas' });
       const lista = me.concat(extra).sort((a, b) => a.de.localeCompare(b.de));
-      return `<div class="cm"><div class="cm-h" style="background:${c}"><b>${MESES[m].toUpperCase()}</b>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
+      return `<div class="cm"><div class="cm-h" style="background:linear-gradient(120deg,${c},${tintaHex(c, .62)})">${svgMes(m)}<b>${MESES[m].toUpperCase()}</b><em>${String(m + 1).padStart(2, '0')}</em>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
         <table class="cm-t"><tr>${['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((x, i) => `<th class="${i === 0 ? 'dom' : ''}" style="color:${i === 0 ? '#e53935' : c}">${x}</th>`).join('')}</tr>${h}</tr></table>
-        <div class="cm-ev">${lista.map(e => `<p><i style="background:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}">${dd(e.de)}${e.ate && e.ate !== e.de ? '–' + dd(e.ate) : ''}</i>${esc(e.desc || e.tipo)}${CURTO_EV[e.tipo] ? ` <em>(${CURTO_EV[e.tipo]})</em>` : ''}</p>`).join('') || '<p class="vazio">—</p>'}</div></div>`;
+        <div class="cm-ev">${lista.map(e => `<p style="border-left-color:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}"><i style="background:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}">${dd(e.de)}${e.ate && e.ate !== e.de ? '–' + dd(e.ate) : ''}</i><span>${esc(e.desc || e.tipo)}${CURTO_EV[e.tipo] ? ` <em>(${CURTO_EV[e.tipo]})</em>` : ''}</span></p>`).join('') || '<p class="vazio">—</p>'}</div></div>`;
     };
     const blocos = d.semestre === '1º semestre' ? [[0, 1, 2, 3, 4, 5]] : d.semestre === '2º semestre' ? [[6, 7, 8, 9, 10, 11]] : [[0, 1, 2, 3, 4, 5], [6, 7, 8, 9, 10, 11]];
     const usados = new Set(evs.map(e => e.tipo));
     const leg = `<div class="cal-leg2">${Object.entries(COR_EV).filter(([t]) => usados.has(t)).map(([t, c]) => `<span><i style="background:${c}"></i>${t}</span>`).join('')}<span><i style="background:#ffd34d"></i>Início / fim das aulas</span><span><i class="dom"></i>Domingo</span></div>`;
-    return `${cab('CALENDÁRIO PEDAGÓGICO')}${blocos.map((b, i) => { const nl = letivos(d, b); const sem = b[0] ? '2º semestre' : '1º semestre';
+    const todosM = blocos.flat(); const doPer = e => todosM.includes(+e.de.slice(5, 7) - 1) && +e.de.slice(0, 4) === y;
+    const qtd = t => evs.filter(e => doPer(e) && t.includes(e.tipo)).length;
+    const resumo = `<table class="cal-res2"><tr><td class="cr-a"><small>${d.semestre && d.semestre !== 'Ano inteiro' ? d.semestre.toUpperCase() : 'ANO LETIVO'}</small><b>${y}</b></td><td><small>INÍCIO DAS AULAS</small><b>${fmt(ini) || '—'}</b></td><td><small>ENCERRAMENTO</small><b>${fmt(fim) || '—'}</b></td><td><small>DIAS LETIVOS</small><b style="color:#0a9d74">${letivos(d, todosM) ?? '—'}</b></td><td><small>AVALIAÇÕES</small><b style="color:#1e6fe8">${qtd(['Avaliação', 'Recuperação'])}</b></td><td><small>FERIADOS</small><b style="color:#e53935">${qtd(['Feriado', 'Ponto facultativo'])}</b></td></tr></table>`;
+    return `${cab('CALENDÁRIO PEDAGÓGICO')}${resumo}${blocos.map((b, i) => { const nl = letivos(d, b); const sem = b[0] ? '2º semestre' : '1º semestre';
       return `<div class="calp-pag"${i ? ' style="page-break-before:always;break-before:page"' : ''}>${blocos.length > 1 ? `<h3 class="calp-sem">${sem} · ${y}</h3>` : ''}<div class="calp">${b.map(mes).join('')}</div>
       <div class="calp-rod">${leg}<div class="calp-tot"><span>Dias letivos ${blocos.length > 1 ? 'no ' + sem : d.semestre ? 'no ' + d.semestre : ''}</span><b>${nl === null ? '—' : nl}</b></div></div></div>`; }).join('')}
       ${blocos.length > 1 ? `<p class="calp-ano">Total de dias letivos no ano: <b>${letivos(d)}</b></p>` : ''}`;
   }
+  // cor de cada disciplina (a mesma no boletim e no horário)
+  const COR_DISC = { 'língua portuguesa': '#1e6fe8', 'português': '#1e6fe8', 'matemática': '#e53935', 'ciências': '#0a9d74', 'biologia': '#2e8b3e', 'física': '#5b3cc4', 'química': '#d6336c', 'história': '#b8860b', 'geografia': '#0d8f8f', 'inglês': '#3949ab', 'espanhol': '#f0671f', 'arte': '#8e24aa', 'artes': '#8e24aa', 'educação física': '#f29f05', 'ensino religioso': '#6d4c41', 'filosofia': '#546e7a', 'sociologia': '#00838f', 'redação': '#c62828', 'literatura': '#ad1457' };
+  const PAL = ['#1e6fe8', '#e53935', '#0a9d74', '#5b3cc4', '#f0671f', '#0d8f8f', '#d6336c', '#b8860b', '#3949ab', '#2e8b3e', '#8e24aa', '#f29f05'];
+  const COR_N = {}; const corDisc = n => { if (!COR_N._) { Object.entries(COR_DISC).forEach(([k, v]) => { COR_N[normal(k)] = v; }); COR_N._ = 1; } const k = normal(n); if (COR_N[k]) return COR_N[k]; let h = 0; for (const c of k) h = (h * 31 + c.charCodeAt(0)) >>> 0; return PAL[h % PAL.length]; };
+  const tinta = (hex, a) => { const m = /^#(..)(..)(..)$/.exec(hex); return m ? `rgba(${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)},${a})` : hex; };
+  const tintaHex = (hex, a) => { const m = /^#(..)(..)(..)$/.exec(hex); if (!m) return hex; return '#' + [1, 2, 3].map(i => Math.round(255 - (255 - parseInt(m[i], 16)) * a).toString(16).padStart(2, '0')).join(''); };
+  const iniciais = n => (n || '').trim().split(/\s+/).filter(w => w.length > 2 || /^[A-ZÁÉÍÓÚ]/.test(w)).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?';
   function docBoletim(d) {
     const n = d.notas || {}; const ds = Object.keys(n); const min = num(d.minima) || 6;
-    return `${cab('BOLETIM ESCOLAR ' + (d.ano || ''))}<table class="doc-id"><tr><th>Aluno(a)</th><td>${esc(d.aluno)}</td></tr><tr><th>Turma</th><td>${esc([d.turma, d.classe].filter(Boolean).join(' · '))}</td></tr></table>
-      <table class="doc-bol"><thead><tr><th>Disciplina</th>${COLS.map(c => `<th>${c[1]}</th>`).join('')}<th>Média</th><th>Faltas</th><th>Situação</th></tr></thead><tbody>${ds.map(x => { const m = media(n[x]); const mn = num(m); return `<tr><td>${esc(x)}</td>${COLS.map(c => `<td>${esc(n[x][c[0]] || '')}</td>`).join('')}<td><b>${esc(m)}</b></td><td>${esc(n[x].faltas || '')}</td><td>${mn === null ? '' : mn >= min ? 'Aprovado' : 'Em recuperação'}</td></tr>`; }).join('')}</tbody></table>
-      <p class="doc-rev">Média para aprovação: ${esc(d.minima || '6,0')}. A nota da recuperação substitui a menor nota das avaliações quando for maior.</p>${d.obs ? bloco('Observações', d.obs) : ''}
-      <p class="doc-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.</p><div class="doc-ass"><div><span></span>Secretaria</div><div><span></span>Responsável</div></div>`;
+    const medias = ds.map(x => num(media(n[x]))).filter(v => v !== null);
+    const mg = medias.length ? medias.reduce((a, b) => a + b, 0) / medias.length : null;
+    const faltas = ds.reduce((a, x) => a + (parseInt(n[x].faltas) || 0), 0);
+    const abaixo = ds.filter(x => { const m = num(media(n[x])); return m !== null && m < min; });
+    const sit = !medias.length ? ['Em andamento', '#7a869a'] : abaixo.length ? ['Em recuperação', '#f0671f'] : medias.length === ds.length ? ['Aprovado(a)', '#0a9d74'] : ['Em andamento', '#1e6fe8'];
+    const nota = v => { const x = num(v); const c = x === null ? null : x >= min ? '#0a9d74' : x >= min - 1 ? '#f29f05' : '#e53935';
+      return x === null ? '<td class="bn vazio">—</td>' : `<td class="bn" style="background:${tintaHex(c, .16)};color:${c}"><b>${esc(String(v).replace('.', ','))}</b></td>`; };
+    const tur = [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '');
+    return `${cab('BOLETIM ESCOLAR')}
+      <table class="bol-aluno"><tr><td class="bol-av" rowspan="2"><span>${esc(iniciais(d.aluno))}</span></td><td class="bol-nome"><small>ALUNO(A)</small><b>${esc(d.aluno || '')}</b></td>
+        <td class="bol-st" rowspan="2"><small>MÉDIA GERAL</small><b style="color:${mg === null ? '#7a869a' : mg >= min ? '#0a9d74' : '#e53935'}">${mg === null ? '—' : mg.toFixed(1).replace('.', ',')}</b></td>
+        <td class="bol-st" rowspan="2"><small>FALTAS</small><b>${faltas}</b></td>
+        <td class="bol-st" rowspan="2"><small>SITUAÇÃO</small><em style="background:${sit[1]}">${sit[0]}</em></td></tr>
+        <tr><td class="bol-tags"><i>${esc(tur || '—')}</i><i>Ano letivo ${esc(d.ano || '')}</i><i>Média mínima ${esc(d.minima || '6,0')}</i></td></tr></table>
+      <table class="bol-t"><thead><tr><th class="bd">Disciplina</th>${COLS.map(c => `<th>${c[1].replace('Aval.', 'Av.')}</th>`).join('')}<th class="bm">Média</th><th>Faltas</th><th>Situação</th></tr></thead><tbody>
+      ${ds.map(x => { const m = media(n[x]); const mn = num(m); const c = corDisc(x); const st = mn === null ? ['', ''] : mn >= min ? ['Aprovado', '#0a9d74'] : ['Recuperação', '#e53935'];
+        return `<tr><td class="bd"><i style="background:${c}"></i>${esc(x)}</td>${COLS.map(cc => nota(n[x][cc[0]])).join('')}<td class="bm" ${mn === null ? '' : `style="background:${mn >= min ? '#0a9d74' : '#e53935'};color:#fff"`}><b>${esc(m || '—')}</b></td><td class="bf">${esc(n[x].faltas || '0')}</td><td class="bs">${st[0] ? `<em style="color:${st[1]};border-color:${st[1]}">${st[0]}</em>` : ''}</td></tr>`; }).join('')}</tbody></table>
+      ${medias.length ? `<div class="bol-graf"><h4>Desempenho por disciplina</h4><div class="bg-cols">${ds.map(x => { const mn = num(media(n[x])); if (mn === null) return ''; const c = corDisc(x);
+        return `<div class="bg-l"><span>${esc(x)}</span><div class="bg-b"><i style="width:${Math.min(100, mn * 10)}%;background:linear-gradient(90deg,${tinta(c, .55)},${c})"></i><u style="left:${min * 10}%"></u></div><b style="color:${c}">${mn.toFixed(1).replace('.', ',')}</b></div>`; }).join('')}</div><p class="bg-leg"><u></u> média mínima (${esc(d.minima || '6,0')})</p></div>` : ''}
+      <p class="doc-rev bol-leg"><span style="background:#e6f6f1;color:#0a9d74">≥ média</span><span style="background:#fef3dc;color:#b37400">até 1 ponto abaixo</span><span style="background:#fdeaea;color:#e53935">abaixo da média</span> A nota da recuperação substitui a menor nota das avaliações quando for maior.</p>
+      ${d.obs ? bloco('Observações', d.obs) : ''}
+      <p class="doc-fim bol-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.</p><div class="doc-ass bol-ass"><div><span></span>Secretaria Escolar</div><div><span></span>Responsável</div></div>`;
   }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
-    return `${cab('HORÁRIO DE AULA')}<table class="doc-id"><tr><th>Turma</th><td>${esc([d.turma, d.classe].filter(Boolean).join(' '))}${d.turno ? ' · ' + esc(d.turno) : ''}</td></tr><tr><th>Válido a partir de</th><td>${fmt(d.data)}</td></tr></table>
-      <table class="doc-hor"><thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(d.aulas || []).map((a, i) => /^interv/i.test(a[0]) ? `<tr class="iv"><td colspan="${dias.length + 1}">INTERVALO${a[1] ? ' · ' + esc(a[1]) : ''}</td></tr>` : `<tr><td class="hr">${esc(a[0])}${a[1] ? '<br>' + esc(a[1]) : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; return `<td><b>${esc(c.d || '')}</b>${c.p ? '<small>' + esc(c.p) + '</small>' : ''}</td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
+    const usados = new Map(); Object.values(g).forEach(c => { if (c.d) { const k = c.d; if (!usados.has(k)) usados.set(k, new Set()); if (c.p) usados.get(k).add(c.p); } });
+    const tur = [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '');
+    let n = 0;
+    return `${cab('HORÁRIO DE AULA')}
+      <table class="hor-top"><tr><td class="ht-tur"><small>TURMA</small><b>${esc(tur || '—')}</b></td><td class="ht-i"><small>TURNO</small><b>${esc(d.turno || '—')}</b></td><td class="ht-i"><small>DIAS</small><b>${esc(d.dias || '')}</b></td><td class="ht-i"><small>VÁLIDO A PARTIR DE</small><b>${fmt(d.data) || '—'}</b></td><td class="ht-i"><small>AULAS POR SEMANA</small><b>${Object.values(g).filter(c => c.d).length}</b></td></tr></table>
+      <table class="hor-t"><thead><tr><th class="hh">Horário</th>${dias.map((x, i) => `<th style="background:${['#1e6fe8', '#0a9d74', '#5b3cc4', '#f0671f', '#d6336c', '#0d8f8f'][i]}">${x}</th>`).join('')}</tr></thead><tbody>
+      ${(d.aulas || []).map((a, i) => { if (/^interv/i.test(a[0])) return `<tr class="hiv"><td colspan="${dias.length + 1}">☕ INTERVALO${a[1] ? ' · ' + esc(a[1]) : ''}</td></tr>`; n++;
+        return `<tr><td class="hh"><em>${n}º</em><b>${esc(a[0])}</b>${a[1] ? `<small>${esc(a[1])}</small>` : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; if (!c.d && !c.p) return '<td class="hc vazio"></td>'; const cor = corDisc(c.d || c.p);
+          return `<td class="hc" style="background:${tintaHex(cor, .14)};border-left-color:${cor}"><b style="color:${cor}">${esc(c.d || '')}</b>${c.p ? `<small>${esc(c.p)}</small>` : ''}</td>`; }).join('')}</tr>`; }).join('')}</tbody></table>
+      ${usados.size ? `<div class="hor-leg"><h4>Professores da turma</h4><div>${[...usados].map(([dsc, ps]) => `<span style="border-color:${corDisc(dsc)}"><i style="background:${corDisc(dsc)}"></i><b>${esc(dsc)}</b>${ps.size ? ' — ' + esc([...ps].join(', ')) : ''}</span>`).join('')}</div></div>` : ''}`;
   }
 
   /* ---------- Horários: professores, disponibilidade e conflitos ---------- */
