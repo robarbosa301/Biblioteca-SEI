@@ -295,3 +295,17 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .ct-masc{bottom:2.15mm;height:30mm;right:.2mm;z-index:3}.ct-rod{z-index:2}.ct-luz{z-index:1}
 .ct-masc{bottom:2.43mm;height:27mm;right:-.6mm}.ct-dados{right:28mm}.ct-2{gap:.8mm}
 .ct-masc{bottom:5mm;height:25mm;right:-.4mm;z-index:1}.ct-luz{display:none}
+/* horário: células no estilo do cabeçalho */
+.hor-t td.hc{border-left:0;padding:0;height:20mm}
+.hcx{position:relative;height:100%;min-height:18mm;display:flex;flex-direction:column;justify-content:center;padding:1.4mm 2mm;overflow:hidden;border-radius:2mm;box-sizing:border-box}
+.hcx b{position:relative;display:block;font:800 9pt/1.12 'SEI Rubik',Arial,sans-serif;letter-spacing:.2px}.hcx small{position:relative;display:block;font:700 7.2pt Arial,sans-serif;margin-top:.8mm}
+.hc-ic{position:absolute;right:-1.6mm;bottom:-1.8mm;width:12.5mm;height:12.5mm}
+.hcA .hcx{background:linear-gradient(135deg,#0a2f86,#071c55);border:.45mm solid #d4a72c;box-shadow:inset 0 0 0 .25mm rgba(255,229,138,.35)}
+.hcA .hcx i{position:absolute;left:0;top:0;bottom:0;width:1.4mm}.hcA b{color:#fff;padding-left:1mm}.hcA small{color:#ffd34d;padding-left:1mm}
+.hcB .hcx{border:.45mm solid rgba(255,255,255,.55)}.hcB b{color:#fff;text-shadow:0 .3mm .6mm rgba(0,0,0,.35)}.hcB small{color:#fff;opacity:.92}
+.hor-t td.hcB{border-radius:2mm}
+.hcC .hcx{padding:0;justify-content:flex-start;background:#fff;border:.35mm solid #d5def0;box-shadow:0 .5mm 1.2mm rgba(11,42,107,.15)}
+.hcC-h{display:flex;align-items:center;gap:1.2mm;padding:1.4mm 1.8mm;min-height:9mm}.hcC-h img{width:5.2mm;height:5.2mm;flex:none}.hcC-h b{color:#fff;font-size:8.4pt}
+.hcC small{color:#33415f;padding:1.6mm 2mm 0;font-size:7.4pt}
+.hor-t td.hcA small{color:#ffd34d}.hor-t td.hcB small{color:#fff}.hor-t td.hcC small{color:#33415f}
+.hcA .hcx{box-shadow:none}.hor-t td.hc{background:none!important}

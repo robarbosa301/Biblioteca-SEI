@@ -155,10 +155,10 @@
       titulo: d => `Horário — ${d.turma || ''}${d.classe ? ' ' + d.classe : ''}${d.turno ? ' (' + d.turno + ')' : ''}`,
       novo: () => ({ turma: '6º ano', turno: 'Manhã', dias: 'Segunda a sexta', aulas: [['07:00', '07:50'], ['07:50', '08:40'], ['08:40', '09:30'], ['INTERVALO', ''], ['09:50', '10:40'], ['10:40', '11:30']], grade: {} }),
       form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma, turmasAtuais()))}${lab('Letra', inp('classe', d.classe, 'A, B…'))}${lab('Turno', inp('turno', d.turno, 'Manhã, Tarde, Noite'))}</div>
-        <div class="g2">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}</div>
+        <div class="g3">${lab('Dias', sel('dias', d.dias, ['Segunda a sexta', 'Segunda a sábado']))}${lab('Válido a partir de', inp('data', d.data || hoje(), '', 'date'))}${lab('Estilo das aulas', `<select id="estiloCel">${[['A', 'A — escuro com moldura dourada'], ['B', 'B — na cor da disciplina'], ['C', 'C — cartão com aba colorida']].map(([k, t]) => `<option value="${k}" ${(d.estiloCel || 'A') === k ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}</div>
         <p class="dica">Em cada horário, escolha a disciplina e o professor. Para o intervalo, escreva <b>INTERVALO</b> no início. O site avisa quando o professor não pode naquele dia e turno, ou já está em outra turma no mesmo horário.</p><div id="alertas" class="alertas"></div><datalist id="profsDL"></datalist>
         <div class="tab"><table class="grade" id="grade"></table></div><button type="button" class="b" id="maisAula">➕ Mais um horário</button>`,
-      campos: ['turma', 'classe', 'turno', 'dias', 'data'],
+      campos: ['turma', 'classe', 'turno', 'dias', 'data', 'estiloCel'],
       depois: async d => { const montar = async () => { const ds = await disciplinas(v('turma')); const dias = DIAS(v('dias')); const g = d.grade || {};
           $('#grade').innerHTML = `<thead><tr><th>Horário</th>${dias.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${(d.aulas || []).map((a, i) => { const iv = /^interv/i.test(a[0]); return `<tr><td class="hr"><input class="hi" value="${esc(a[0])}"> <input class="hf" value="${esc(a[1])}" ${iv ? 'hidden' : ''}></td>${iv ? `<td colspan="${dias.length}" class="iv">INTERVALO</td>` : dias.map(x => { const c = (g[i + '|' + x] || {}); return `<td><select class="gd" data-k="${i}|${x}"><option value="">—</option>${ds.map(s => `<option ${c.d === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select><input class="gp" data-k="${i}|${x}" list="profsDL" placeholder="Professor(a)" value="${esc(c.p || '')}"><span class="alerta-c" data-k="${i}|${x}"></span></td>`; }).join('')}</tr>`; }).join('')}</tbody>`; };
         const montar0 = montar; const montarC = async () => { await montar0(); await ligaChecagem(d); };
@@ -503,6 +503,36 @@
       ${d.obs ? bloco('Observações', d.obs) : ''}
       <p class="doc-fim bol-fim">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.</p><div class="doc-ass bol-ass"><div><span></span>Secretaria Escolar</div><div><span></span>Responsável</div></div>`;
   }
+  // ícones de traço por disciplina (para o horário)
+  const ICO_D = {
+    mat: '<text x="3" y="17" font-size="15" font-family="Georgia" font-weight="700" stroke="none" fill="C">π</text><path d="M13 13l2 4 4-12h3"/>',
+    port: '<path d="M12 6c-2.2-1.4-5.5-1.8-9-1.2v13c3.5-.6 6.8-.2 9 1.2 2.2-1.4 5.5-1.8 9-1.2v-13c-3.5-.6-6.8-.2-9 1.2zM12 6v13M5.5 9h3.5M5.5 12h3.5M15 9h3.5M15 12h3.5"/>',
+    cien: '<path d="M9 3h6M10 3v6l-5 9.5c-.4.8.2 1.5 1 1.5h12c.8 0 1.4-.7 1-1.5L14 9V3M7.2 14h9.6"/><circle cx="10.5" cy="16.5" r=".9"/><circle cx="13.5" cy="17.2" r=".7"/>',
+    bio: '<path d="M8 3c0 6 8 6 8 12s-8 6-8 6M16 3c0 6-8 6-8 12s8 6 8 6M9 6h6M8.5 10h7M8.5 14h7M9 18h6"/>',
+    fis: '<ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/><circle cx="12" cy="12" r="1.4" fill="C"/>',
+    quim: '<path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="3.6"/>',
+    hist: '<path d="M3 7h18l-2-3H5zM4 20h16M3 22h18M6 7v13M10 7v13M14 7v13M18 7v13"/>',
+    geo: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M4.5 7.5h15M4.5 16.5h15"/>',
+    ing: '<path d="M4 4h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><text x="12" y="13.5" font-size="7" text-anchor="middle" font-family="Arial" font-weight="700" stroke="none" fill="C">Hi!</text>',
+    esp: '<path d="M4 4h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><text x="12" y="13.5" font-size="6" text-anchor="middle" font-family="Arial" font-weight="700" stroke="none" fill="C">¡Hola!</text>',
+    arte: '<path d="M12 3C6.5 3 3 7 3 11.5S6.8 20 11 20c1.6 0 1.8-1.5 1-2.5s-.4-2.5 1.2-2.5H16c3 0 5-2 5-5 0-4-4-7-9-7z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10" cy="7" r="1.3"/><circle cx="15" cy="7.5" r="1.3"/>',
+    ef: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5l4 2.9-1.5 4.7h-5L8 10.4zM12 3v4.5M20.6 9.3l-4.6 1.1M17.3 19.3l-2.8-4.2M6.7 19.3l2.8-4.2M3.4 9.3l4.6 1.1"/>',
+    rel: '<path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/>',
+    fil: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+    soc: '<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="8.5" r="2.5"/><path d="M2.5 20c.5-4 3-6 5.5-6s5 2 5.5 6M13 15c1-1 2.2-1.5 3.5-1.5 2.3 0 4.2 2 4.6 6"/>',
+    red: '<path d="M4 20l1-5L16 4l4 4L9 19zM14 6l4 4M4 20h16"/>',
+    lit: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11"/>',
+    gen: '<path d="M4 5h7v14H4zM13 5h7v14h-7zM6 8h3M15 8h3"/>'
+  };
+  const icoDe = n => { const k = normal(n); return /matem/.test(k) ? 'mat' : /portug|lingua p/.test(k) ? 'port' : /ciencia/.test(k) ? 'cien' : /biolog/.test(k) ? 'bio' : /fisica/.test(k) && !/educa/.test(k) ? 'fis' : /quimic/.test(k) ? 'quim' : /histor/.test(k) ? 'hist' : /geograf/.test(k) ? 'geo' : /ingles/.test(k) ? 'ing' : /espanh/.test(k) ? 'esp' : /arte/.test(k) ? 'arte' : /educa.*fisica|ed\. fis/.test(k) ? 'ef' : /religi/.test(k) ? 'rel' : /filosof/.test(k) ? 'fil' : /sociolog/.test(k) ? 'soc' : /redac/.test(k) ? 'red' : /literat/.test(k) ? 'lit' : 'gen'; };
+  const icoSrc = (n, cor, sw) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='64' height='64' fill='none' stroke='${cor}' stroke-width='${sw || 1.5}' stroke-linecap='round' stroke-linejoin='round'>${ICO_D[icoDe(n)].replace(/fill="C"/g, `fill="${cor}"`).replace(/"/g, "'")}</svg>`);
+  // célula do horário no estilo do cabeçalho: escura com moldura dourada (A), cor da disciplina (B) ou cartão com aba (C)
+  function celHor(c, est) {
+    const cor = corDisc(c.d || c.p), nome = esc(c.d || ''), prof = c.p ? esc(c.p) : '';
+    if (est === 'B') return `<td class="hc hcB" style="background:linear-gradient(135deg,${cor},${tintaHex(cor, .7)})"><div class="hcx"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(255,255,255,.55)', 1.6)}" alt=""><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+    if (est === 'C') return `<td class="hc hcC"><div class="hcx"><div class="hcC-h" style="background:${cor}"><img src="${icoSrc(c.d || c.p, '#ffffff', 1.8)}" alt=""><b>${nome}</b></div>${prof ? `<small>${prof}</small>` : '<small>&nbsp;</small>'}</div></td>`;
+    return `<td class="hc hcA"><div class="hcx"><img class="hc-ic" src="${icoSrc(c.d || c.p, 'rgba(140,210,255,.5)', 1.5)}" alt=""><i style="background:${cor}"></i><b>${nome}</b>${prof ? `<small>${prof}</small>` : ''}</div></td>`;
+  }
   function docHorario(d) {
     const dias = DIAS(d.dias); const g = d.grade || {};
     const usados = new Map(); Object.values(g).forEach(c => { if (c.d) { const k = c.d; if (!usados.has(k)) usados.set(k, new Set()); if (c.p) usados.get(k).add(c.p); } });
@@ -512,8 +542,7 @@
       <table class="hor-top"><tr><td class="ht-tur"><small>TURMA</small><b>${esc(tur || '—')}</b></td><td class="ht-i"><small>TURNO</small><b>${esc(d.turno || '—')}</b></td><td class="ht-i"><small>DIAS</small><b>${esc(d.dias || '')}</b></td><td class="ht-i"><small>VÁLIDO A PARTIR DE</small><b>${fmt(d.data) || '—'}</b></td><td class="ht-i"><small>AULAS POR SEMANA</small><b>${Object.values(g).filter(c => c.d).length}</b></td></tr></table>
       <table class="hor-t"><thead><tr><th class="hh">Horário</th>${dias.map((x, i) => `<th style="background:${['#1e6fe8', '#0a9d74', '#5b3cc4', '#f0671f', '#d6336c', '#0d8f8f'][i]}">${x}</th>`).join('')}</tr></thead><tbody>
       ${(d.aulas || []).map((a, i) => { if (/^interv/i.test(a[0])) return `<tr class="hiv"><td colspan="${dias.length + 1}">☕ INTERVALO${a[1] ? ' · ' + esc(a[1]) : ''}</td></tr>`; n++;
-        return `<tr><td class="hh"><em>${n}º</em><b>${esc(a[0])}</b>${a[1] ? `<small>${esc(a[1])}</small>` : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; if (!c.d && !c.p) return '<td class="hc vazio"></td>'; const cor = corDisc(c.d || c.p);
-          return `<td class="hc" style="background:${tintaHex(cor, .14)};border-left-color:${cor}"><b style="color:${cor}">${esc(c.d || '')}</b>${c.p ? `<small>${esc(c.p)}</small>` : ''}</td>`; }).join('')}</tr>`; }).join('')}</tbody></table>
+        return `<tr><td class="hh"><em>${n}º</em><b>${esc(a[0])}</b>${a[1] ? `<small>${esc(a[1])}</small>` : ''}</td>${dias.map(x => { const c = g[i + '|' + x] || {}; if (!c.d && !c.p) return '<td class="hc vazio"></td>'; return celHor(c, d.estiloCel || window.SEI_HCEL || 'A'); }).join('')}</tr>`; }).join('')}</tbody></table>
       ${usados.size ? `<div class="hor-leg"><h4>Professores da turma</h4><div>${[...usados].map(([dsc, ps]) => `<span style="border-color:${corDisc(dsc)}"><i style="background:${corDisc(dsc)}"></i><b>${esc(dsc)}</b>${ps.size ? ' — ' + esc([...ps].join(', ')) : ''}</span>`).join('')}</div></div>` : ''}`;
   }
 
