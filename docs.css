@@ -309,3 +309,8 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .hcC small{color:#33415f;padding:1.6mm 2mm 0;font-size:7.4pt}
 .hor-t td.hcA small{color:#ffd34d}.hor-t td.hcB small{color:#fff}.hor-t td.hcC small{color:#33415f}
 .hcA .hcx{box-shadow:none}.hor-t td.hc{background:none!important}
+.hcD .hcx{padding:0;justify-content:flex-start;background:#071c55;border:.45mm solid #d4a72c}
+.hcD-art{display:block;width:100%;height:auto;aspect-ratio:520/280;object-fit:cover}
+.hor-t td.hcD small{color:#ffd34d;text-align:center;font:700 7.4pt Arial,sans-serif;margin:0;padding:.7mm 1mm .9mm;background:#071c55}
+.hor-t td.hcD{height:auto}
+.hor-t{table-layout:fixed}.hor-t th.hh,.hor-t td.hh{width:17mm}
