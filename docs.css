@@ -444,3 +444,15 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .rc-rod{display:flex;justify-content:space-around;gap:2mm;background:#0b2a6b;color:#fff;font:700 5.8pt Arial,sans-serif;padding:1mm 2mm;border-top:.5mm solid #e6b422}
 .rc-corte{text-align:center;color:#8a97ad;font:7pt Arial,sans-serif;letter-spacing:1px;margin:1.8mm 0;white-space:nowrap;overflow:hidden}
 .rc{box-shadow:none}.rc-chip{font-size:7pt;padding:.5mm 2mm .5mm .7mm}.rc-ref{padding-right:24mm;gap:1mm 1.2mm}.rc-ass{width:58mm;font-size:6.6pt}.rc-ass span{white-space:nowrap}
+/* ===== Financeiro ===== */
+.mens-f{min-width:520px}.mens-f input{width:100%;font:14px system-ui;padding:5px;border:1px solid #b9cce6;border-radius:6px}.mens-f th{text-align:left;white-space:nowrap}
+.mens-res{display:flex;gap:2mm;margin:0 0 2mm}.mens-res span{flex:1;text-align:center;border-radius:2mm;padding:1.2mm;font:700 7.5pt Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}.mens-res b{font:800 12pt 'SEI Rubik',Arial,sans-serif;margin-right:1mm}
+.r-ok{background:#e6f6f1;color:#0a7a5a}.r-at{background:#fdeaea;color:#c62828}.r-ab{background:#eef4fd;color:#1e4fb8}
+.mens-t td{height:7.4mm;text-align:center;font-size:8.6pt}.mens-t td.mm{text-align:left;font-weight:800;color:#0b2a6b}.mens-t td.mm small{font-weight:400;color:#6b7fa8}
+.mens-t em{font-style:normal;font:800 6.6pt Arial,sans-serif;border-radius:99px;padding:.5mm 2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}.s-ok{background:#0a9d74;color:#fff}.s-at{background:#e53935;color:#fff}.s-ab{background:#dbe9ff;color:#1e4fb8}
+.mens-t tr.ok td{background:#f2fbf8!important}.mens-t tr.at td{background:#fff3f3!important}
+.vl{margin:0 0 3mm;break-inside:avoid}.vl-h{display:inline-flex;gap:2mm;align-items:baseline;background:#0b2a6b;color:#fff;border-radius:2mm 2mm 0 0;padding:1mm 3mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}.vl-h small{font:700 6pt Arial,sans-serif;color:#9fdcff}.vl-h b{font:800 8.5pt 'SEI Rubik',Arial,sans-serif;color:#ffd34d}
+.vl-t{width:100%;border-collapse:collapse;min-width:0;table-layout:fixed}.vl-t th,.vl-t td{border:.25mm solid #b9c6dd;font:700 5.6pt Arial,sans-serif;text-align:center;padding:.3mm 0;height:5.4mm;position:static;background:#fff}
+.vl-t th{background:#eef4fd!important;color:#0b2a6b}.vl-t .vl-n{width:17mm;text-align:left;padding-left:1mm;font-size:5.8pt;color:#0b2a6b}.vl-t .vl-tot{width:11mm;background:#fff6d6!important}
+.vl-t .vx{background:#e3e8f2!important}.vl-t tr.vl-sum td{background:#f1f5fc!important;font-weight:800}
+.vl-h{display:inline-block!important;color:#fff!important;font:700 6pt Arial,sans-serif}.vl-h small{color:#9fdcff!important;margin-right:2mm}.vl-h b{color:#ffd34d!important;font:800 8.5pt Arial,sans-serif}

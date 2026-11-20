@@ -211,7 +211,7 @@
   };
   Object.assign(TIPOS, {
     declaracao: {
-      nome: 'Declaração', icone: '🧾', desc: 'Pagamento (IR), serviço prestado, liberação de funcionário, matrícula', setores: ['secretaria'],
+      nome: 'Declaração', icone: '📜', desc: 'Pagamento (IR), serviço prestado, liberação de funcionário, matrícula', setores: ['secretaria', 'financeiro'],
       titulo: d => `Declaração — ${MOD_DEC[d.modelo] ? MOD_DEC[d.modelo].curto : ''}${d.nome || d.aluno ? ': ' + (d.modelo === 'pagamento' ? d.aluno || d.resp : d.nome || d.aluno) : ''}`,
       novo: () => ({ data: hoje(), modelo: 'pagamento', turma: '6º ano', anoRef: String(new Date().getFullYear() - 1), cargo: 'Secretária Escolar' }),
       form: d => `${lab('Modelo', `<select id="modelo">${Object.entries(MOD_DEC).map(([k, m]) => `<option value="${k}" ${d.modelo === k ? 'selected' : ''}>${m.nome}</option>`).join('')}</select>`, 1)}
@@ -330,7 +330,7 @@
   const L_ = '________________________';
   const campo = (r, v, w) => `<span class="cf"${w ? ` style="flex:${w}"` : ''}><small>${r}</small><b>${esc(v || '') || '&nbsp;'}</b></span>`;
   TIPOS.contrato = {
-    nome: 'Contrato de matrícula', icone: '✍️', desc: 'Contrato de prestação de serviços educacionais (modelo da escola)', setores: ['secretaria'],
+    nome: 'Contrato de matrícula', icone: '✍️', desc: 'Contrato de prestação de serviços educacionais (modelo da escola)', setores: ['secretaria', 'financeiro'],
     titulo: d => `Contrato — ${d.aluno || ''} (${(d.turma || '').replace(/ \(.*\)/, '')})`,
     novo: () => { const y = String(new Date().getFullYear()); const p = PRECOS['6º ano']; return { ano: y, turma: '6º ano', turno: 'Manhã', cidade: 'São Miguel do Guamá', uf: 'PA', data: hoje(), mens: brl(p[0]), anuid: brl(p[1]), mensApos: brl(p[2]), anuidApos: brl(p[3]), material: p[4], orgao: 'SEGUP' }; },
     form: d => `<h4>Dados do(a) aluno(a)</h4><div class="g3">${lab('Nome do(a) aluno(a)', inp('aluno', d.aluno))}${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turno', sel('turno', d.turno || 'Manhã', ['Manhã', 'Tarde', 'Noite', 'Integral']))}</div>
@@ -363,7 +363,7 @@
   };
   const REFS = ['Mensalidade', 'Matrícula', 'Taxa do material', 'Outro'];
   TIPOS.recibo = {
-    nome: 'Recibo', icone: '🧾', desc: 'Recibo de pagamento com canhoto (preenchido ou em branco)', setores: ['secretaria'], livre: true,
+    nome: 'Recibo', icone: '🧾', desc: 'Recibo de pagamento com canhoto (preenchido ou em branco)', setores: ['secretaria', 'financeiro'], livre: true,
     titulo: d => d.branco === 'sim' ? 'Recibos em branco' : `Recibo — ${d.de || ''} · ${d.ref || ''}${d.ref === 'Mensalidade' && d.mes ? ' ' + d.mes : ''}`,
     novo: () => ({ data: hoje(), ref: 'Mensalidade', mes: MESES[new Date().getMonth()], vias: '3', branco: 'nao', assinante: '' }),
     form: d => `<div class="g2">${lab('Tipo', `<select id="branco"><option value="nao" ${d.branco !== 'sim' ? 'selected' : ''}>Preenchido</option><option value="sim" ${d.branco === 'sim' ? 'selected' : ''}>Em branco (para preencher à mão)</option></select>`)}${lab('Recibos por folha', sel('vias', d.vias || '3', ['1', '2', '3']))}</div>
@@ -387,6 +387,45 @@
             <img class="rc-masc" src="assets/docs/mascote-sei.png?v=14" alt=""></div>
           <div class="rc-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div></div></div>`;
       const n = Math.max(1, Math.min(3, +d.vias || 3)); return `<div class="rec-pag rc-n${n}">${Array.from({ length: n }, () => um).join('<div class="rc-corte">✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</div>')}</div>`; }
+  };
+  /* ---------- financeiro: controle de mensalidades e orçamento de vales ---------- */
+  const MES_ABR = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  TIPOS.mensalidades = {
+    nome: 'Controle de mensalidades', icone: '💳', desc: 'Ficha do aluno com as 12 parcelas: vencimento, valor, pagamento e visto', setores: ['financeiro', 'secretaria'],
+    titulo: d => `Mensalidades ${d.ano || ''} — ${d.aluno || ''}`,
+    novo: () => { const y = String(new Date().getFullYear()); const p = PRECOS['6º ano']; return { ano: y, turma: '6º ano', venc: '05', valor: brl(p[0]), pagos: {}, data: hoje() }; },
+    form: d => { const pg = d.pagos || {}; return `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turma', inp('classe', d.classe))}</div>
+      <div class="g3">${lab('Responsável financeiro', inp('resp', d.resp))}${lab('Telefone', inp('tel', d.tel, '', 'tel'))}${lab('Ano letivo', inp('ano', d.ano))}</div>
+      <div class="g3">${lab('Valor da mensalidade', inp('valor', d.valor))}${lab('Dia do vencimento', inp('venc', d.venc || '05'))}${lab('Desconto (opcional)', inp('desc', d.desc, 'Ex.: 10% até o vencimento'))}</div>
+      <h4>Pagamentos <small>(preencha a data em que pagou; deixe em branco o que ainda não foi pago)</small></h4>
+      <div class="tab"><table class="mens-f"><thead><tr><th>Parcela</th><th>Valor pago</th><th>Data do pagamento</th><th>Recibo nº</th></tr></thead><tbody>${MESES.map((m, i) => { const x = pg[i] || {}; return `<tr><th>${i + 1}ª · ${m}</th><td><input class="pgv" data-i="${i}" value="${esc(x.v || '')}" inputmode="decimal"></td><td><input class="pgd" data-i="${i}" type="date" value="${esc(x.d || '')}"></td><td><input class="pgr" data-i="${i}" value="${esc(x.r || '')}"></td></tr>`; }).join('')}</tbody></table></div>`; },
+    campos: ['aluno', 'turma', 'classe', 'resp', 'tel', 'ano', 'valor', 'venc', 'desc', 'data'],
+    depois: () => { $('#turma').addEventListener('change', () => { const p = PRECOS[v('turma')]; if (p) $('#valor').value = brl(p[0]); }); },
+    extra: d => { const pg = {}; for (let i = 0; i < 12; i++) { const g = c => (document.querySelector(`.${c}[data-i="${i}"]`) || {}).value || ''; const x = { v: g('pgv').trim(), d: g('pgd'), r: g('pgr').trim() }; if (x.v || x.d || x.r) pg[i] = x; } d.pagos = pg; },
+    doc: d => { const pg = d.pagos || {}; const y = +d.ano || new Date().getFullYear(); const hojeK = hoje(); let pagos = 0, abertos = 0, atras = 0;
+      const rows = MESES.map((m, i) => { const x = pg[i] || {}; const vk = `${y}-${String(i + 1).padStart(2, '0')}-${String(d.venc || '05').padStart(2, '0')}`; const pago = !!x.d; const at = !pago && vk < hojeK;
+        if (pago) pagos++; else if (at) atras++; else abertos++;
+        return `<tr class="${pago ? 'ok' : at ? 'at' : ''}"><td class="mn">${String(i + 1).padStart(2, '0')}</td><td class="mm">${MES_ABR[i]} <small>${m}</small></td><td>${fmt(vk)}</td><td>${esc(d.valor || '')}</td><td>${esc(x.v ? brl(String(x.v).replace(/\./g, '').replace(',', '.')) : '')}</td><td>${pago ? fmt(x.d) : ''}</td><td>${esc(x.r || '')}</td><td class="ms">${pago ? '<em class="s-ok">PAGO</em>' : at ? '<em class="s-at">EM ATRASO</em>' : '<em class="s-ab">A VENCER</em>'}</td><td></td></tr>`; }).join('');
+      return `${cab('CONTROLE DE MENSALIDADES')}<table class="mapa-top"><tr><td class="mt-a"><small>ANO LETIVO</small><b>${y}</b></td><td><small>ALUNO(A)</small><b>${esc((d.aluno || '—').toUpperCase())}</b></td><td><small>SÉRIE / TURMA</small><b>${esc([serieGrande(d.turma), d.classe].filter(Boolean).join(' '))}</b></td><td><small>MENSALIDADE</small><b>${esc(d.valor || '—')}</b></td></tr></table>
+        <table class="mapa-top"><tr><td><small>RESPONSÁVEL FINANCEIRO</small><b>${esc((d.resp || '—').toUpperCase())}</b></td><td><small>TELEFONE</small><b>${esc(d.tel || '—')}</b></td><td><small>VENCIMENTO</small><b>Todo dia ${esc(d.venc || '05')}</b></td>${d.desc ? `<td><small>DESCONTO</small><b>${esc(d.desc)}</b></td>` : ''}</tr></table>
+        <div class="mens-res"><span class="r-ok"><b>${pagos}</b> pagas</span><span class="r-at"><b>${atras}</b> em atraso</span><span class="r-ab"><b>${abertos}</b> a vencer</span></div>
+        <table class="mapa-t mens-t"><thead><tr><th class="mn">Nº</th><th>MÊS</th><th>VENCIMENTO</th><th>VALOR</th><th>VALOR PAGO</th><th>PAGO EM</th><th>RECIBO</th><th>SITUAÇÃO</th><th>VISTO</th></tr></thead><tbody>${rows}</tbody></table>
+        <p class="doc-rev">Após o vencimento: multa de 2% e juros de mora de 0,6% ao dia, com perda de eventual desconto (contrato de prestação de serviços educacionais).</p>
+        <div class="doc-ass"><div><span></span>Setor financeiro</div><div><span></span>${esc(d.resp || 'Responsável financeiro')}</div></div>`; }
+  };
+  TIPOS.vales = {
+    nome: 'Orçamento de vales', icone: '🚌', desc: 'Vale-transporte e vale-alimentação do mês, por professor', setores: ['financeiro'],
+    titulo: d => `Orçamento de vales — ${MESES[+(d.mes || '').slice(5, 7) - 1] || ''} de ${(d.mes || '').slice(0, 4)}`,
+    novo: () => { const x = new Date(); return { mes: `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`, itens: 'Vale passagem, Almoço, Jantar', data: hoje() }; },
+    form: d => `<div class="g2">${lab('Mês', inp('mes', d.mes, '', 'month'))}${lab('Linhas (separadas por vírgula)', inp('itens', d.itens || 'Vale passagem, Almoço, Jantar'))}</div>
+      ${lab('Professores / funcionários (um por linha)', `<textarea id="profs" data-ed="sem" rows="8" placeholder="Hugo&#10;Denilson Miranda&#10;Tiely">${esc(d.profs || '')}</textarea>`, 1)}
+      <p class="dica">Sai uma tabela por pessoa, com os dias do mês para marcar e o total. Sábados, domingos e feriados ficam sombreados.</p>`,
+    campos: ['mes', 'itens', 'profs', 'data'],
+    doc: d => { const [y, m] = (d.mes || '').split('-').map(Number); if (!y) return cab('ORÇAMENTO DE VALES'); const nd = new Date(y, m, 0).getDate(); const fer = new Set(feriadosDe(y).map(e => e.de));
+      const its = (d.itens || 'Vale passagem, Almoço, Jantar').split(',').map(x => x.trim()).filter(Boolean); const ps = (d.profs || '').split('\n').map(x => x.trim()).filter(Boolean); const lista = ps.length ? ps : ['', '', ''];
+      const cls = dd => { const w = new Date(y, m - 1, dd).getDay(); const k = `${y}-${String(m).padStart(2, '0')}-${String(dd).padStart(2, '0')}`; return w === 0 || w === 6 || fer.has(k) ? ' class="vx"' : ''; };
+      const tab = p => `<div class="vl"><div class="vl-h"><small>PROFESSOR(A)</small><b>${esc(p.toUpperCase()) || '&nbsp;'}</b></div><table class="vl-t"><thead><tr><th class="vl-n">DIAS</th>${Array.from({ length: nd }, (_, k) => `<th${cls(k + 1)}>${String(k + 1).padStart(2, '0')}</th>`).join('')}<th class="vl-tot">TOTAL</th></tr></thead><tbody>${its.concat(['TOTAL']).map(it => `<tr${it === 'TOTAL' ? ' class="vl-sum"' : ''}><td class="vl-n">${esc(it.toUpperCase())}</td>${Array.from({ length: nd }, (_, k) => `<td${cls(k + 1)}></td>`).join('')}<td class="vl-tot"></td></tr>`).join('')}</tbody></table></div>`;
+      return `${cab('ORÇAMENTO DE VALES')}<table class="mapa-top"><tr><td class="mt-a"><small>MÊS</small><b>${esc((MESES[m - 1] || '').toUpperCase())} ${y}</b></td><td><small>DOCUMENTO</small><b>VALE-TRANSPORTE E VALE-ALIMENTAÇÃO</b></td><td><small>PESSOAS</small><b>${ps.length}</b></td></tr></table>${lista.map(tab).join('')}`; }
   };
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
@@ -499,7 +538,7 @@
   const linhaEv = e => `<div class="ev"><input type="date" class="ev-de" value="${esc(e.de || '')}"><input type="date" class="ev-ate" value="${esc(e.ate || '')}" title="Até (opcional)"><select class="ev-tipo">${TIPOS_EV.map(t => `<option ${e.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select><input class="ev-desc" placeholder="Descrição" value="${esc(e.desc || '')}"><button type="button" class="b ghost ev-x" title="Tirar">✕</button></div>`;
 
   /* ---------- impressão ---------- */
-  const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica' }[SETOR];
+  const NOME_SETOR = { secretaria: 'Secretaria Escolar', coordenacao: 'Coordenação Pedagógica', avisos: 'Secretaria Escolar', calendario: 'Secretaria Escolar', horarios: 'Coordenação Pedagógica', financeiro: 'Setor Financeiro' }[SETOR];
   // Cabeçalho: a arte aprovada do site (mascote, Nº 1 em aprovação e logo) com o título na faixa
   const tamTit = t => t.length <= 24 ? Math.min(22, Math.round(330 / Math.max(8, t.length) * 10) / 10) : Math.max(8.5, Math.min(11.5, Math.round(600 / t.length * 10) / 10));
   const cab0 = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</div>`;
@@ -508,13 +547,13 @@
   const cab = titulo => { if (!titCap) titCap = titulo; if (!FOLHA) return cab0(titulo); return FOLHA.duas ? `<img class="folha-banda" src="${FOLHA.banda}" alt="">` : nCab++ ? '' : `<img class="folha-cab" src="${FOLHA.cab}" alt="">`; };
   const PEQ = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'em', 'para']);
   const tituloCaso = t => t.toLowerCase().split(' ').map((w, i) => i && PEQ.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  const PLACA = { secretaria: ['SECRETARIA', 'ESCOLAR'], coordenacao: ['COORDENAÇÃO', 'PEDAGÓGICA'], avisos: ['AVISOS', 'E COMUNICADOS'], calendario: ['CALENDÁRIO', 'ESCOLAR'], horarios: ['HORÁRIOS', 'DE AULA'] };
+  const PLACA = { secretaria: ['SECRETARIA', 'ESCOLAR'], coordenacao: ['COORDENAÇÃO', 'PEDAGÓGICA'], avisos: ['AVISOS', 'E COMUNICADOS'], calendario: ['CALENDÁRIO', 'ESCOLAR'], horarios: ['HORÁRIOS', 'DE AULA'], financeiro: ['FINANCEIRO', 'SEI'] };
   function faixa(d) {
     const t = TIPOS[d.tipo]; const ano = (d.data || '').slice(0, 4);
     const docN = t.nome.split(' /')[0] + (d.numero ? ` nº ${d.numero}/${ano}` : '') + (d.modelo && MOD_DEC[d.modelo] ? ' — ' + MOD_DEC[d.modelo].curto : '');
     const quem = d.aluno || d.alunoM ? ['Aluno(a)', d.aluno || d.alunoM] : d.nome ? ['Nome', d.nome] : d.resp ? ['Responsável', d.resp] : d.assunto || d.titulo ? ['Assunto', d.assunto || d.titulo] : d.tipoR ? ['Reunião', d.tipoR] : (d.publico || d.para) ? ['Para', d.publico || d.para] : ['Setor', NOME_SETOR];
     const tur = d.turma && !(d.tipo === 'declaracao' && ['servico', 'liberacao', 'livre'].includes(d.modelo)) ? ['Turma', [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '')] : ['Segmento', segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : 'Todos'];
-    return [['Documento', docN], quem, ['Data', d.tipo === 'frequencia' && d.mes ? (MESES[+d.mes.slice(5, 7) - 1] || '') + ' de ' + d.mes.slice(0, 4) : fmt(d.data) || d.ano || ''], tur];
+    return [['Documento', docN], quem, ['Data', (d.tipo === 'frequencia' || d.tipo === 'vales') && d.mes ? (MESES[+d.mes.slice(5, 7) - 1] || '') + ' de ' + d.mes.slice(0, 4) : fmt(d.data) || d.ano || ''], tur];
   }
   async function prepFolha(d) {
     segDoc = d.seg || null; FOLHA = null; titCap = null; nCab = 0; TIPOS[d.tipo].doc(d); const tit = tituloCaso(titCap || TIPOS[d.tipo].nome);
@@ -1011,7 +1050,7 @@
       return;
     }
     const t = TIPOS[tipo]; const ordT = d => TURMAS.indexOf(d.turma) * 100 + ((d.classe || ' ').charCodeAt(0) % 100); const l = lista.filter(d => d.tipo === tipo && doSeg(d) && (!etapa || etapaDe(d.turma) === etapa)).sort((a, b) => tipo === 'horario' ? ordT(a) - ordT(b) : (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
-    const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos' }[SETOR];
+    const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos', financeiro: 'Financeiro' }[SETOR];
     p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
       <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button><button class="b" id="verModelo">👁 Ver modelo</button></div>
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
