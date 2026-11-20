@@ -371,17 +371,22 @@
       <div class="g3">${lab('Referente a', sel('ref', d.ref || 'Mensalidade', REFS))}${lab('Mês (mensalidade)', sel('mes', d.mes || MESES[0], MESES))}${lab('Outro (descreva)', inp('outro', d.outro))}</div>
       <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Nº do recibo (opcional)', inp('numero', d.numero))}${lab('Quem assina', inp('assinante', d.assinante, 'Coordenação'))}</div>`,
     campos: ['branco', 'vias', 'de', 'valor', 'aluno', 'ref', 'mes', 'outro', 'data', 'numero', 'assinante'],
-    doc: d => { const b = d.branco === 'sim'; const val = b ? '' : reais(d.valor) || ''; const mk = r => b ? '☐' : (d.ref === r ? '☒' : '☐');
-      const um = `<div class="rec"><div class="rec-can"><img src="assets/docs/logo-sei.png?v=3" alt=""><b>CANHOTO</b>${d.numero ? `<small>Nº ${esc(d.numero)}</small>` : ''}<p><small>Recebi de</small>${b ? '<i></i>' : esc(d.de || '')}</p><p><small>Valor</small>${b ? '<i></i>' : esc(brl(String(d.valor || '').replace(/\./g, '').replace(',', '.')) || '')}</p><p><small>Referente a</small>${b ? '<i></i>' : esc(d.ref === 'Mensalidade' ? 'Mensalidade · ' + (d.mes || '') : d.ref === 'Outro' ? d.outro || '' : d.ref || '')}</p><p><small>Data</small>${b ? '___/___/_____' : fmt(d.data)}</p></div>
-        <div class="rec-main"><div class="rec-top"><img src="assets/docs/logo-sei.png?v=3" alt=""><div><b>RECIBO</b><small>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA · CNPJ 07.869.021/0001-97</small></div>${d.numero ? `<em>Nº ${esc(d.numero)}</em>` : ''}<span class="rec-val">${b ? 'R$ ________' : esc(brl(String(d.valor || '').replace(/\./g, '').replace(',', '.')))}</span></div>
-          <p class="rec-l"><small>RECEBI DE</small><span>${b ? '' : esc((d.de || '').toUpperCase())}</span></p>
-          <p class="rec-l"><small>A IMPORTÂNCIA DE</small><span>${esc(val)}</span></p>
-          ${d.aluno && !b ? `<p class="rec-l"><small>ALUNO(A)</small><span>${esc(d.aluno.toUpperCase())}</span></p>` : ''}
-          <div class="rec-ref"><small>REFERENTE AO PAGAMENTO DE</small><span>${mk('Matrícula')} Matrícula</span><span>${mk('Mensalidade')} Mensalidade: mês de <u>${b ? '&nbsp;'.repeat(18) : esc(d.ref === 'Mensalidade' ? d.mes || '' : '')}</u></span><span>${mk('Taxa do material')} Taxa do material</span>${d.ref === 'Outro' && !b ? `<span>☒ ${esc(d.outro || '')}</span>` : ''}</div>
-          <p class="rec-aviso">As prestações deverão ser pagas até o dia 05 de cada mês. Após o vencimento: multa de 2% e juros de mora de 0,6% ao dia, além da perda de eventual desconto previsto no contrato.</p>
-          <div class="rec-fim"><span>${CIDADE.split(' —')[0]}, ${b ? '_____/_____/_______' : extenso(d.data)}.</span><span class="rec-ass"><i></i>${esc(d.assinante || 'Coordenação')}</span></div>
-          <div class="rec-rod">Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA · (91) 9 8124-8323 · @_sei01</div></div></div>`;
-      const n = Math.max(1, Math.min(3, +d.vias || 3)); return `<div class="rec-pag">${Array.from({ length: n }, () => um).join('<hr class="doc-corte">')}</div>`; }
+    doc: d => { const b = d.branco === 'sim'; const vnum = String(d.valor || '').replace(/\./g, '').replace(',', '.'); const val = b ? '' : reais(d.valor) || ''; const vs = b ? '' : brl(vnum);
+      const refTxt = d.ref === 'Mensalidade' ? 'Mensalidade · ' + (d.mes || '') : d.ref === 'Outro' ? d.outro || '' : d.ref || '';
+      const chip = (r, t) => `<span class="rc-chip${!b && d.ref === r ? ' on' : ''}"><i>${!b && d.ref === r ? '✓' : ''}</i>${t}</span>`;
+      const um = `<div class="rc"><div class="rc-can"><img class="rc-can-logo" src="assets/docs/logo-sei.png?v=3" alt=""><b>CANHOTO</b>${d.numero ? `<em>Nº ${esc(d.numero)}</em>` : ''}
+          <p><small>Recebi de</small><span>${b ? '' : esc(d.de || '')}</span></p><p><small>Valor</small><span>${esc(vs)}</span></p><p><small>Referente a</small><span>${b ? '' : esc(refTxt)}</span></p><p><small>Data</small><span>${b ? '' : fmt(d.data)}</span></p><p><small>Visto</small><span></span></p></div>
+        <div class="rc-main"><img class="rc-agua" src="assets/docs/logo-sei.png?v=3" alt="">
+          <div class="rc-top"><img src="assets/docs/logo-sei.png?v=3" alt=""><div class="rc-tit"><b>RECIBO</b><small>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA · CNPJ 07.869.021/0001-97</small></div><div class="rc-val"><small>${d.numero ? 'Nº ' + esc(d.numero) : 'VALOR'}</small><b>${vs ? esc(vs) : 'R$'}</b></div></div>
+          <div class="rc-body"><p class="rc-l"><small>Recebi de</small><span>${b ? '' : esc((d.de || '').toUpperCase())}</span></p>
+            <p class="rc-l"><small>A importância de</small><span class="rc-ext">${esc(val)}</span></p>
+            <p class="rc-l"><small>Aluno(a)</small><span>${b ? '' : esc((d.aluno || '').toUpperCase())}</span></p>
+            <div class="rc-ref"><small>Referente ao pagamento de</small>${chip('Matrícula', 'Matrícula')}${chip('Mensalidade', `Mensalidade${!b && d.ref === 'Mensalidade' ? ' · ' + esc(d.mes || '') : ' · mês: ______'}`)}${chip('Taxa do material', 'Taxa do material')}${chip('Outro', !b && d.ref === 'Outro' ? esc(d.outro || 'Outro') : 'Outro: ________')}</div>
+            <div class="rc-fim"><p class="rc-aviso">⚠️ Prestações até o dia <b>05</b> de cada mês. Após o vencimento: multa de 2% e juros de 0,6% ao dia, com perda de eventual desconto.</p>
+              <div class="rc-ass"><span>${CIDADE.split(' —')[0]}, ${b ? '____/____/______' : extenso(d.data)}</span><i></i><b>${esc(d.assinante || 'Coordenação')}</b></div></div>
+            <img class="rc-masc" src="assets/docs/mascote-sei.png?v=14" alt=""></div>
+          <div class="rc-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div></div></div>`;
+      const n = Math.max(1, Math.min(3, +d.vias || 3)); return `<div class="rec-pag rc-n${n}">${Array.from({ length: n }, () => um).join('<div class="rc-corte">✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</div>')}</div>`; }
   };
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {

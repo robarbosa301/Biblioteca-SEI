@@ -412,3 +412,35 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .pv-jan .pv-bar{flex-wrap:wrap}.pv-jan .pv-bar .b{margin-left:auto}
 @media (max-width:600px){.pv-jan{padding:0}.pv-jan-in{border-radius:0;min-height:100%}}
 .hor-t td.hc.vazio{border:.35mm dashed #c9d6ea!important;border-radius:2mm;background:#f7f9fd!important;height:17mm}
+/* ===== Recibo (novo) ===== */
+.rc{display:flex;height:79mm;border:1.4mm solid #e6b422;border-radius:4mm;box-shadow:inset 0 0 0 .4mm #fff1a8;overflow:hidden;break-inside:avoid;font-family:Arial,sans-serif;box-sizing:border-box;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-n2 .rc{height:112mm}.rc-n1 .rc{height:130mm}
+.rc-can{position:relative;width:40mm;padding:2.5mm 2.4mm;background:linear-gradient(180deg,#0a2f86,#061642);color:#fff;box-sizing:border-box;display:flex;flex-direction:column;gap:1mm}
+.rc-can::after{content:'';position:absolute;right:-1.6mm;top:2mm;bottom:2mm;border-right:.7mm dashed #e6b422}
+.rc-can-logo{height:11mm;align-self:center;filter:drop-shadow(0 .4mm .6mm rgba(0,0,0,.5))}
+.rc-can>b{text-align:center;font:800 8.5pt 'SEI Rubik',Arial,sans-serif;color:#ffd34d;letter-spacing:2px}.rc-can>em{text-align:center;font:700 7pt Arial,sans-serif;font-style:normal;color:#9fdcff}
+.rc-can p{margin:0;flex:1;display:flex;flex-direction:column;justify-content:flex-end;border-bottom:.3mm solid rgba(159,220,255,.5);min-height:0}
+.rc-can p small{font:700 5.4pt Arial,sans-serif;color:#9fdcff;text-transform:uppercase;letter-spacing:.5px}.rc-can p span{font:700 7.2pt Arial,sans-serif;min-height:3.4mm;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.rc-main{position:relative;flex:1;display:flex;flex-direction:column;min-width:0;margin-left:2mm}
+.rc-agua{position:absolute;left:50%;top:55%;width:70mm;transform:translate(-50%,-50%);opacity:.06;pointer-events:none}
+.rc-top{display:flex;align-items:center;gap:3mm;padding:2mm 3mm;background:linear-gradient(110deg,#0a2f86,#071c55 60%,#1652c9);color:#fff;position:relative}
+.rc-top img{height:12mm;filter:drop-shadow(0 .4mm .6mm rgba(0,0,0,.5))}
+.rc-tit{flex:1;min-width:0}.rc-tit b{display:block;font:800 19pt/1 'SEI Rubik',Arial Black,sans-serif;color:#ffd34d;letter-spacing:3px;text-shadow:0 .5mm 1mm rgba(0,0,0,.45)}.rc-tit small{display:block;font:700 5.6pt Arial,sans-serif;color:#9fdcff;margin-top:.8mm}
+.rc-val{text-align:center;background:linear-gradient(180deg,#ffe58a,#e6b422);color:#0b2a5b;border-radius:2.5mm;padding:1.2mm 3.4mm;box-shadow:0 .6mm 1.4mm rgba(0,0,0,.35);min-width:30mm}
+.rc-val small{display:block;font:800 5.8pt Arial,sans-serif;letter-spacing:1px}.rc-val b{font:800 14pt 'SEI Rubik',Arial,sans-serif}
+.rc-body{position:relative;flex:1;padding:2.2mm 3.4mm 1mm;display:flex;flex-direction:column}
+.rc-l{display:flex;align-items:flex-end;gap:2mm;margin:0 0 1.6mm}.rc-l small{flex:none;font:800 6.6pt Arial,sans-serif;color:#1e4fb8;text-transform:uppercase;letter-spacing:.4px}
+.rc-l span{flex:1;border-bottom:.3mm solid #9aa9c8;min-height:4.6mm;font:700 9.2pt Arial,sans-serif;color:#0b1f5c;padding-left:1mm}
+.rc-ext{background:#f1f5fc;border-radius:1.2mm 1.2mm 0 0}
+.rc-ref{display:flex;flex-wrap:wrap;gap:1.2mm 1.6mm;margin:.6mm 0 1.2mm;padding-right:30mm}.rc-ref small{width:100%;font:800 6.6pt Arial,sans-serif;color:#1e4fb8;text-transform:uppercase;letter-spacing:.4px}
+.rc-chip{display:inline-flex;align-items:center;gap:1.2mm;border:.35mm solid #9aa9c8;border-radius:99px;padding:.6mm 2.4mm .6mm .8mm;font:700 7.6pt Arial,sans-serif;color:#33415f;background:#fff}
+.rc-chip i{width:3.4mm;height:3.4mm;border-radius:50%;border:.35mm solid #9aa9c8;display:inline-flex;align-items:center;justify-content:center;font:800 6.5pt Arial,sans-serif;font-style:normal;color:#fff}
+.rc-chip.on{background:#0b2a6b;border-color:#0b2a6b;color:#fff}.rc-chip.on i{background:#ffd34d;border-color:#ffd34d;color:#0b2a5b}
+.rc-fim{margin-top:auto;display:flex;align-items:flex-end;gap:3mm;padding-right:30mm}
+.rc-aviso{flex:1;margin:0;font:6.3pt/1.3 Arial,sans-serif;color:#7a1010;background:#fdeceb;border-left:.8mm solid #c62828;border-radius:1mm;padding:1mm 1.6mm}
+.rc-ass{width:50mm;text-align:center;font:7pt Arial,sans-serif;color:#0b1f5c}.rc-ass span{display:block;margin-bottom:5mm}.rc-ass i{display:block;border-top:.3mm solid #0b2a6b;margin-bottom:.6mm}.rc-ass b{font-size:7.4pt}
+.rc-masc{position:absolute;right:1mm;bottom:0;height:27mm;filter:drop-shadow(0 .5mm 1mm rgba(0,0,0,.3))}
+.rc-n2 .rc-masc,.rc-n1 .rc-masc{height:36mm}
+.rc-rod{display:flex;justify-content:space-around;gap:2mm;background:#0b2a6b;color:#fff;font:700 5.8pt Arial,sans-serif;padding:1mm 2mm;border-top:.5mm solid #e6b422}
+.rc-corte{text-align:center;color:#8a97ad;font:7pt Arial,sans-serif;letter-spacing:1px;margin:1.8mm 0;white-space:nowrap;overflow:hidden}
+.rc{box-shadow:none}.rc-chip{font-size:7pt;padding:.5mm 2mm .5mm .7mm}.rc-ref{padding-right:24mm;gap:1mm 1.2mm}.rc-ass{width:58mm;font-size:6.6pt}.rc-ass span{white-space:nowrap}
