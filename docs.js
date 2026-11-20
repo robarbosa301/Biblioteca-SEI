@@ -570,7 +570,7 @@ Respeito os professores e os colegas`;
     const cols = apur ? [...sc, 'Total', '% positivo'] : sc;
     const h = linhasAv(itens).map(l => ehGrupo(l) ? `<tr class="avg"><td colspan="${cols.length + 1}">${esc(l)}</td></tr>` : `<tr><td class="avi">${esc(l)}</td>${cols.map(() => apur ? '<td class="avn"></td>' : '<td class="avc"><i></i></td>').join('')}</tr>`).join('');
     return `<table class="av-t${cls ? ' ' + cls : ''}${apur ? ' av-ap' : ''}"><thead><tr><th class="avi">${esc(tit)}</th>${cols.map(e => `<th>${esc(e)}</th>`).join('')}</tr></thead><tbody>${h}</tbody></table>`; };
-  const abertas = (qs, n = 3) => qs.map(q => `<div class="av-ab"><b>${esc(q)}</b>${'<i></i>'.repeat(n)}</div>`).join('');
+  const abertas = (qs, n = 3) => qs.map((q, k) => `<div class="av-ab"><div class="av-abq"><span class="av-n">${k + 1}</span><b>${esc(q)}</b></div><div class="av-abl">${'<i></i>'.repeat(n)}</div></div>`).join('');
   const marca = (q, ops, obs) => `<p class="av-ck"><b>${esc(q)}</b>${obs ? ` <small>${esc(obs)}</small>` : ''}<br>${ops.map(o => `<span>☐ ${esc(o)}</span>`).join('&nbsp;&nbsp;&nbsp; ')}</p>`;
   const nps = q => `<p class="av-ck"><b>${esc(q)}</b> <small>(circule uma nota)</small></p><table class="av-nps"><tr>${Array.from({ length: 11 }, (_, i) => `<td width="9%">${i}</td>`).join('')}</tr></table><p class="av-nps-l">0 = de jeito nenhum · 10 = com certeza</p>`;
   const contagem = (tit, ops) => `<table class="av-t av-ap av-cont"><thead><tr><th class="avi">${esc(tit)}</th><th>Total</th></tr></thead><tbody>${ops.map(o => `<tr><td class="avi">${esc(o.replace(/:\s*_+$/, ''))}</td><td class="avn"></td></tr>`).join('')}</tbody></table>`;
@@ -627,7 +627,7 @@ Respeito os professores e os colegas`;
     doc: d => { const px = proxAno(d), ds = linhasAv(d.discs == null ? DISC_PAD : d.discs), auto = d.auto == null ? AUTO_ALU : d.auto, DISC_C = [...ESC, 'Tenho dificuldade'];
       if (d.folha === 'Folha de apuração') return apuracao(d, 'Alunos', [[d.itens || AV_ALU, ESC, 'Item avaliado'], ...(linhasAv(auto).length ? [[auto, FREQ, 'Autoavaliação dos alunos']] : []), ...(ds.length ? [[ds.join('\n'), DISC_C, 'Professor(a) de…']] : [])],
         [['Bullying neste ano', ['Não', 'Sim, sofri', 'Sim, presenciei']], [`O que querem ter em ${px}`, QUER_ALU], [`Pretende estudar aqui em ${px}?`, ['Sim', 'Não', 'Ainda não sei']], ['Motivo de saída', SAIDA_ALU]], ['Do que os alunos mais gostam', 'O que mais pediram para melhorar', 'Plano de ação: o que faremos e quem será o responsável']);
-      return `${cab('AVALIAÇÃO DA ESCOLA')}<p class="av-int"><b>Querido(a) aluno(a), queremos ouvir você!</b> ${esc(d.msg || `Responda com sinceridade: sua opinião vai ajudar o Incentivo a ficar ainda melhor em ${px}.`)}</p>
+      return `${cab('AVALIAÇÃO DA ESCOLA')}<p class="av-int"><b>Querido(a) aluno(a), queremos ouvir você!</b> ${esc(d.msg || `Responda com sinceridade: sua opinião vai ajudar o Incentivo a ficar ainda melhor em ${px}.`)} <b>Obrigado pela sua participação! 💙</b></p>
         ${entrega({ ...d, local: d.local || 'ao professor da turma' })}
         ${d.ident === 'anônima' ? `<div class="cfs av-id">${campo('Série / turma', '', 1)}${campo('Turno', '', 1)}</div><p class="av-anon">🔒 Não escreva seu nome — esta avaliação é anônima.</p>` : `<div class="cfs av-id">${campo('Nome (opcional)', '', 3)}${campo('Série / turma', '', 1.4)}${campo('Turno', '', 1)}</div>`}
         ${marca('Há quanto tempo você estuda no Incentivo?', ['Este é o 1º ano', '2 a 3 anos', '4 anos ou mais'])}
@@ -640,8 +640,7 @@ Respeito os professores e os colegas`;
         ${marca(`O que você gostaria de ter no Incentivo em ${px}?`, QUER_ALU, '(marque até 3)')}
         ${nps('De 0 a 10, você indicaria o Incentivo para um amigo?')}
         <p class="av-ck"><b>Você pretende estudar no Incentivo em ${px}?</b><br><span>☐ Sim</span>&nbsp;&nbsp;&nbsp; <span>☐ Não</span>&nbsp;&nbsp;&nbsp; <span>☐ Ainda não sei</span><br><b>Se não, por quê?</b> ${SAIDA_ALU.map(o => `<span>☐ ${esc(o)}</span>`).join('&nbsp;&nbsp; ')}</p>
-        <div class="av-abs">${abertas(['Do que você mais gosta no Incentivo?', 'O que precisa melhorar? Deixe também um recado ou sugestão para os professores e a direção.'], 3)}</div>
-        <p class="av-fim">Obrigado pela sua participação! 💙 — Sistema de Ensino Incentivo</p>`; }
+        <div class="av-abs">${abertas(['Do que você mais gosta no Incentivo?', 'O que precisa melhorar? Deixe também um recado ou sugestão para os professores e a direção.'], 3)}</div>`; }
   };
   /* ---------- equipe do ano (lista de professores por segmento e corpo administrativo) ---------- */
   const EQ_SEC = `## EDUCAÇÃO INFANTIL: MATERNAL, PRÉ I E PRÉ II | ANO
