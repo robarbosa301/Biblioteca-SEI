@@ -468,3 +468,16 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .rc-top{padding:1mm 3mm}.rc-top>img{height:20mm}.rc-can-logo{height:17mm}.rc-tit-img{height:9mm}.rc-tit small{margin-top:1.2mm}.rc-n2 .rc-top>img,.rc-n1 .rc-top>img{height:26mm}.rc-n2 .rc-tit-img,.rc-n1 .rc-tit-img{height:12mm}
 .rc-tit-img{height:8mm;max-width:100%;object-fit:contain;object-position:left}.rc-tit{overflow:hidden}
 .rc-top .rc-tit-img{height:9mm;width:auto;max-width:100%;object-fit:contain;object-position:left center}.rc-n2 .rc-top .rc-tit-img,.rc-n1 .rc-top .rc-tit-img{height:12mm}
+/* ===== Avaliação institucional ===== */
+.av-int{font:10pt/1.45 Arial,sans-serif;margin:0 0 2mm;background:#eef4fd;border-left:1.2mm solid #1e4fb8;border-radius:1.5mm;padding:2mm 3mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.av-anon{font:700 8pt Arial,sans-serif;color:#0a7a5a;margin:0 0 2mm}.av-id{margin:0 0 2.5mm}
+.av-t{width:100%;border-collapse:collapse;min-width:0;margin:0 0 3mm}
+.av-t th{background:#0b2a6b!important;color:#fff!important;font:800 7.4pt Arial,sans-serif;padding:1.4mm 1mm;border:.3mm solid #0b2a6b;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:center}
+.av-t th.avi{text-align:left;padding-left:2mm}
+.av-t td{border:.3mm solid #c9d6ea;font:8.6pt Arial,sans-serif;padding:1mm 2mm;position:static;background:#fff;height:5.6mm}
+.av-t td.avc{width:15mm;text-align:center;padding:0}.av-t td.avc i{display:inline-block;width:3.6mm;height:3.6mm;border:.35mm solid #1e4fb8;border-radius:50%;vertical-align:middle}
+.av-t tr.avg td{background:#dbe9ff!important;color:#0b2a6b;font:800 7.4pt Arial,sans-serif;letter-spacing:1px;height:auto;padding:1mm 2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.av-t tbody tr:nth-child(even):not(.avg) td{background:#f7f9fd!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.av-abs{break-inside:auto}.av-ab{margin:0 0 3mm;break-inside:avoid}.av-ab b{display:block;font:800 9pt Arial,sans-serif;color:#0b2a6b;margin-bottom:1mm}.av-ab i{display:block;border-bottom:.3mm solid #9aa9c8;height:7mm}
+.av-fim{text-align:center;font:700 9pt Arial,sans-serif;color:#1e4fb8;margin-top:3mm}
+.av-t.av-d{break-inside:avoid}.av-t tr{break-inside:avoid}

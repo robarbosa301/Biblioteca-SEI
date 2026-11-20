@@ -489,6 +489,88 @@
       <p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>
       <div class="doc-ass"><div><span></span><b>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA</b><br>Locador</div><div><span></span><b>${esc(d.locatario || 'LOCATÁRIO')}</b><br>Locatário</div><div><span></span>${esc(d.t1 || 'Testemunha 1')}</div><div><span></span>${esc(d.t2 || 'Testemunha 2')}</div></div>`
   };
+  /* ---------- avaliação institucional (fim de ano): professores e alunos ---------- */
+  const ESC = ['Ótimo', 'Bom', 'Regular', 'Ruim'];
+  const AV_PROF = `GESTÃO E ORGANIZAÇÃO
+Direção da escola (apoio, abertura ao diálogo)
+Coordenação pedagógica (acompanhamento e orientação)
+Secretaria (atendimento e agilidade)
+Comunicação interna (avisos, prazos, informações)
+Reuniões pedagógicas e formações
+Planejamento e calendário escolar
+CONDIÇÕES DE TRABALHO
+Estrutura das salas de aula (carteiras, quadro, iluminação)
+Climatização / ventilação
+Recursos tecnológicos (projetor, internet, impressão)
+Material didático / apostilas
+Limpeza e conservação
+Segurança da escola
+Valorização profissional e pagamentos em dia
+CONVIVÊNCIA
+Disciplina e comportamento dos alunos
+Relacionamento entre colegas de trabalho
+Participação das famílias
+Apoio a alunos com necessidades especiais (AEE)`;
+  const AV_ALU = `PROFESSORES E AULAS
+Os professores explicam bem o conteúdo
+Os professores tiram minhas dúvidas
+Os professores são pontuais e organizados
+Os professores me tratam com respeito
+As aulas são interessantes
+MATERIAL E AVALIAÇÕES
+Material didático (livros / apostilas)
+As provas cobram o que foi ensinado
+Trabalhos e atividades de casa
+Simulados e aulas de reforço
+ESCOLA
+Salas de aula (carteiras, quadro, iluminação)
+Climatização / ventilação
+Banheiros e bebedouros
+Limpeza da escola
+Intervalo / cantina
+Segurança
+Eventos (jogos internos, feiras, festas)
+ATENDIMENTO E CONVIVÊNCIA
+Coordenação e direção
+Secretaria
+Respeito entre os colegas (sem bullying)
+Sinto-me bem nesta escola`;
+  const DISC_PAD = 'Língua Portuguesa\nMatemática\nCiências\nHistória\nGeografia\nInglês\nEspanhol\nArte\nEducação Física\nEnsino Religioso';
+  const blocoAv = itens => { let h = '', abre = false; itens.split('\n').map(x => x.trim()).filter(Boolean).forEach(l => {
+      if (l === l.toUpperCase() && /[A-ZÁÉÍÓÚÇ]/.test(l)) { h += `<tr class="avg"><td colspan="5">${esc(l)}</td></tr>`; } else h += `<tr><td class="avi">${esc(l)}</td>${ESC.map(() => '<td class="avc"><i></i></td>').join('')}</tr>`; });
+    return `<table class="av-t"><thead><tr><th class="avi">Avalie cada item marcando um X</th>${ESC.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${h}</tbody></table>`; };
+  const abertas = qs => qs.map(q => `<div class="av-ab"><b>${esc(q)}</b>${'<i></i>'.repeat(4)}</div>`).join('');
+  TIPOS.avprof = {
+    nome: 'Avaliação da escola — professores', icone: '🗳️', desc: 'Questionário de fim de ano para os professores avaliarem o Incentivo e dizerem o que melhorar', setores: ['coordenacao', 'secretaria'],
+    titulo: d => `Avaliação institucional ${d.ano || ''} — professores`,
+    novo: () => ({ ano: String(new Date().getFullYear()), itens: AV_PROF, ident: 'opcional', data: hoje() }),
+    form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Identificação', sel('ident', d.ident || 'opcional', ['opcional', 'anônima']))}</div>
+      ${lab('Itens avaliados <small>(um por linha; linhas em MAIÚSCULAS viram título de grupo)</small>', `<textarea id="itens" data-ed="sem" rows="14">${esc(d.itens || AV_PROF)}</textarea>`, 1)}
+      ${lab('Mensagem de abertura (opcional)', inp('msg', d.msg, 'Ex.: Sua opinião é muito importante para construirmos um 2027 ainda melhor!'), 1)}`,
+    campos: ['ano', 'ident', 'itens', 'msg', 'data'],
+    doc: d => `${cab('AVALIAÇÃO INSTITUCIONAL')}<p class="av-int"><b>Professor(a), sua opinião é muito importante!</b> ${esc(d.msg || `Ajude-nos a avaliar o ano letivo de ${d.ano || ''} e a construir um Incentivo ainda melhor. Responda com sinceridade.`)}</p>
+      ${d.ident === 'anônima' ? '<p class="av-anon">🔒 Esta avaliação é anônima — não é preciso se identificar.</p>' : `<div class="cfs av-id">${campo('Nome (opcional)', '', 3)}${campo('Disciplina(s)', '', 2)}${campo('Segmento', '', 1.4)}</div>`}
+      ${blocoAv(d.itens || AV_PROF)}
+      <div class="av-abs">${abertas(['O que a escola faz de melhor? (pontos positivos)', 'O que precisa melhorar? (seja específico)', 'Que sugestões você dá para o próximo ano?', 'De que você precisa para trabalhar melhor? (recursos, apoio, formação)'])}</div>
+      <p class="av-fim">Obrigado pela colaboração! 💙 — Direção do Sistema de Ensino Incentivo</p>`
+  };
+  TIPOS.avaluno = {
+    nome: 'Avaliação da escola — alunos', icone: '📝', desc: 'Questionário de fim de ano para os alunos avaliarem professores, material, estrutura e o que melhorar', setores: ['coordenacao', 'secretaria'],
+    titulo: d => `Avaliação institucional ${d.ano || ''} — alunos`,
+    novo: () => ({ ano: String(new Date().getFullYear()), itens: AV_ALU, discs: DISC_PAD, ident: 'anônima', data: hoje() }),
+    form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Identificação', sel('ident', d.ident || 'anônima', ['anônima', 'opcional']))}</div>
+      ${lab('Itens avaliados <small>(um por linha; linhas em MAIÚSCULAS viram título de grupo)</small>', `<textarea id="itens" data-ed="sem" rows="14">${esc(d.itens || AV_ALU)}</textarea>`, 1)}
+      ${lab('Disciplinas para avaliar os professores <small>(uma por linha; deixe vazio para não incluir)</small>', `<textarea id="discs" data-ed="sem" rows="6">${esc(d.discs == null ? DISC_PAD : d.discs)}</textarea>`, 1)}
+      ${lab('Mensagem de abertura (opcional)', inp('msg', d.msg), 1)}`,
+    campos: ['ano', 'ident', 'itens', 'discs', 'msg', 'data'],
+    doc: d => { const ds = (d.discs == null ? DISC_PAD : d.discs).split('\n').map(x => x.trim()).filter(Boolean);
+      return `${cab('AVALIAÇÃO DA ESCOLA')}<p class="av-int"><b>Querido(a) aluno(a), queremos ouvir você!</b> ${esc(d.msg || `Responda com sinceridade: sua opinião vai ajudar o Incentivo a melhorar em ${(+d.ano || new Date().getFullYear()) + 1}.`)}</p>
+        ${d.ident === 'anônima' ? `<div class="cfs av-id">${campo('Série / turma', '', 1)}${campo('Turno', '', 1)}</div><p class="av-anon">🔒 Não escreva seu nome — esta avaliação é anônima.</p>` : `<div class="cfs av-id">${campo('Nome (opcional)', '', 3)}${campo('Série / turma', '', 1.4)}${campo('Turno', '', 1)}</div>`}
+        ${blocoAv(d.itens || AV_ALU)}
+        ${ds.length ? `<table class="av-t av-d"><thead><tr><th class="avi">Como você avalia o(a) professor(a) de…</th>${ESC.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${ds.map(x => `<tr><td class="avi">${esc(x)}</td>${ESC.map(() => '<td class="avc"><i></i></td>').join('')}</tr>`).join('')}</tbody></table>` : ''}
+        <div class="av-abs">${abertas(['Do que você mais gosta no Incentivo?', 'O que precisa melhorar?', 'Deixe um recado ou sugestão para os professores e a direção'])}</div>
+        <p class="av-fim">Obrigado pela sua participação! 💙 — Sistema de Ensino Incentivo</p>`; }
+  };
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
     nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao', 'financeiro'], fin: ['pag'],
