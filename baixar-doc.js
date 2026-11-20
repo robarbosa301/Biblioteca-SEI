@@ -165,11 +165,14 @@
       const b = cfg.borda ? `<w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(x => `<w:${x} w:val="single" w:sz="4" w:space="0" w:color="${cfg.borda}"/>`).join('')}</w:tblBorders>` : `<w:tblBorders>${['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(x => `<w:${x} w:val="nil"/>`).join('')}</w:tblBorders>`;
       const lin = (o, v, c, z = 4) => `<w:${o} w:val="${v}" w:sz="${z}" w:space="0" w:color="${c}"/>`;
       const bx = t.classList.contains('av-t') ? `<w:tblBorders>${lin('top', 'single', 'C9D6EA')}${lin('left', 'single', 'C9D6EA')}${lin('bottom', 'single', 'C9D6EA')}${lin('right', 'single', 'C9D6EA')}${lin('insideH', 'single', 'E3EAF5')}${t.classList.contains('av-ap') ? lin('insideV', 'single', 'E3EAF5') : '<w:insideV w:val="nil"/>'}</w:tblBorders>` : t.classList.contains('av-box') ? '<w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="C9D6EA"/><w:left w:val="single" w:sz="36" w:space="0" w:color="1E4FB8"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="C9D6EA"/><w:right w:val="single" w:sz="4" w:space="0" w:color="C9D6EA"/><w:insideH w:val="dashed" w:sz="4" w:space="0" w:color="9AB3DE"/><w:insideV w:val="nil"/></w:tblBorders>' : b;
-      let x = `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/>${bx}<w:tblLayout w:type="autofit"/><w:tblCellMar><w:left w:w="70" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${(() => { const fr = rows.find(tr => [...tr.children].length === ncols && [...tr.children].every(c => c.getAttribute('width'))); return fr ? [...fr.children].map(c => `<w:gridCol w:w="${Math.round(parseInt(c.getAttribute('width')) * 96)}"/>`).join('') : '<w:gridCol w:w="1000"/>'.repeat(ncols); })()}</w:tblGrid>`;
+      const aninh = !!(t.parentElement && t.parentElement.closest('table')); const fr = rows.find(tr => [...tr.children].length === ncols && [...tr.children].every(c => c.getAttribute('width')));
+      let cols = null; if (!aninh) { if (fr) { const ps = [...fr.children].map(c => parseFloat(c.getAttribute('width')) || 1); const sm = ps.reduce((a, b) => a + b, 0); cols = ps.map(p => Math.round(p * W_TW / sm)); } else cols = Array(ncols).fill(Math.round(W_TW / ncols)); }
+      let x = `<w:tbl><w:tblPr>${aninh ? '<w:tblW w:w="5000" w:type="pct"/>' : `<w:tblW w:w="${W_TW}" w:type="dxa"/>`}${bx}<w:tblLayout w:type="${cols && fr ? 'fixed' : 'autofit'}"/><w:tblCellMar><w:left w:w="70" w:type="dxa"/><w:right w:w="70" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${cols ? cols.map(v => `<w:gridCol w:w="${v}"/>`).join('') : (fr ? [...fr.children].map(c => `<w:gridCol w:w="${Math.round(parseInt(c.getAttribute('width')) * 96)}"/>`).join('') : '<w:gridCol w:w="1000"/>'.repeat(ncols))}</w:tblGrid>`;
       for (const tr of rows) {
         const cab_ = tr.parentNode.tagName === 'THEAD', junto = cab_ || tr.classList.contains('avg') || tr.classList.contains('av-boxq') || (tr.classList.contains('av-boxl') && tr.nextElementSibling);
         const boxq = tr.classList.contains('av-boxq'), boxl = tr.classList.contains('av-boxl');
         x += `<w:tr><w:trPr><w:cantSplit/>${cab_ ? '<w:tblHeader/>' : ''}${boxl ? '<w:trHeight w:val="320" w:hRule="exact"/>' : t.classList.contains('av-t') && !cab_ && !tr.classList.contains('avg') && !t.classList.contains('av-ap') ? '<w:trHeight w:val="262" w:hRule="exact"/>' : ''}</w:trPr>`;
+        let ci = 0;
         for (const c of tr.children) {
           const th = c.tagName === 'TH'; let fill = cfg.fill || null; let r = Object.assign({}, r0, { sz: cfg.sz || r0.sz, b: cfg.b || r0.b });
           if (cfg.cor) r.cor = cfg.cor; if (th && cfg.th) { fill = cfg.th; r.cor = cfg.thCor; r.b = 1; }
@@ -180,7 +183,8 @@
           const span = +c.getAttribute('colspan') || 1; const w = c.getAttribute('width');
           const jc = c.getAttribute('align') || (th && cfg.th ? (cfg.jc || 'left') : cfg.jc) || null;
           let inner = blocos(c, r, { jc }); if (!inner) inner = '<w:p/>'; if (junto) inner = inner.replace(/<w:pPr>/g, '<w:pPr><w:keepNext/>').replace(/<w:p\/>/g, '<w:p><w:pPr><w:keepNext/></w:pPr></w:p>');
-          x += `<w:tc><w:tcPr>${w ? `<w:tcW w:w="${parseInt(w) * 50}" w:type="pct"/>` : ''}${span > 1 ? `<w:gridSpan w:val="${span}"/>` : ''}${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}<w:vAlign w:val="${c.getAttribute('valign') === 'bottom' ? 'bottom' : c.getAttribute('valign') === 'top' ? 'top' : 'center'}"/></w:tcPr>${inner}</w:tc>`;
+          const tw = cols ? cols.slice(ci, ci + span).reduce((a, b) => a + b, 0) : 0; ci += span;
+          x += `<w:tc><w:tcPr>${tw ? `<w:tcW w:w="${tw}" w:type="dxa"/>` : w ? `<w:tcW w:w="${parseInt(w) * 50}" w:type="pct"/>` : ''}${span > 1 ? `<w:gridSpan w:val="${span}"/>` : ''}${fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>` : ''}<w:vAlign w:val="${c.getAttribute('valign') === 'bottom' ? 'bottom' : c.getAttribute('valign') === 'top' ? 'top' : 'center'}"/></w:tcPr>${inner}</w:tc>`;
         }
         x += '</w:tr>';
       }
@@ -189,13 +193,13 @@
     const corpo = blocos(d, { sz: 10.5 });
     return { corpo, imgs };
   }
-  const W_MARG = { t: 27, l: 12, r: 12, b: 18 }; let W_ESP = 0;
+  const W_MARG = { t: 27, l: 12, r: 12, b: 18 }; let W_ESP = 0, W_TW = 10206;
   const ancora = (rid, id, nome, cxmm, cymm, z) => `<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr><w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${z}" behindDoc="1" locked="1" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>0</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>0</wp:posOffset></wp:positionV><wp:extent cx="${Math.round(cxmm * 36000)}" cy="${Math.round(cymm * 36000)}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="${id}" name="${nome}"/><wp:cNvGraphicFramePr/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${id}" name="${nome}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${Math.round(cxmm * 36000)}" cy="${Math.round(cymm * 36000)}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r></w:p>`;
   async function word(html, nome, rotulo, fol) {
     aviso('⏳ Gerando o arquivo do Word…');
     try {
       if (!window.JSZip) await carregar('assets/vendor/jszip.min.js');
-      const comArte = !!(fol && fol.fundo && !fol.livre); W_ESP = comArte && fol.cab ? 420 * 210 / 1240 - W_MARG.t + 3 : 0; const tmp = document.createElement('div'); tmp.innerHTML = paraWord(html, comArte ? fol : null);
+      const comArte = !!(fol && fol.fundo && !fol.livre); W_TW = comArte ? 10546 : 10206; W_ESP = comArte && fol.cab ? 420 * 210 / 1240 - W_MARG.t + 3 : 0; const tmp = document.createElement('div'); tmp.innerHTML = paraWord(html, comArte ? fol : null);
       // tamanho real das imagens (proporção)
       await Promise.all([...tmp.querySelectorAll('img')].map(im => new Promise(ok => { const i = new Image(); i.onload = () => { im.dataset.w = i.naturalWidth; im.dataset.h = i.naturalHeight; ok(); }; i.onerror = ok; i.src = im.getAttribute('src'); })));
       const { corpo, imgs } = docx(tmp.innerHTML);
