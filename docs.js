@@ -1379,7 +1379,7 @@ Serviços gerais / merendeiras (cantina); `;
   const via1 = h => FOLHA && FOLHA.duas ? h.replace(/<img class="folha-banda"[^>]*>/, '') : h;
   const htmlDe = d => { segDoc = d.seg || null; nCab = 0; return via1(TIPOS[d.tipo].doc(d)) + (d.copias === '2' ? '' : rodape()); };
   const nomeDe = d => TIPOS[d.tipo].titulo(d).replace(/—\s*$/, '').trim() + (d.seg && SEGS[d.seg] ? ' - ' + SEGS[d.seg].nome : '');
-  async function baixar2(fmt, d) { if (!window.seiBaixar) return alert('Atualize a página e tente de novo.'); if (window.seiFolha) await prepFolha(d); return fmt === 'pdf' ? seiBaixar.pdf(htmlDe(d), nomeDe(d), FOLHA) : seiBaixar.word(htmlDe(d), nomeDe(d), TIPOS[d.tipo].nome); }
+  async function baixar2(fmt, d) { if (!window.seiBaixar) return alert('Atualize a página e tente de novo.'); if (window.seiFolha) await prepFolha(d); return fmt === 'pdf' ? seiBaixar.pdf(htmlDe(d), nomeDe(d), FOLHA) : seiBaixar.word(htmlDe(d), nomeDe(d), TIPOS[d.tipo].nome, FOLHA); }
   async function imprimir(d) {
     const t = TIPOS[d.tipo]; if (window.seiFolha) await prepFolha(d); segDoc = d.seg || null; nCab = 0; document.body.dataset.doc = d.tipo;
     $('#imprimir').innerHTML = via1(t.doc(d)) + (d.copias === '2' ? '' : rodape());

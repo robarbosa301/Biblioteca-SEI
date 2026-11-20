@@ -282,7 +282,7 @@
   async function baixarAee(fmt, tipo, id) {
     const xs = tipo === 'atend' ? (await todos('atend')).find(x => x.id === id) : tipo === 'pei' ? (await todos('pei')).find(x => x.id === id) : null;
     await prepFolha(tipo, xs); const h = await montarDoc(tipo, id); const nome = ({ perfil: 'Ficha do aluno', atend: 'Ficha de atendimento', pei: 'PEI', parecer: 'Parecer neuropsicopedagógico', 'atend-todos': 'Atendimentos' })[tipo] + ' - ' + atual.nome;
-    return fmt === 'pdf' ? seiBaixar.pdf(h, nome, FOLHA) : seiBaixar.word(h, nome);
+    return fmt === 'pdf' ? seiBaixar.pdf(h, nome, FOLHA) : seiBaixar.word(h, nome, '', FOLHA);
   }
   async function imprimir(tipo, id) {
     let h = ''; await prepFolha(tipo, tipo === 'atend' ? (await todos('atend')).find(x => x.id === id) : tipo === 'pei' ? (await todos('pei')).find(x => x.id === id) : null);
