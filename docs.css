@@ -489,3 +489,26 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .eq-adm{display:grid;grid-template-columns:1fr 1fr;gap:2.5mm}
 .eq-card{border:.35mm solid #c9d6ea;border-left:1.4mm solid #e6b422;border-radius:2mm;padding:2mm 3mm;background:#f7f9fd;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .eq-card small{display:block;font:800 6.6pt Arial,sans-serif;color:#1e4fb8;letter-spacing:.4px}.eq-card b{display:block;font:800 9.4pt Arial,sans-serif;color:#0b1f5c;margin-top:.6mm;min-height:4mm}
+/* avaliação: blocos novos */
+.av-instr{font:8.6pt/1.4 Arial,sans-serif;color:#24365e;margin:0 0 2mm}
+.av-ck{font:8.8pt/1.5 Arial,sans-serif;color:#1d2b4f;margin:0 0 2mm;break-inside:avoid}.av-ck b{color:#0b2a6b}.av-ck small{color:#5a6b8c;font-size:7.6pt}.av-ck span{white-space:nowrap;display:inline-block}
+.av-sec{background:#0b2a6b;color:#fff;font:800 7.6pt Arial,sans-serif;letter-spacing:1px;padding:1.3mm 2mm;margin:1mm 0 2mm;border-radius:1mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-after:avoid}
+.av-nps{border-collapse:collapse;width:100%;margin:0 0 .6mm;min-width:0}.av-nps td{border:.35mm solid #1e4fb8;text-align:center;font:800 9pt Arial,sans-serif;color:#0b2a6b;padding:1.2mm 0;position:static;background:#fff}
+.av-npsa tr+tr td{height:6mm}
+.av-nps-l{font:7.4pt Arial,sans-serif;color:#5a6b8c;margin:0 0 2.5mm}
+.av-nota{font:italic 7.8pt Arial,sans-serif;color:#0a7a5a;margin:-1mm 0 2mm}
+.av-dev{font:8pt/1.4 Arial,sans-serif;color:#24365e;background:#f7f9fd;border:.3mm dashed #9aa9c8;border-radius:1.5mm;padding:1.6mm 3mm;margin:1mm 0 0}
+.av-t td.avn{width:13mm;background:#fff}.av-ap td.avi{width:auto}.av-cont{width:70%}
+.av-t.av-auto th{background:#1e4fb8!important;border-color:#1e4fb8}
+.av-t.av-d th:last-child{font-size:6.4pt}
+/* equipe: blocos novos */
+.eq-r{width:100%;border-collapse:collapse;margin:0 0 4mm;min-width:0}
+.eq-r th{background:#0b2a6b!important;color:#fff!important;font:800 7.6pt Arial,sans-serif;padding:1.6mm 2mm;border:.3mm solid #0b2a6b;text-align:left;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.eq-r td{border:.3mm solid #c9d6ea;font:8.6pt Arial,sans-serif;padding:1.6mm 2mm;position:static;background:#fff;color:#0b1f5c}
+.eq-r tr.eq-tot td{background:#dbe9ff!important;font-weight:800;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.eq-g td{font-size:7.8pt;padding:1.1mm 2mm;vertical-align:top}.eq-g .eq-l{color:#1e4fb8;font-size:7.2pt;line-height:1.35}.eq-r tr{break-inside:avoid}
+.eq-t .eq-n{width:54mm}.eq-t .eq-c{width:46mm}.eq-t .eq-ct{width:28mm}.eq-t .eq-as{width:40mm}
+.eq-obs{font:italic 7.6pt Arial,sans-serif;color:#5a6b8c;margin:1mm 0 0}
+.eq-li{font:9pt/1.45 Arial,sans-serif;color:#1d2b4f;margin:0 0 1.4mm;padding-left:2mm}.eq-li b{color:#1e4fb8}
+.av-t td{height:4.8mm;padding:.5mm 2mm;font-size:8.3pt}.av-t tr.avg td{padding:.7mm 2mm}.av-ab{margin:0 0 2mm}.av-ab i{height:6.2mm}.av-ck{margin:0 0 1.6mm}
+.av-fim{margin-top:1mm}.av-abs .av-ab:last-child{margin-bottom:0}

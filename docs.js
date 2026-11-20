@@ -490,85 +490,157 @@
       <div class="doc-ass"><div><span></span><b>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA</b><br>Locador</div><div><span></span><b>${esc(d.locatario || 'LOCATÁRIO')}</b><br>Locatário</div><div><span></span>${esc(d.t1 || 'Testemunha 1')}</div><div><span></span>${esc(d.t2 || 'Testemunha 2')}</div></div>`
   };
   /* ---------- avaliação institucional (fim de ano): professores e alunos ---------- */
-  const ESC = ['Ótimo', 'Bom', 'Regular', 'Ruim'];
+  const ESC = ['Ótimo', 'Bom', 'Regular', 'Ruim'], ESC_NA = [...ESC, 'N/A'], FREQ = ['Sempre', 'Às vezes', 'Raramente'];
   const AV_PROF = `GESTÃO E ORGANIZAÇÃO
 Direção da escola (apoio, abertura ao diálogo)
 Coordenação pedagógica (acompanhamento e orientação)
+Retorno (feedback) que recebo sobre o meu trabalho
 Secretaria (atendimento e agilidade)
 Comunicação interna (avisos, prazos, informações)
-Reuniões pedagógicas e formações
 Planejamento e calendário escolar
+Reuniões pedagógicas e formações
+ENSINO E APRENDIZAGEM
+Proposta pedagógica da escola (objetivos claros)
+Autonomia para planejar e conduzir as aulas
+Sistema de avaliação (provas, simulados, recuperação)
+Material didático / apostilas
+Plataforma digital e lançamento de notas
+Número de alunos por turma
+Tempo para planejamento e correções
 CONDIÇÕES DE TRABALHO
-Estrutura das salas de aula (carteiras, quadro, iluminação)
+Estrutura das salas (carteiras, quadro, iluminação)
 Climatização / ventilação
 Recursos tecnológicos (projetor, internet, impressão)
-Material didático / apostilas
-Limpeza e conservação
-Segurança da escola
+Sala dos professores (descanso e trabalho)
+Limpeza, conservação e segurança
 Valorização profissional e pagamentos em dia
 CONVIVÊNCIA
 Disciplina e comportamento dos alunos
+Apoio da escola em casos de indisciplina
 Relacionamento entre colegas de trabalho
 Participação das famílias
 Apoio a alunos com necessidades especiais (AEE)`;
+  const AUTO_PROF = `Cumpri o planejamento e o conteúdo previsto
+Entreguei diários, notas e planejamentos no prazo
+Fui pontual e assíduo(a)
+Usei estratégias variadas (jogos, tecnologia, práticas)
+Acompanhei de perto os alunos com dificuldade
+Mantive bom diálogo com famílias e coordenação`;
   const AV_ALU = `PROFESSORES E AULAS
 Os professores explicam bem o conteúdo
 Os professores tiram minhas dúvidas
 Os professores são pontuais e organizados
 Os professores me tratam com respeito
-As aulas são interessantes
+As aulas são interessantes (exemplos, jogos, tecnologia)
 MATERIAL E AVALIAÇÕES
 Material didático (livros / apostilas)
 As provas cobram o que foi ensinado
+Recebo as notas e as correções com explicação
 Trabalhos e atividades de casa
 Simulados e aulas de reforço
+Plataforma digital / aplicativo da escola
 ESCOLA
 Salas de aula (carteiras, quadro, iluminação)
 Climatização / ventilação
 Banheiros e bebedouros
 Limpeza da escola
 Intervalo / cantina
-Segurança
 Eventos (jogos internos, feiras, festas)
 ATENDIMENTO E CONVIVÊNCIA
 Coordenação e direção
 Secretaria
+Sou avisado(a) com antecedência sobre provas e eventos
 Respeito entre os colegas (sem bullying)
-Sinto-me bem nesta escola`;
-  const DISC_PAD = 'Língua Portuguesa\nMatemática\nCiências\nHistória\nGeografia\nInglês\nEspanhol\nArte\nEducação Física\nEnsino Religioso';
-  const blocoAv = itens => { let h = '', abre = false; itens.split('\n').map(x => x.trim()).filter(Boolean).forEach(l => {
-      if (l === l.toUpperCase() && /[A-ZÁÉÍÓÚÇ]/.test(l)) { h += `<tr class="avg"><td colspan="5">${esc(l)}</td></tr>`; } else h += `<tr><td class="avi">${esc(l)}</td>${ESC.map(() => '<td class="avc"><i></i></td>').join('')}</tr>`; });
-    return `<table class="av-t"><thead><tr><th class="avi">Avalie cada item marcando um X</th>${ESC.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${h}</tbody></table>`; };
-  const abertas = qs => qs.map(q => `<div class="av-ab"><b>${esc(q)}</b>${'<i></i>'.repeat(4)}</div>`).join('');
+Sinto-me seguro(a) e bem nesta escola
+Tenho com quem conversar quando tenho um problema`;
+  const AUTO_ALU = `Presto atenção nas aulas
+Faço as tarefas de casa
+Estudo para as provas
+Peço ajuda quando não entendo
+Respeito os professores e os colegas`;
+  const DISC_PAD = 'Língua Portuguesa\nLiteratura\nRedação\nMatemática\nCiências / Biologia\nFísica\nQuímica\nHistória\nGeografia\nEstudos Amazônicos\nFilosofia\nSociologia\nInglês\nArte\nEducação Física\nEducação Financeira\nEmpreendedorismo';
+  const SEGS_AV = ['Educação Infantil', 'Fund. Anos Iniciais', 'Fund. Anos Finais', 'Ensino Médio', 'Pré-vestibular'];
+  const FORM_PROF = ['Tecnologia e inteligência artificial em sala', 'Inclusão e AEE', 'Gestão de sala e indisciplina', 'Avaliação e recuperação da aprendizagem', 'Metodologias ativas', 'Saúde emocional do professor', 'Preparação para ENEM e vestibulares', 'Outro: ________________'];
+  const PRIO_PROF = ['Estrutura e climatização', 'Material didático', 'Tecnologia e internet', 'Disciplina dos alunos', 'Formação dos professores', 'Valorização e salários', 'Comunicação interna', 'Participação das famílias', 'Inclusão (AEE)', 'Eventos e projetos'];
+  const QUER_ALU = ['Mais aulas de reforço', 'Mais simulados e aulões', 'Aulas de campo e passeios', 'Esportes e jogos internos', 'Feira de ciências', 'Clubes (leitura, robótica, xadrez)', 'Orientação profissional', 'Mais aulas com tecnologia'];
+  const SAIDA_ALU = ['Mudança de cidade ou escola', 'Valor da mensalidade', 'Vou concluir os estudos', 'Outro'];
+  const linhasAv = t => (t || '').split('\n').map(x => x.trim()).filter(Boolean);
+  const ehGrupo = l => l === l.toUpperCase() && /[A-ZÁÉÍÓÚÇ]/.test(l);
+  const blocoAv = (itens, sc = ESC, tit = 'Avalie cada item marcando um X', cls = '', apur) => {
+    const cols = apur ? [...sc, 'Total', '% positivo'] : sc;
+    const h = linhasAv(itens).map(l => ehGrupo(l) ? `<tr class="avg"><td colspan="${cols.length + 1}">${esc(l)}</td></tr>` : `<tr><td class="avi">${esc(l)}</td>${cols.map(() => apur ? '<td class="avn"></td>' : '<td class="avc"><i></i></td>').join('')}</tr>`).join('');
+    return `<table class="av-t${cls ? ' ' + cls : ''}${apur ? ' av-ap' : ''}"><thead><tr><th class="avi">${esc(tit)}</th>${cols.map(e => `<th>${esc(e)}</th>`).join('')}</tr></thead><tbody>${h}</tbody></table>`; };
+  const abertas = (qs, n = 3) => qs.map(q => `<div class="av-ab"><b>${esc(q)}</b>${'<i></i>'.repeat(n)}</div>`).join('');
+  const marca = (q, ops, obs) => `<p class="av-ck"><b>${esc(q)}</b>${obs ? ` <small>${esc(obs)}</small>` : ''}<br>${ops.map(o => `<span>☐ ${esc(o)}</span>`).join('&nbsp;&nbsp;&nbsp; ')}</p>`;
+  const nps = q => `<p class="av-ck"><b>${esc(q)}</b> <small>(circule uma nota)</small></p><table class="av-nps"><tr>${Array.from({ length: 11 }, (_, i) => `<td width="9%">${i}</td>`).join('')}</tr></table><p class="av-nps-l">0 = de jeito nenhum · 10 = com certeza</p>`;
+  const contagem = (tit, ops) => `<table class="av-t av-ap av-cont"><thead><tr><th class="avi">${esc(tit)}</th><th>Total</th></tr></thead><tbody>${ops.map(o => `<tr><td class="avi">${esc(o.replace(/:\s*_+$/, ''))}</td><td class="avn"></td></tr>`).join('')}</tbody></table>`;
+  const proxAno = d => (+d.ano || new Date().getFullYear()) + 1;
+  const entrega = d => `<p class="av-instr"><b>Como responder:</b> marque um X em cada linha${d.na ? ' (N/A = não se aplica / não sei avaliar)' : ''}. Entregue até <b>${d.prazo ? esc(fmt(d.prazo)) : '____/____'}</b> ${esc(d.local || 'na coordenação pedagógica')}.</p>`;
+  const apuracao = (d, pub, blocos, conts, abertasT) => `${cab('APURAÇÃO DA AVALIAÇÃO — ' + pub.toUpperCase())}<p class="av-int"><b>Folha de apuração — uso da coordenação.</b> Conte as marcações de todos os questionários e anote os totais em cada linha. <b>% positivo</b> = (Ótimo + Bom) ÷ total de respostas × 100. Itens com menos de 60% merecem um plano de ação.</p>
+      <div class="cfs av-id">${campo('Questionários recebidos', '', 1.3)}${campo('Público', pub, 1)}${campo('Apurado por', '', 2)}${campo('Data', '', 1)}</div>
+      ${blocos.map(([it, sc, t]) => blocoAv(it, sc, t, '', 1)).join('')}
+      <p class="av-sec">RECOMENDAÇÃO (0 A 10) — QUANTOS MARCARAM CADA NOTA</p><table class="av-nps av-npsa"><tr>${Array.from({ length: 11 }, (_, i) => `<td width="9%">${i}</td>`).join('')}</tr><tr>${Array.from({ length: 11 }, () => '<td width="9%">&nbsp;</td>').join('')}</tr></table>
+      <p class="av-nps-l">Nota de recomendação = % de notas 9 e 10 − % de notas 0 a 6. Acima de 50 é muito bom; abaixo de 0 pede atenção.</p>
+      ${conts.map(([t, o]) => contagem(t, o)).join('')}
+      <div class="av-abs">${abertas(abertasT)}</div>
+      <div class="doc-ass"><div><span></span>Coordenação pedagógica</div><div><span></span>Direção</div></div>`;
   TIPOS.avprof = {
-    nome: 'Avaliação da escola — professores', icone: '🗳️', desc: 'Questionário de fim de ano para os professores avaliarem o Incentivo e dizerem o que melhorar', setores: ['coordenacao', 'secretaria'],
-    titulo: d => `Avaliação institucional ${d.ano || ''} — professores`,
-    novo: () => ({ ano: String(new Date().getFullYear()), itens: AV_PROF, ident: 'opcional', data: hoje() }),
-    form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Identificação', sel('ident', d.ident || 'opcional', ['opcional', 'anônima']))}</div>
+    nome: 'Avaliação da escola — professores', icone: '🗳️', desc: 'Questionário de fim de ano para os professores avaliarem o Incentivo, se autoavaliarem e planejarem o próximo ano (com folha de apuração)', setores: ['coordenacao', 'secretaria'],
+    titulo: d => `${d.folha === 'Folha de apuração' ? 'Apuração — ' : ''}Avaliação institucional ${d.ano || ''} — professores`,
+    novo: () => ({ ano: String(new Date().getFullYear()), itens: AV_PROF, auto: AUTO_PROF, ident: 'opcional', folha: 'Questionário', data: hoje() }),
+    form: d => `<div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Identificação', sel('ident', d.ident || 'opcional', ['opcional', 'anônima']))}${lab('Imprimir', sel('folha', d.folha || 'Questionário', ['Questionário', 'Folha de apuração']))}</div>
+      <div class="g2">${lab('Entregar até', inp('prazo', d.prazo, '', 'date'))}${lab('Onde entregar', inp('local', d.local, 'na coordenação pedagógica'))}</div>
       ${lab('Itens avaliados <small>(um por linha; linhas em MAIÚSCULAS viram título de grupo)</small>', `<textarea id="itens" data-ed="sem" rows="14">${esc(d.itens || AV_PROF)}</textarea>`, 1)}
-      ${lab('Mensagem de abertura (opcional)', inp('msg', d.msg, 'Ex.: Sua opinião é muito importante para construirmos um 2027 ainda melhor!'), 1)}`,
-    campos: ['ano', 'ident', 'itens', 'msg', 'data'],
-    doc: d => `${cab('AVALIAÇÃO INSTITUCIONAL')}<p class="av-int"><b>Professor(a), sua opinião é muito importante!</b> ${esc(d.msg || `Ajude-nos a avaliar o ano letivo de ${d.ano || ''} e a construir um Incentivo ainda melhor. Responda com sinceridade.`)}</p>
-      ${d.ident === 'anônima' ? '<p class="av-anon">🔒 Esta avaliação é anônima — não é preciso se identificar.</p>' : `<div class="cfs av-id">${campo('Nome (opcional)', '', 3)}${campo('Disciplina(s)', '', 2)}${campo('Segmento', '', 1.4)}</div>`}
-      ${blocoAv(d.itens || AV_PROF)}
-      <div class="av-abs">${abertas(['O que a escola faz de melhor? (pontos positivos)', 'O que precisa melhorar? (seja específico)', 'Que sugestões você dá para o próximo ano?', 'De que você precisa para trabalhar melhor? (recursos, apoio, formação)'])}</div>
-      <p class="av-fim">Obrigado pela colaboração! 💙 — Direção do Sistema de Ensino Incentivo</p>`
+      ${lab('Autoavaliação do professor <small>(um por linha)</small>', `<textarea id="auto" data-ed="sem" rows="6">${esc(d.auto == null ? AUTO_PROF : d.auto)}</textarea>`, 1)}
+      ${lab('Mensagem de abertura (opcional)', inp('msg', d.msg, 'Ex.: Sua opinião é muito importante para construirmos um ano ainda melhor!'), 1)}`,
+    campos: ['ano', 'ident', 'folha', 'prazo', 'local', 'itens', 'auto', 'msg', 'data'],
+    doc: d => { const px = proxAno(d), auto = d.auto == null ? AUTO_PROF : d.auto;
+      const abs = ['O que a escola faz de melhor? (pontos positivos)', 'O que precisa melhorar? (seja específico)', `Que sugestões você dá para ${px}?`, 'De que você precisa para trabalhar melhor? (recursos, apoio, formação)'];
+      if (d.folha === 'Folha de apuração') return apuracao(d, 'Professores', [[d.itens || AV_PROF, ESC_NA, 'Item avaliado'], ...(linhasAv(auto).length ? [[auto, FREQ, 'Autoavaliação']] : [])],
+        [['Segmento em que atua', SEGS_AV], [`Temas de formação para ${px}`, FORM_PROF], [`Prioridades para ${px}`, PRIO_PROF], [`Pretende continuar em ${px}?`, ['Sim', 'Não', 'Ainda não sei']]], ['Pontos positivos mais citados', 'O que mais pediram para melhorar', 'Plano de ação: o que faremos e quem será o responsável']);
+      return `${cab('AVALIAÇÃO INSTITUCIONAL')}<p class="av-int"><b>Professor(a), sua opinião é muito importante!</b> ${esc(d.msg || `Ajude-nos a avaliar o ano letivo de ${d.ano || ''} e a construir um Incentivo ainda melhor em ${px}. Responda com sinceridade.`)}</p>
+      ${entrega({ ...d, na: 1 })}
+      ${d.ident === 'anônima' ? '<p class="av-anon">🔒 Esta avaliação é anônima — não é preciso se identificar.</p>' : `<div class="cfs av-id">${campo('Nome (opcional)', '', 3)}${campo('Disciplina(s)', '', 2)}</div>`}
+      ${marca('Segmento(s) em que atua:', SEGS_AV)}${marca('Tempo no Incentivo:', ['Primeiro ano', '2 a 3 anos', '4 anos ou mais'])}
+      ${blocoAv(d.itens || AV_PROF, ESC_NA)}
+      ${linhasAv(auto).length ? blocoAv(auto, FREQ, `Autoavaliação — meu trabalho em ${d.ano || ''}`, 'av-auto') : ''}
+      <p class="av-sec">PLANEJANDO ${px}</p>
+      ${marca(`Em quais temas você gostaria de receber formação em ${px}?`, FORM_PROF, '(marque quantos quiser)')}
+      ${marca(`Quais devem ser as prioridades da escola para ${px}?`, PRIO_PROF, '(marque até 3)')}
+      ${nps('De 0 a 10, o quanto você recomendaria o Incentivo como lugar para trabalhar?')}
+      ${marca(`Você pretende continuar no Incentivo em ${px}?`, ['Sim', 'Não', 'Ainda não sei'])}
+      <div class="av-abs">${abertas(abs)}</div>
+      <p class="av-dev">As respostas serão lidas somente pela direção e analisadas em conjunto. Os resultados e as ações de melhoria serão apresentados na Jornada Pedagógica de ${px}.</p>
+      <p class="av-fim">Obrigado pela colaboração! 💙 — Direção do Sistema de Ensino Incentivo</p>`; }
   };
   TIPOS.avaluno = {
-    nome: 'Avaliação da escola — alunos', icone: '📝', desc: 'Questionário de fim de ano para os alunos avaliarem professores, material, estrutura e o que melhorar', setores: ['coordenacao', 'secretaria'],
-    titulo: d => `Avaliação institucional ${d.ano || ''} — alunos`,
-    novo: () => ({ ano: String(new Date().getFullYear()), itens: AV_ALU, discs: DISC_PAD, ident: 'anônima', data: hoje() }),
-    form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Identificação', sel('ident', d.ident || 'anônima', ['anônima', 'opcional']))}</div>
+    nome: 'Avaliação da escola — alunos', icone: '📝', desc: 'Questionário de fim de ano para os alunos avaliarem professores, material, estrutura e bem-estar (com folha de apuração)', setores: ['coordenacao', 'secretaria'],
+    titulo: d => `${d.folha === 'Folha de apuração' ? 'Apuração — ' : ''}Avaliação institucional ${d.ano || ''} — alunos`,
+    novo: () => ({ ano: String(new Date().getFullYear()), itens: AV_ALU, auto: AUTO_ALU, discs: DISC_PAD, ident: 'anônima', folha: 'Questionário', data: hoje() }),
+    form: d => `<div class="g3">${lab('Ano', inp('ano', d.ano))}${lab('Identificação', sel('ident', d.ident || 'anônima', ['anônima', 'opcional']))}${lab('Imprimir', sel('folha', d.folha || 'Questionário', ['Questionário', 'Folha de apuração']))}</div>
+      <div class="g2">${lab('Entregar até', inp('prazo', d.prazo, '', 'date'))}${lab('Onde entregar', inp('local', d.local, 'ao professor da turma'))}</div>
       ${lab('Itens avaliados <small>(um por linha; linhas em MAIÚSCULAS viram título de grupo)</small>', `<textarea id="itens" data-ed="sem" rows="14">${esc(d.itens || AV_ALU)}</textarea>`, 1)}
+      ${lab('Autoavaliação do aluno <small>(um por linha)</small>', `<textarea id="auto" data-ed="sem" rows="5">${esc(d.auto == null ? AUTO_ALU : d.auto)}</textarea>`, 1)}
       ${lab('Disciplinas para avaliar os professores <small>(uma por linha; deixe vazio para não incluir)</small>', `<textarea id="discs" data-ed="sem" rows="6">${esc(d.discs == null ? DISC_PAD : d.discs)}</textarea>`, 1)}
       ${lab('Mensagem de abertura (opcional)', inp('msg', d.msg), 1)}`,
-    campos: ['ano', 'ident', 'itens', 'discs', 'msg', 'data'],
-    doc: d => { const ds = (d.discs == null ? DISC_PAD : d.discs).split('\n').map(x => x.trim()).filter(Boolean);
-      return `${cab('AVALIAÇÃO DA ESCOLA')}<p class="av-int"><b>Querido(a) aluno(a), queremos ouvir você!</b> ${esc(d.msg || `Responda com sinceridade: sua opinião vai ajudar o Incentivo a melhorar em ${(+d.ano || new Date().getFullYear()) + 1}.`)}</p>
+    campos: ['ano', 'ident', 'folha', 'prazo', 'local', 'itens', 'auto', 'discs', 'msg', 'data'],
+    doc: d => { const px = proxAno(d), ds = linhasAv(d.discs == null ? DISC_PAD : d.discs), auto = d.auto == null ? AUTO_ALU : d.auto, DISC_C = [...ESC, 'Tenho dificuldade'];
+      if (d.folha === 'Folha de apuração') return apuracao(d, 'Alunos', [[d.itens || AV_ALU, ESC, 'Item avaliado'], ...(linhasAv(auto).length ? [[auto, FREQ, 'Autoavaliação dos alunos']] : []), ...(ds.length ? [[ds.join('\n'), DISC_C, 'Professor(a) de…']] : [])],
+        [['Bullying neste ano', ['Não', 'Sim, sofri', 'Sim, presenciei']], [`O que querem ter em ${px}`, QUER_ALU], [`Pretende estudar aqui em ${px}?`, ['Sim', 'Não', 'Ainda não sei']], ['Motivo de saída', SAIDA_ALU]], ['Do que os alunos mais gostam', 'O que mais pediram para melhorar', 'Plano de ação: o que faremos e quem será o responsável']);
+      return `${cab('AVALIAÇÃO DA ESCOLA')}<p class="av-int"><b>Querido(a) aluno(a), queremos ouvir você!</b> ${esc(d.msg || `Responda com sinceridade: sua opinião vai ajudar o Incentivo a ficar ainda melhor em ${px}.`)}</p>
+        ${entrega({ ...d, local: d.local || 'ao professor da turma' })}
         ${d.ident === 'anônima' ? `<div class="cfs av-id">${campo('Série / turma', '', 1)}${campo('Turno', '', 1)}</div><p class="av-anon">🔒 Não escreva seu nome — esta avaliação é anônima.</p>` : `<div class="cfs av-id">${campo('Nome (opcional)', '', 3)}${campo('Série / turma', '', 1.4)}${campo('Turno', '', 1)}</div>`}
+        ${marca('Há quanto tempo você estuda no Incentivo?', ['Este é o 1º ano', '2 a 3 anos', '4 anos ou mais'])}
         ${blocoAv(d.itens || AV_ALU)}
-        ${ds.length ? `<table class="av-t av-d"><thead><tr><th class="avi">Como você avalia o(a) professor(a) de…</th>${ESC.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${ds.map(x => `<tr><td class="avi">${esc(x)}</td>${ESC.map(() => '<td class="avc"><i></i></td>').join('')}</tr>`).join('')}</tbody></table>` : ''}
-        <div class="av-abs">${abertas(['Do que você mais gosta no Incentivo?', 'O que precisa melhorar?', 'Deixe um recado ou sugestão para os professores e a direção'])}</div>
+        ${ds.length ? blocoAv(ds.join('\n'), DISC_C, 'Professor(a) de… (avalie só as disciplinas que você tem)', 'av-d') : ''}
+        ${linhasAv(auto).length ? blocoAv(auto, FREQ, 'Sobre você — seja sincero(a)', 'av-auto') : ''}
+        <p class="av-sec">QUEREMOS SABER MAIS</p>
+        ${marca('Neste ano, você sofreu ou presenciou bullying na escola?', ['Não', 'Sim, sofri', 'Sim, presenciei'])}
+        <p class="av-nota">Se quiser conversar sobre isso, procure a coordenação. Você não está sozinho(a). 💙</p>
+        ${marca(`O que você gostaria de ter no Incentivo em ${px}?`, QUER_ALU, '(marque até 3)')}
+        ${nps('De 0 a 10, você indicaria o Incentivo para um amigo?')}
+        <p class="av-ck"><b>Você pretende estudar no Incentivo em ${px}?</b><br><span>☐ Sim</span>&nbsp;&nbsp;&nbsp; <span>☐ Não</span>&nbsp;&nbsp;&nbsp; <span>☐ Ainda não sei</span><br><b>Se não, por quê?</b> ${SAIDA_ALU.map(o => `<span>☐ ${esc(o)}</span>`).join('&nbsp;&nbsp; ')}</p>
+        <div class="av-abs">${abertas(['Do que você mais gosta no Incentivo?', 'O que precisa melhorar? Deixe também um recado ou sugestão para os professores e a direção.'], 3)}</div>
         <p class="av-fim">Obrigado pela sua participação! 💙 — Sistema de Ensino Incentivo</p>`; }
   };
   /* ---------- equipe do ano (lista de professores por segmento e corpo administrativo) ---------- */
@@ -680,23 +752,74 @@ Serviços gerais / merendeiras (cantina); `;
     }
     return { secoes: secs.map(x => '## ' + x.t + '\n' + x.l.join('\n')).join('\n'), adm: adm.join('\n') };
   }
+  const EQ_DATAS = `Jornada pedagógica; 
+Entrega do planejamento anual à coordenação; 
+Início das aulas; 
+Primeira reunião de pais; 
+Fim do 1º bimestre e entrega das notas; `;
+  const EQ_COMB = `Chegar com 10 minutos de antecedência e registrar a frequência diariamente.
+Entregar planejamentos, provas e atividades à coordenação dentro dos prazos.
+Manter diários, notas e frequência dos alunos sempre atualizados na plataforma.
+Avisar a coordenação com antecedência sobre faltas, para organizar a substituição.
+Falar com as famílias somente pelos canais oficiais da escola e com a coordenação ciente.
+Usar o celular em sala apenas para fins pedagógicos.
+Zelar pelos materiais, equipamentos e pela organização das salas.
+Tratar alunos, famílias e colegas com respeito e manter sigilo sobre informações dos alunos.`;
+  const EQ_DOCS = `RG e CPF (cópias)
+Comprovante de residência atualizado
+Diploma ou certificado de formação (cópia)
+Carteira de trabalho / PIS
+Dados bancários ou chave PIX
+Foto 3x4
+Certidão de antecedentes criminais`;
+  const segCurto = t => /INFANTIL/i.test(t) ? 'Educação Infantil' : /INICIAIS/i.test(t) ? 'Fund. Anos Iniciais' : /FINAIS/i.test(t) ? 'Fund. Anos Finais' : /M[ÉE]DIO/i.test(t) ? 'Ensino Médio' : /VESTIBULAR/i.test(t) ? (/TARDE/i.test(t) ? 'Pré-vestibular (tarde)' : /S[ÁA]BADO/i.test(t) ? 'Pré-vestibular (sábado)' : 'Pré-vestibular') : t.split(/[:—–(|]/)[0].trim();
+  const chaveNome = n => n.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/^PROF(ESSOR)?A?\.?(º|ª)?\s+/, '').replace(/\s+/g, ' ').trim();
   TIPOS.equipe = {
-    nome: 'Equipe do ano (professores e gestão)', icone: '👥', desc: 'Relação dos professores por segmento e disciplina, com assinatura, e o corpo administrativo', setores: ['secretaria', 'coordenacao'],
+    nome: 'Equipe do ano (professores e gestão)', icone: '👥', desc: 'Boas-vindas, quadro-resumo, professores por segmento com assinatura e contato, quadro geral por professor, corpo administrativo e combinados', setores: ['secretaria', 'coordenacao'],
     titulo: d => `Equipe do Incentivo ${d.ano || ''}`,
-    novo: () => ({ ano: String(new Date().getFullYear() + (new Date().getMonth() > 9 ? 1 : 0)), secoes: EQ_SEC, adm: EQ_ADM, data: hoje() }),
+    novo: () => ({ ano: String(new Date().getFullYear() + (new Date().getMonth() > 9 ? 1 : 0)), secoes: EQ_SEC, adm: EQ_ADM, datas: EQ_DATAS, comb: EQ_COMB, docsrh: EQ_DOCS, data: hoje() }),
     form: d => `<div class="g2">${lab('Ano letivo', inp('ano', d.ano))}${lab('Importar do Word', `<label class="b">📄 Escolher arquivo .docx<input type="file" id="eqArq" accept=".docx" hidden></label>`)}</div>
       <p class="dica">Você pode importar a relação do ano anterior (Word) e só trocar o que mudou. Formato: <b>## TÍTULO DO SEGMENTO | ANO</b> (ou <b>| COMPONENTE CURRICULAR</b>) e, embaixo, uma linha por professor: <b>Nome; turma ou disciplina</b>.</p>
+      ${lab('Mensagem de boas-vindas (opcional)', inp('msg', d.msg, 'Ex.: Sejam bem-vindos a mais um ano de muito trabalho e conquistas!'), 1)}
       ${lab('Professores por segmento', `<textarea id="secoes" data-ed="sem" rows="18">${esc(d.secoes || EQ_SEC)}</textarea>`, 1)}
-      ${lab('Corpo administrativo e técnico <small>(uma linha por cargo: Cargo; Nome)</small>', `<textarea id="adm" data-ed="sem" rows="10">${esc(d.adm || EQ_ADM)}</textarea>`, 1)}`,
-    campos: ['ano', 'secoes', 'adm', 'data'],
+      ${lab('Corpo administrativo e técnico <small>(uma linha por cargo: Cargo; Nome)</small>', `<textarea id="adm" data-ed="sem" rows="10">${esc(d.adm || EQ_ADM)}</textarea>`, 1)}
+      ${lab('Datas importantes <small>(uma por linha: Evento; data — deixe a data vazia para preencher à mão)</small>', `<textarea id="datas" data-ed="sem" rows="5">${esc(d.datas == null ? EQ_DATAS : d.datas)}</textarea>`, 1)}
+      ${lab('Combinados da equipe <small>(um por linha)</small>', `<textarea id="comb" data-ed="sem" rows="8">${esc(d.comb == null ? EQ_COMB : d.comb)}</textarea>`, 1)}
+      ${lab('Documentos para entregar na secretaria <small>(um por linha)</small>', `<textarea id="docsrh" data-ed="sem" rows="6">${esc(d.docsrh == null ? EQ_DOCS : d.docsrh)}</textarea>`, 1)}`,
+    campos: ['ano', 'msg', 'secoes', 'adm', 'datas', 'comb', 'docsrh', 'data'],
     depois: () => { $('#eqArq').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const r = await importaEquipe(f); if (r.secoes) $('#secoes').value = r.secoes; if (r.adm) $('#adm').value = r.adm; $('#secoes').dispatchEvent(new Event('input', { bubbles: true })); alert('Relação importada. Confira e ajuste o que mudou.'); } catch (x) { alert('Não consegui ler este arquivo.'); } }; },
-    doc: d => { const secs = []; let cur = null;
+    doc: d => { const secs = []; let cur = null; const ano = esc(d.ano || '');
       (d.secoes || '').split('\n').forEach(l => { l = l.trim(); if (!l) return; if (l.startsWith('##')) { const [t, c] = l.slice(2).split('|'); cur = { t: t.trim(), c: (c || 'COMPONENTE CURRICULAR').trim(), l: [] }; secs.push(cur); } else if (cur) { const [n, x] = l.split(';'); cur.l.push([(n || '').trim(), (x || '').trim()]); } });
       const adm = (d.adm || '').split('\n').map(l => l.split(';')).filter(x => x[0] && x[0].trim()).map(([c, n]) => [c.trim(), (n || '').trim()]);
-      const tab = (x, i) => `<div class="eq-sec"${i ? ' style="break-before:page;page-break-before:always"' : ''}>${i ? '' : `<h2 class="eq-tit">EQUIPE DO INCENTIVO PARA ${esc(d.ano || '')}</h2>`}<div class="eq-faixa"><small>LISTA DOS PROFESSORES ${/ANO/.test(x.c) && !/COMPONENTE/.test(x.c) ? 'POR SEGMENTO E TURMA' : 'POR COMPONENTE CURRICULAR'} ${esc(d.ano || '')}</small><b>${esc(x.t)}</b></div>
-        <table class="mapa-t eq-t"><thead><tr><th class="mn">Nº</th><th>NOME</th><th>${esc(x.c)}</th><th class="eq-as">ASSINATURA</th></tr></thead><tbody>${x.l.map((r, k) => `<tr><td class="mn">${String(k + 1).padStart(2, '0')}</td><td class="eq-n">${esc(r[0].toUpperCase())}</td><td class="eq-c">${esc(r[1].toUpperCase())}</td><td></td></tr>`).join('')}${Array.from({ length: 2 }, (_, k) => `<tr><td class="mn">${String(x.l.length + k + 1).padStart(2, '0')}</td><td></td><td></td><td></td></tr>`).join('')}</tbody></table></div>`;
-      return `${cab('EQUIPE DO INCENTIVO ' + (d.ano || ''))}${secs.map(tab).join('')}
-        ${adm.length ? `<div class="eq-sec" style="break-before:page;page-break-before:always"><div class="eq-faixa"><small>${esc(d.ano || '')}</small><b>ESTRUTURA DO CORPO ADMINISTRATIVO E TÉCNICO</b></div><div class="eq-adm">${adm.map(([c, n]) => `<div class="eq-card"><small>${esc(c.toUpperCase())}</small><b>${esc(n) || '&nbsp;'}</b></div>`).join('')}</div></div>` : ''}`; }
+      const datas = linhasAv(d.datas == null ? EQ_DATAS : d.datas).map(l => l.split(';').map(x => x.trim()));
+      const comb = linhasAv(d.comb == null ? EQ_COMB : d.comb), docsrh = linhasAv(d.docsrh == null ? EQ_DOCS : d.docsrh);
+      // quadro geral: junta as lotações de cada professor
+      const pr = new Map(); secs.forEach(x => x.l.forEach(([n, c]) => { if (!n) return; const k = chaveNome(n); if (!pr.has(k)) pr.set(k, { n, l: [] }); pr.get(k).l.push(segCurto(x.t) + ' — ' + (c || '—')); }));
+      const profs = [...pr.values()].sort((a, b) => chaveNome(a.n).localeCompare(chaveNome(b.n)));
+      const quebra = ' style="break-before:page;page-break-before:always"';
+      const faixa = (s, b) => `<div class="eq-faixa"><small>${s}</small><b>${b}</b></div>`;
+      const resumo = secs.map(x => { const ns = new Set(x.l.filter(r => r[0]).map(r => chaveNome(r[0]))); return `<tr><td>${esc(segCurto(x.t))}</td><td align="center">${ns.size}</td><td align="center">${x.l.filter(r => r[0]).length}</td></tr>`; }).join('');
+      const admN = adm.filter(a => a[1]).length;
+      const capa = `<h2 class="eq-tit">EQUIPE DO INCENTIVO PARA ${ano}</h2>
+        <p class="av-int"><b>Seja bem-vindo(a) ao ano letivo de ${ano}!</b> ${esc(d.msg || 'Este documento apresenta a nossa equipe, a lotação de cada professor e os combinados para começarmos o ano juntos e bem organizados.')} Ao assinar a lista do seu segmento, o(a) professor(a) confirma <b>a sua lotação</b> (turmas e componentes) e o <b>recebimento destas orientações</b>. Anote também o seu WhatsApp para os grupos da equipe.</p>
+        ${faixa('VISÃO GERAL ' + ano, 'QUADRO-RESUMO DA EQUIPE')}
+        <table class="eq-r"><thead><tr><th width="60%">SEGMENTO</th><th width="20%">PROFESSORES</th><th width="20%">LOTAÇÕES</th></tr></thead><tbody>${resumo}
+          <tr class="eq-tot"><td>TOTAL DE PROFESSORES DIFERENTES</td><td align="center">${profs.length}</td><td align="center">${secs.reduce((s, x) => s + x.l.filter(r => r[0]).length, 0)}</td></tr>
+          ${adm.length ? `<tr class="eq-tot"><td>CORPO ADMINISTRATIVO E TÉCNICO (cargos)</td><td align="center">${admN || adm.length}</td><td align="center">—</td></tr>` : ''}</tbody></table>
+        ${datas.length ? `${faixa('ANOTE NA AGENDA', 'DATAS IMPORTANTES DO INÍCIO DO ANO')}<table class="eq-r"><thead><tr><th width="72%">EVENTO</th><th width="28%">DATA</th></tr></thead><tbody>${datas.map(([e, dt]) => `<tr><td>${esc(e)}</td><td align="center">${esc(dt || '') || '____/____/______'}</td></tr>`).join('')}</tbody></table>` : ''}`;
+      const tab = x => `<div class="eq-sec"${quebra}>${faixa(`LISTA DOS PROFESSORES ${/ANO/.test(x.c) && !/COMPONENTE/.test(x.c) ? 'POR SEGMENTO E TURMA' : 'POR COMPONENTE CURRICULAR'} ${ano}`, esc(x.t))}
+        <table class="mapa-t eq-t"><thead><tr><th class="mn">Nº</th><th>NOME</th><th>${esc(x.c)}</th><th class="eq-ct">WHATSAPP</th><th class="eq-as">ASSINATURA</th></tr></thead><tbody>${x.l.map((r, k) => `<tr><td class="mn">${String(k + 1).padStart(2, '0')}</td><td class="eq-n">${esc(r[0].toUpperCase())}</td><td class="eq-c">${esc(r[1].toUpperCase())}</td><td></td><td></td></tr>`).join('')}${Array.from({ length: 2 }, (_, k) => `<tr><td class="mn">${String(x.l.length + k + 1).padStart(2, '0')}</td><td></td><td></td><td></td><td></td></tr>`).join('')}</tbody></table>
+        <p class="eq-obs">Ao assinar, confirmo minha lotação para ${ano} e o recebimento das orientações da equipe.</p></div>`;
+      const geral = profs.length ? `<div class="eq-sec"${quebra}>${faixa('TODAS AS TURMAS E COMPONENTES DE CADA PROFESSOR ' + ano, 'QUADRO GERAL POR PROFESSOR')}
+        <table class="eq-r eq-g"><thead><tr><th width="5%">Nº</th><th width="33%">PROFESSOR(A)</th><th width="52%">LOTAÇÕES (SEGMENTO — TURMA OU COMPONENTE)</th><th width="10%">TOTAL</th></tr></thead><tbody>${profs.map((p, i) => `<tr><td align="center">${String(i + 1).padStart(2, '0')}</td><td class="eq-n">${esc(p.n.toUpperCase())}</td><td class="eq-l">${p.l.map(esc).join('<br>')}</td><td align="center"><b>${p.l.length}</b></td></tr>`).join('')}</tbody></table>
+        <p class="eq-obs">Confira se a sua carga está correta. Divergências devem ser comunicadas à coordenação antes do início das aulas.</p></div>` : '';
+      const admH = adm.length ? `<div class="eq-sec"${quebra}>${faixa(ano, 'ESTRUTURA DO CORPO ADMINISTRATIVO E TÉCNICO')}<div class="eq-adm">${adm.map(([c, n]) => `<div class="eq-card"><small>${esc(c.toUpperCase())}</small><b>${esc(n) || '&nbsp;'}</b></div>`).join('')}</div></div>` : '';
+      const orient = comb.length || docsrh.length ? `<div class="eq-sec"${quebra}>${faixa('PARA COMEÇARMOS BEM ' + ano, 'ORIENTAÇÕES PARA O ANO LETIVO')}
+        ${comb.length ? `<p class="av-sec">COMBINADOS DA EQUIPE</p>${comb.map((c, i) => `<p class="eq-li"><b>${i + 1}.</b> ${esc(c)}</p>`).join('')}` : ''}
+        ${docsrh.length ? `<p class="av-sec">DOCUMENTOS PARA ENTREGAR NA SECRETARIA (NOVOS PROFISSIONAIS OU ATUALIZAÇÃO)</p>${docsrh.map(c => `<p class="eq-li">☐ ${esc(c)}</p>`).join('')}` : ''}
+        <p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${d.data ? extenso(d.data) : `_____ de ____________________ de ${ano}`}.</p>
+        <div class="doc-ass"><div><span></span>Direção</div><div><span></span>Coordenação pedagógica</div></div></div>` : '';
+      return `${cab('EQUIPE DO INCENTIVO ' + (d.ano || ''))}${capa}${secs.map(tab).join('')}${geral}${admH}${orient}`; }
   };
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
