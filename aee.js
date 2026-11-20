@@ -79,7 +79,7 @@
       ${campo('Interesses', txt('pInteresses', a.interesses, 'Temas, brincadeiras, personagens de que gosta', 2), 'full')}
       ${campo('Dificuldades', txt('pDific', a.dificuldades, 'O que ainda é difícil'), 'full')}
       ${campo('Como aprende melhor', chips('apr', APRENDE, a.aprende) + inp('pAprOutra', a.aprendeOutra, 'Outro (opcional)'), 'full')}
-      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button>${atual.id ? `<button class="b" type="button" data-imp="perfil">🖨 Imprimir ficha do aluno</button><button class="b" type="button" data-baixa="word" data-imp2="perfil">⬇ Word</button><button class="b" type="button" data-baixa="pdf" data-imp2="perfil">⬇ PDF</button><button class="b ghost" type="button" id="delAluno">Excluir aluno</button>` : ''}</div>
+      <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b" type="button" data-vermod="perfil">👁 Ver ficha</button>${atual.id ? `<button class="b" type="button" data-imp="perfil">🖨 Imprimir ficha do aluno</button><button class="b" type="button" data-baixa="word" data-imp2="perfil">⬇ Word</button><button class="b" type="button" data-baixa="pdf" data-imp2="perfil">⬇ PDF</button><button class="b ghost" type="button" id="delAluno">Excluir aluno</button>` : ''}</div>
     </form>`;
     $('#fPerfil').onsubmit = async e => {
       e.preventDefault(); const f = e.target; const nome = val('pNome').trim(); if (!nome) { alert('Escreva o nome do aluno.'); return; }
@@ -103,10 +103,10 @@
   async function atend() {
     const l = (await todos('atend')).filter(x => x.aluno === atual.id).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
     if (edit && edit.tipo === 'atend') return formAtend(edit.obj);
-    $('#cont').innerHTML = `<div class="acoes"><button class="b main" id="novoAt">➕ Registrar atendimento</button>${l.length ? `<button class="b" data-imp="atend-todos">🖨 Imprimir todos (${l.length})</button>` : ''}</div>
+    $('#cont').innerHTML = `<div class="acoes"><button class="b main" id="novoAt">➕ Registrar atendimento</button><button class="b" data-vermod="atend">👁 Ver modelo</button>${l.length ? `<button class="b" data-imp="atend-todos">🖨 Imprimir todos (${l.length})</button>` : ''}</div>
       ${l.length ? `<div class="cards">${l.map(x => `<article class="aula"><div class="topo"><b>${fmt(x.data)}${x.inicio ? ' · ' + esc(x.inicio) + (x.fim ? '–' + esc(x.fim) : '') : ''}</b><span class="tag">${esc(x.modalidade || 'Individual')}</span></div>
         <h3>${esc(x.objetivo || 'Atendimento')}</h3>${x.participacao ? `<p class="cont"><b>${esc(x.participacao)}</b></p>` : ''}<p class="cont">${esc((x.atividades || '').slice(0, 160))}</p>
-        <div class="acoes"><button class="b main" data-imp="atend" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="atend" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="atend" data-id="${x.id}">⬇ PDF</button><button class="b" data-edat="${x.id}">Editar</button><button class="b ghost" data-delat="${x.id}">Excluir</button></div></article>`).join('')}</div>`
+        <div class="acoes"><button class="b main" data-ver="atend" data-id="${x.id}">👁 Ver</button><button class="b" data-imp="atend" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="atend" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="atend" data-id="${x.id}">⬇ PDF</button><button class="b" data-edat="${x.id}">Editar</button><button class="b ghost" data-delat="${x.id}">Excluir</button></div></article>`).join('')}</div>`
         : '<p class="dica">Nenhum atendimento registrado. Toque em “Registrar atendimento” depois de cada encontro.</p>'}`;
     $('#novoAt').onclick = () => { edit = { tipo: 'atend', obj: { data: hoje(), profissional: atual.profissional } }; atend(); };
   }
@@ -137,10 +137,10 @@
     if (edit && edit.tipo === 'pei') return formPei(edit.obj);
     const l = (await todos('pei')).filter(x => x.aluno === atual.id).sort((a, b) => (b.ano + b.periodo).localeCompare(a.ano + a.periodo));
     $('#cont').innerHTML = `<p class="dica">O PEI (Plano Educacional Individualizado) organiza os objetivos e as adaptações do aluno para o período. Revise a cada semestre.</p>
-      <div class="acoes"><button class="b main" id="novoPei">➕ Novo PEI</button></div>
+      <div class="acoes"><button class="b main" id="novoPei">➕ Novo PEI</button><button class="b" data-vermod="pei">👁 Ver modelo</button></div>
       ${l.length ? `<div class="cards">${l.map(x => `<article class="aula"><div class="topo"><b>${esc(x.periodo)} de ${esc(x.ano)}</b><span class="tag">PEI</span></div>
         <h3>${esc(x.frequencia || '')}</h3><p class="cont">${esc((x.obj_cognitivo || x.obj_comunicacao || '').slice(0, 150))}</p>
-        <div class="acoes"><button class="b main" data-imp="pei" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="pei" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="pei" data-id="${x.id}">⬇ PDF</button><button class="b" data-edpei="${x.id}">Editar</button><button class="b" data-duppei="${x.id}">Copiar para novo período</button><button class="b ghost" data-delpei="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
+        <div class="acoes"><button class="b main" data-ver="pei" data-id="${x.id}">👁 Ver</button><button class="b" data-imp="pei" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="pei" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="pei" data-id="${x.id}">⬇ PDF</button><button class="b" data-edpei="${x.id}">Editar</button><button class="b" data-duppei="${x.id}">Copiar para novo período</button><button class="b ghost" data-delpei="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
     $('#novoPei').onclick = () => { edit = { tipo: 'pei', obj: { ano: String(new Date().getFullYear()), periodo: new Date().getMonth() < 6 ? '1º semestre' : '2º semestre', necessidades: necTxt(atual), potencialidades: [atual.fortes, atual.interesses].filter(Boolean).join('\n') } }; pei(); };
   }
   function formPei(x) {
@@ -181,9 +181,9 @@
     if (edit && edit.tipo === 'parecer') return formParecer(edit.obj);
     const l = (await todos('parecer')).filter(x => x.aluno === atual.id).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
     $('#cont').innerHTML = `<p class="dica">Parecer com a capa da escola. Aluno, turma e ano escolar entram na capa automaticamente.</p>
-      <div class="acoes"><button class="b main" id="novoPar">➕ Novo parecer</button></div>
+      <div class="acoes"><button class="b main" id="novoPar">➕ Novo parecer</button><button class="b" data-vermod="parecer">👁 Ver modelo</button></div>
       ${l.length ? `<div class="cards">${l.map(x => `<article class="aula"><div class="topo"><b>${fmt(x.data)}</b><span class="tag">Parecer</span></div><h3>${esc((x.conclusao || x.motivo || 'Parecer neuropsicopedagógico').slice(0, 120))}</h3>
-        <div class="acoes"><button class="b main" data-imp="parecer" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="parecer" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="parecer" data-id="${x.id}">⬇ PDF</button><button class="b" data-edpar="${x.id}">✏️ Editar</button><button class="b ghost" data-delpar="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
+        <div class="acoes"><button class="b main" data-ver="parecer" data-id="${x.id}">👁 Ver</button><button class="b" data-imp="parecer" data-id="${x.id}">🖨 Imprimir</button><button class="b" data-baixa="word" data-imp2="parecer" data-id="${x.id}">⬇ Word</button><button class="b" data-baixa="pdf" data-imp2="parecer" data-id="${x.id}">⬇ PDF</button><button class="b" data-edpar="${x.id}">✏️ Editar</button><button class="b ghost" data-delpar="${x.id}">Excluir</button></div></article>`).join('')}</div>` : ''}`;
     $('#novoPar').onclick = () => { edit = { tipo: 'parecer', obj: { data: hoje(), turma: [atual.serie, atual.classe].filter(Boolean).join(' ').replace(/ \(Médio\)/, ''), turno: atual.turno, ano: String(new Date().getFullYear()) } }; parecer(); };
   }
   function formParecer(x) {
@@ -296,6 +296,20 @@
     window.print();
   }
 
+  /* ---------- prévia em janela ---------- */
+  const MODELO = { atend: () => ({ data: hoje(), profissional: (atual || {}).profissional }), pei: () => ({ ano: String(new Date().getFullYear()), periodo: new Date().getMonth() < 6 ? '1º semestre' : '2º semestre' }), parecer: () => ({ data: hoje(), ano: String(new Date().getFullYear()) }) };
+  async function verPrevia(tipo, id) {
+    let w = $('#pvJan'); if (!w) { document.body.insertAdjacentHTML('beforeend', '<div id="pvJan" class="pv-jan no-print"><div class="pv-jan-in"><div class="pv-bar"><b>👁 Prévia</b><small id="pvJanSub"></small><button type="button" class="b ghost" id="pvJanX">✕ Fechar</button></div><div class="pv-box" id="pvJanBox"><div class="pv-pag sei-pdf" id="pvJanPag"></div></div></div></div>'); w = $('#pvJan'); $('#pvJanX').onclick = () => { w.hidden = true; }; w.onclick = e => { if (e.target === w) w.hidden = true; }; }
+    w.hidden = false; const pag = $('#pvJanPag'); pag.innerHTML = '<p style="padding:20mm;text-align:center;font-size:14pt">Carregando…</p>';
+    const a = atual && (atual.nome || atual.id) ? atual : { nome: '', necessidades: [], aprende: [] }; const guard = atual; atual = a;
+    let x = null; if (id) x = (await todos(tipo === 'atend' ? 'atend' : tipo)).find(o => o.id === id); else if (MODELO[tipo]) x = MODELO[tipo]();
+    $('#pvJanSub').textContent = id ? '' : 'Modelo em branco';
+    await prepFolha(tipo, x); let h = '';
+    if (tipo === 'perfil') h = docPerfil(a); if (tipo === 'atend') h = docAtend(a, x); if (tipo === 'pei') h = docPei(a, x); if (tipo === 'parecer') h = await docParecer(a, x);
+    atual = guard; pag.innerHTML = h; pag.style.setProperty('--pvfundo', FOLHA && FOLHA.fundo ? `url(${FOLHA.fundo})` : 'url(assets/docs/moldura-doc.jpg?v=3)');
+    await Promise.all([...pag.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    const box = $('#pvJanBox'); const k = box.clientWidth / pag.offsetWidth; pag.style.transform = `scale(${k})`; box.style.height = Math.ceil(pag.offsetHeight * k) + 'px';
+  }
   /* ---------- eventos ---------- */
   let avT = null;
   function aviso(t) { let a = $('#aeeAviso'); if (!a) { a = document.createElement('div'); a.id = 'aeeAviso'; a.className = 'no-print'; document.body.append(a); } a.textContent = '✅ ' + t; a.hidden = false; clearTimeout(avT); avT = setTimeout(() => { a.hidden = true; }, 2500); }
@@ -303,6 +317,8 @@
     const t = e.target.closest('button'); if (!t) return;
     if (t.dataset.al) { atual = alunos.find(a => a.id === t.dataset.al); aba = 'perfil'; edit = null; lista(); painel(); if (innerWidth < 800) $('#painel').scrollIntoView(); return; }
     if (t.dataset.aba && t.closest('.abas-al')) { aba = t.dataset.aba; edit = null; painel(); return; }
+    if (t.dataset.vermod) { verPrevia(t.dataset.vermod); return; }
+    if (t.dataset.ver) { verPrevia(t.dataset.ver, t.dataset.id); return; }
     if (t.dataset.imp) { imprimir(t.dataset.imp, t.dataset.id); return; }
     if (t.dataset.baixa) { baixarAee(t.dataset.baixa, t.dataset.imp2, t.dataset.id); return; }
     if (t.dataset.edat) { edit = { tipo: 'atend', obj: (await todos('atend')).find(x => x.id === t.dataset.edat) }; atend(); }
