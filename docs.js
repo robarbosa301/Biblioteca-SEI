@@ -571,6 +571,133 @@ Sinto-me bem nesta escola`;
         <div class="av-abs">${abertas(['Do que você mais gosta no Incentivo?', 'O que precisa melhorar?', 'Deixe um recado ou sugestão para os professores e a direção'])}</div>
         <p class="av-fim">Obrigado pela sua participação! 💙 — Sistema de Ensino Incentivo</p>`; }
   };
+  /* ---------- equipe do ano (lista de professores por segmento e corpo administrativo) ---------- */
+  const EQ_SEC = `## EDUCAÇÃO INFANTIL: MATERNAL, PRÉ I E PRÉ II | ANO
+; MATERNAL (03 ANOS)
+; PRÉ I (04 ANOS)
+; PRÉ II (05 ANOS)
+; EDUCAÇÃO FÍSICA: MATERNAL, PRÉ I E PRÉ II
+; LÍNGUA INGLESA: MATERNAL, PRÉ I E PRÉ II
+## ENSINO FUNDAMENTAL — ANOS INICIAIS | ANO
+; 1º ANO
+; 2º ANO
+; 3º ANO
+; 4º ANO
+; 5º ANO
+; EDUCAÇÃO FÍSICA: 1º AO 5º ANO
+; LÍNGUA INGLESA: 1º AO 5º ANO
+## ENSINO FUNDAMENTAL — ANOS FINAIS (6º AO 9º ANO) | COMPONENTE CURRICULAR
+; LÍNGUA PORTUGUESA: 6º AO 9º ANO
+; REDAÇÃO: 6º AO 9º ANO
+; HISTÓRIA: 6º AO 9º ANO
+; ESTUDOS AMAZÔNICOS: 6º AO 9º ANO
+; GEOGRAFIA: 6º AO 9º ANO
+; FILOSOFIA: 6º AO 9º ANO
+; CIÊNCIAS: 6º AO 8º ANO
+; QUÍMICA: 9º ANO
+; FÍSICA: 9º ANO
+; BIOLOGIA: 9º ANO
+; MATEMÁTICA: 6º AO 9º ANO
+; ENSINO DE ARTES: 6º AO 9º ANO
+; EDUCAÇÃO FÍSICA: 6º AO 9º ANO
+; LÍNGUA INGLESA: 6º AO 9º ANO
+; EDUCAÇÃO FINANCEIRA
+; EMPREENDEDORISMO
+## NOVO ENSINO MÉDIO — 1ª, 2ª E 3ª SÉRIE (CONVÊNIO) | COMPONENTE CURRICULAR
+; LÍNGUA PORTUGUESA: 1ª A 3ª SÉRIE
+; LITERATURA: 1ª A 3ª SÉRIE
+; REDAÇÃO: 1ª A 3ª SÉRIE
+; ARTES: 1ª A 3ª SÉRIE
+; INGLÊS: 1ª A 3ª SÉRIE
+; HISTÓRIA: 1ª A 3ª SÉRIE
+; GEOGRAFIA: 1ª A 3ª SÉRIE
+; FILOSOFIA: 1ª A 3ª SÉRIE
+; SOCIOLOGIA: 1ª A 3ª SÉRIE
+; MATEMÁTICA: 1ª A 3ª SÉRIE
+; FÍSICA: 1ª A 3ª SÉRIE
+; QUÍMICA: 1ª A 3ª SÉRIE
+; BIOLOGIA: 1ª A 3ª SÉRIE
+; EDUCAÇÃO FÍSICA: 1ª A 3ª SÉRIE
+; EDUCAÇÃO FINANCEIRA
+; EMPREENDEDORISMO
+## PRÉ-VESTIBULAR — TURMA DA TARDE | COMPONENTE CURRICULAR
+; LÍNGUA PORTUGUESA
+; LITERATURA
+; REDAÇÃO
+; INGLÊS
+; HISTÓRIA
+; GEOGRAFIA
+; FILOSOFIA
+; SOCIOLOGIA
+; MATEMÁTICA
+; FÍSICA
+; QUÍMICA
+; BIOLOGIA
+## PRÉ-VESTIBULAR — TURMA DE SÁBADO (MANHÃ) | COMPONENTE CURRICULAR
+; LÍNGUA PORTUGUESA
+; LITERATURA
+; REDAÇÃO
+; INGLÊS
+; HISTÓRIA
+; GEOGRAFIA
+; FILOSOFIA
+; SOCIOLOGIA
+; MATEMÁTICA
+; FÍSICA
+; QUÍMICA
+; BIOLOGIA`;
+  const EQ_ADM = `Gestor; 
+Diretor(a) pedagógico(a); 
+Coordenação pedagógica — Educação Infantil e Anos Iniciais; 
+Coordenação pedagógica — Anos Finais e Ensino Médio; 
+Coordenação pedagógica — 3ª série e Pré-vestibular; 
+Coordenação da plataforma; 
+Neuropsicopedagoga — Educação Especial; 
+Secretaria e serviços gerais; 
+Coordenação do material didático; 
+Diagramação, impressões e gráfica; 
+Administração e marketing; 
+Financeiro e cantina; 
+Serviços gerais / matrículas / financeiro; 
+Serviços gerais; 
+Serviços gerais / merendeiras (cantina); `;
+  // lê o Word da relação de funcionários (tabelas Nº / Nome / Ano ou Componente / Assinatura)
+  async function importaEquipe(arq) {
+    if (!window.mammoth) await new Promise((ok, er) => { const sc = document.createElement('script'); sc.src = 'assets/vendor/mammoth.browser.min.js'; sc.onload = ok; sc.onerror = er; document.head.append(sc); });
+    const html = (await mammoth.convertToHtml({ arrayBuffer: await arq.arrayBuffer() })).value; const dv = document.createElement('div'); dv.innerHTML = html;
+    const limpa = t => (t || '').replace(/\s+/g, ' ').trim(); const secs = []; let tit = '', adm = [], modoAdm = false, cargo = '';
+    for (const el of dv.children) {
+      const t = limpa(el.textContent); if (!t) continue;
+      if (el.tagName === 'TABLE') { const rows = [...el.querySelectorAll('tr')].map(tr => [...tr.children].map(td => limpa(td.textContent)));
+        const cab2 = rows.find(r => r.some(c => /NOME/i.test(c))) || []; const col = cab2.find(c => /ANO|COMPONENTE/i.test(c)) || 'COMPONENTE CURRICULAR';
+        const linhas = rows.filter(r => /^\d+$/.test(r[0] || '') && (r[1] || r[2])).map(r => `${r[1] || ''}; ${r[2] || ''}`);
+        if (linhas.length) { if (secs.length && !tit) secs[secs.length - 1].l.push(...linhas); else secs.push({ t: (tit || 'PROFESSORES') + ' | ' + (/ANO/i.test(col) && !/COMPONENTE/i.test(col) ? 'ANO' : 'COMPONENTE CURRICULAR'), l: linhas }); tit = ''; }
+        continue; }
+      if (/ESTRUTURA DO CORPO/i.test(t)) { modoAdm = true; continue; }
+      if (modoAdm) { const ehCargo = !/^PROF/i.test(t) && (/GESTOR|DIRETOR|COORDENA|NEUROPSICO|SECRETARIA|SERVI[ÇC]OS|DIAGRAMA|ADMINISTRA|FINANCEIRO|MATERIAL|PLATAFORMA|VESTIBULAR|ENSINO|EDUCA|CANTINA|MERENDEIR|^E$/i.test(t)); if (ehCargo) cargo = (cargo ? cargo + ' ' : '') + t; else if (cargo) { adm.push(`${cargo.replace(/\s+E\s*$/i, '').replace(/\.$/, '')}; ${t}`); cargo = ''; } continue; }
+      if (/^LISTA DOS PROFESSORES/i.test(t) || /EQUIPE DO INCENTIVO|Autoriza|E-mail|Sistema de Ensino Incentivo Trav/i.test(t)) continue;
+      if (/INFANTIL|FUNDAMENTAL|MÉDIO|MEDIO|VESTIBULAR|CONVÊNIO/i.test(t)) tit = t.replace(/\s*-\s*(l{1,3})\b/g, (m, x) => ' ' + 'I'.repeat(x.length)).replace(/[,.]\s*$/, '').toUpperCase();
+    }
+    return { secoes: secs.map(x => '## ' + x.t + '\n' + x.l.join('\n')).join('\n'), adm: adm.join('\n') };
+  }
+  TIPOS.equipe = {
+    nome: 'Equipe do ano (professores e gestão)', icone: '👥', desc: 'Relação dos professores por segmento e disciplina, com assinatura, e o corpo administrativo', setores: ['secretaria', 'coordenacao'],
+    titulo: d => `Equipe do Incentivo ${d.ano || ''}`,
+    novo: () => ({ ano: String(new Date().getFullYear() + (new Date().getMonth() > 9 ? 1 : 0)), secoes: EQ_SEC, adm: EQ_ADM, data: hoje() }),
+    form: d => `<div class="g2">${lab('Ano letivo', inp('ano', d.ano))}${lab('Importar do Word', `<label class="b">📄 Escolher arquivo .docx<input type="file" id="eqArq" accept=".docx" hidden></label>`)}</div>
+      <p class="dica">Você pode importar a relação do ano anterior (Word) e só trocar o que mudou. Formato: <b>## TÍTULO DO SEGMENTO | ANO</b> (ou <b>| COMPONENTE CURRICULAR</b>) e, embaixo, uma linha por professor: <b>Nome; turma ou disciplina</b>.</p>
+      ${lab('Professores por segmento', `<textarea id="secoes" data-ed="sem" rows="18">${esc(d.secoes || EQ_SEC)}</textarea>`, 1)}
+      ${lab('Corpo administrativo e técnico <small>(uma linha por cargo: Cargo; Nome)</small>', `<textarea id="adm" data-ed="sem" rows="10">${esc(d.adm || EQ_ADM)}</textarea>`, 1)}`,
+    campos: ['ano', 'secoes', 'adm', 'data'],
+    depois: () => { $('#eqArq').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const r = await importaEquipe(f); if (r.secoes) $('#secoes').value = r.secoes; if (r.adm) $('#adm').value = r.adm; $('#secoes').dispatchEvent(new Event('input', { bubbles: true })); alert('Relação importada. Confira e ajuste o que mudou.'); } catch (x) { alert('Não consegui ler este arquivo.'); } }; },
+    doc: d => { const secs = []; let cur = null;
+      (d.secoes || '').split('\n').forEach(l => { l = l.trim(); if (!l) return; if (l.startsWith('##')) { const [t, c] = l.slice(2).split('|'); cur = { t: t.trim(), c: (c || 'COMPONENTE CURRICULAR').trim(), l: [] }; secs.push(cur); } else if (cur) { const [n, x] = l.split(';'); cur.l.push([(n || '').trim(), (x || '').trim()]); } });
+      const adm = (d.adm || '').split('\n').map(l => l.split(';')).filter(x => x[0] && x[0].trim()).map(([c, n]) => [c.trim(), (n || '').trim()]);
+      const tab = (x, i) => `<div class="eq-sec"${i ? ' style="break-before:page;page-break-before:always"' : ''}>${i ? '' : `<h2 class="eq-tit">EQUIPE DO INCENTIVO PARA ${esc(d.ano || '')}</h2>`}<div class="eq-faixa"><small>LISTA DOS PROFESSORES ${/ANO/.test(x.c) && !/COMPONENTE/.test(x.c) ? 'POR SEGMENTO E TURMA' : 'POR COMPONENTE CURRICULAR'} ${esc(d.ano || '')}</small><b>${esc(x.t)}</b></div>
+        <table class="mapa-t eq-t"><thead><tr><th class="mn">Nº</th><th>NOME</th><th>${esc(x.c)}</th><th class="eq-as">ASSINATURA</th></tr></thead><tbody>${x.l.map((r, k) => `<tr><td class="mn">${String(k + 1).padStart(2, '0')}</td><td class="eq-n">${esc(r[0].toUpperCase())}</td><td class="eq-c">${esc(r[1].toUpperCase())}</td><td></td></tr>`).join('')}${Array.from({ length: 2 }, (_, k) => `<tr><td class="mn">${String(x.l.length + k + 1).padStart(2, '0')}</td><td></td><td></td><td></td></tr>`).join('')}</tbody></table></div>`;
+      return `${cab('EQUIPE DO INCENTIVO ' + (d.ano || ''))}${secs.map(tab).join('')}
+        ${adm.length ? `<div class="eq-sec" style="break-before:page;page-break-before:always"><div class="eq-faixa"><small>${esc(d.ano || '')}</small><b>ESTRUTURA DO CORPO ADMINISTRATIVO E TÉCNICO</b></div><div class="eq-adm">${adm.map(([c, n]) => `<div class="eq-card"><small>${esc(c.toUpperCase())}</small><b>${esc(n) || '&nbsp;'}</b></div>`).join('')}</div></div>` : ''}`; }
+  };
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
     nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao', 'financeiro'], fin: ['pag'],

@@ -481,3 +481,11 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .av-abs{break-inside:auto}.av-ab{margin:0 0 3mm;break-inside:avoid}.av-ab b{display:block;font:800 9pt Arial,sans-serif;color:#0b2a6b;margin-bottom:1mm}.av-ab i{display:block;border-bottom:.3mm solid #9aa9c8;height:7mm}
 .av-fim{text-align:center;font:700 9pt Arial,sans-serif;color:#1e4fb8;margin-top:3mm}
 .av-t.av-d{break-inside:avoid}.av-t tr{break-inside:avoid}
+/* ===== Equipe do ano ===== */
+.eq-tit{text-align:center;font:800 15pt 'SEI Rubik',Arial,sans-serif;color:#0b2a6b;margin:0 0 3mm;letter-spacing:.5px}
+.eq-faixa{background:linear-gradient(90deg,#0b2a6b,#1e4fb8);color:#fff;border-radius:2.5mm;padding:1.8mm 3mm;margin:0 0 2mm;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.eq-faixa small{display:block;font:700 6.8pt Arial,sans-serif;color:#9fdcff;letter-spacing:1px}.eq-faixa b{font:800 10.5pt 'SEI Rubik',Arial,sans-serif;color:#ffd34d}
+.eq-t td{height:7.6mm;font-size:8.2pt}.eq-t .eq-n{font-weight:700;color:#0b1f5c;width:62mm}.eq-t .eq-c{font-size:7.6pt;color:#1e4fb8;font-weight:700;width:58mm}.eq-t .eq-as{width:46mm}
+.eq-adm{display:grid;grid-template-columns:1fr 1fr;gap:2.5mm}
+.eq-card{border:.35mm solid #c9d6ea;border-left:1.4mm solid #e6b422;border-radius:2mm;padding:2mm 3mm;background:#f7f9fd;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.eq-card small{display:block;font:800 6.6pt Arial,sans-serif;color:#1e4fb8;letter-spacing:.4px}.eq-card b{display:block;font:800 9.4pt Arial,sans-serif;color:#0b1f5c;margin-top:.6mm;min-height:4mm}
