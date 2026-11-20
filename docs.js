@@ -1018,8 +1018,22 @@
     const t = TIPOS[edit.tipo];
     $('#docs').innerHTML = `<nav class="trilha"><button class="b ghost" data-volta="2">‹ ${t.nome}</button></nav><form class="ficha" id="fDoc"><h3>${t.icone} ${edit.id ? 'Editar' : 'Novo'}: ${t.nome}</h3>${t.form(edit)}
       <div class="acoes"><button class="b main" type="submit">💾 Salvar</button><button class="b" type="button" id="salvaImp">💾 Salvar e imprimir</button><button class="b" type="button" id="salvaWord">💾 Salvar e baixar Word</button><button class="b" type="button" id="salvaPdf">💾 Salvar e baixar PDF</button><button class="b ghost" type="button" data-volta="2">Cancelar</button></div></form>`;
+    $('#fDoc').insertAdjacentHTML('beforebegin', '<div class="form-pv" id="formPv"></div>'); $('#formPv').append($('#fDoc'));
+    $('#formPv').insertAdjacentHTML('beforeend', `<aside class="pv" id="pvAside"><div class="pv-bar"><b>👁 Prévia</b><small>atualiza enquanto você preenche</small><button type="button" class="b ghost pv-fecha" id="pvFecha">✕ Fechar</button></div><div class="pv-box" id="pvBox"><div class="pv-pag sei-pdf" id="pvPag"></div></div></aside><button type="button" class="b main pv-abre" id="pvAbre">👁 Ver prévia</button>`);
     if (t.depois) await t.depois(edit);
     if (window.seiEditor) seiEditor.ligarTodos($('#fDoc'));
+    // prévia ao vivo
+    let pvT = null, pvN = 0;
+    const escalaPv = () => { const box = $('#pvBox'), pag = $('#pvPag'); if (!box || !pag) return; const k = box.clientWidth / pag.offsetWidth; pag.style.transform = `scale(${k})`; box.style.height = Math.ceil(pag.offsetHeight * k) + 'px'; };
+    const atualizaPv = async () => { const meu = ++pvN; try { const d = JSON.parse(JSON.stringify(edit)); Object.assign(d, ler(t.campos)); if (t.extra) t.extra(d);
+        if (window.seiFolha) await prepFolha(d); if (meu !== pvN || !$('#pvPag')) return; segDoc = d.seg || null; nCab = 0; const pag = $('#pvPag');
+        pag.innerHTML = via1(t.doc(d)); pag.style.setProperty('--pvfundo', FOLHA && FOLHA.fundo ? `url(${FOLHA.fundo})` : 'none');
+        await Promise.all([...pag.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))); escalaPv(); } catch (e) { console.warn('prévia', e); } };
+    const agenda = () => { clearTimeout(pvT); pvT = setTimeout(atualizaPv, 450); };
+    $('#fDoc').addEventListener('input', agenda); $('#fDoc').addEventListener('change', agenda); $('#fDoc').addEventListener('click', e => { if (e.target.closest('button,.dp,.chip,label')) agenda(); });
+    addEventListener('resize', escalaPv);
+    $('#pvAbre').onclick = () => { $('#formPv').classList.add('pv-on'); escalaPv(); atualizaPv(); }; $('#pvFecha').onclick = () => $('#formPv').classList.remove('pv-on');
+    atualizaPv();
     const salvar = async () => {
       if (edit.tipo === 'horario') { const n = document.querySelectorAll('#grade td.conflito').length; if (n && !confirm(`Este horário tem ${n} conflito(s) marcado(s) em vermelho. Salvar mesmo assim?`)) throw new Error('cancelado'); }
       Object.assign(edit, ler(t.campos)); if (t.extra) t.extra(edit); if (!edit.id) { edit.id = novoId(); edit.criado = Date.now(); } await gravar(edit); const d = edit; aviso('Documento salvo.'); edit = null; await carregar(); return d; };
