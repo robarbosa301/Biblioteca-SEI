@@ -42,8 +42,14 @@
     pv: { nome: 'Pré-vestibular', icone: '🎓', desc: 'Turmas do pré-vestibular', turmas: ['Pré-vestibular'] }
   };
   let seg = null, segDoc = null;
+  // Financeiro: o que a escola recebe (alunos), o que paga (equipe) e aluguel de salas
+  const GRUPOS = { rec: { nome: 'Recebimentos', icone: '💵', desc: 'Alunos e responsáveis — o que a escola recebe: matrícula, mensalidades, recibos e declarações' },
+    pag: { nome: 'Pagamentos', icone: '💸', desc: 'Equipe do Incentivo — o que a escola paga: salários, vales, recibos e frequência', subs: { prof: { nome: 'Professores', icone: '👩‍🏫', desc: 'Corpo docente' }, gest: { nome: 'Equipe de gestão', icone: '🧑‍💼', desc: 'Direção, coordenação, secretaria e apoio' } } },
+    alug: { nome: 'Aluguel de salas', icone: '🏢', desc: 'Locação de salas da escola — contrato e recibos de aluguel' } };
+  let fg = null, fs = null;
+  const nomeGrupo = d => d && d.grupo && GRUPOS[d.grupo] ? (d.sub && GRUPOS.pag.subs[d.sub] ? GRUPOS.pag.nome + ' · ' + GRUPOS.pag.subs[d.sub].nome : GRUPOS[d.grupo].nome) : '';
   const turmasAtuais = () => (edit && edit.seg && SEGS[edit.seg]) ? SEGS[edit.seg].turmas : etapa ? ETAPAS[etapa].turmas : TURMAS;
-  const doSeg = d => SETOR !== 'secretaria' || !seg || d.seg === seg;
+  const doSeg = d => (SETOR !== 'secretaria' || !seg || d.seg === seg) && (SETOR !== 'financeiro' || ((!fg || d.grupo === fg) && (!fs || d.sub === fs)));
   const etapaDe = t => Object.keys(ETAPAS).find(k => ETAPAS[k].turmas.includes(t));
   let etapa = null;
   const TURMAS = ['Maternal', 'Pré I', 'Pré II', '1º ano', '2º ano', '3º ano', '4º ano', '5º ano', '6º ano', '7º ano', '8º ano', '9º ano', '1ª série (Médio)', '2ª série (Médio)', '3ª série (Convênio)', 'Pré-vestibular'];
@@ -211,7 +217,7 @@
   };
   Object.assign(TIPOS, {
     declaracao: {
-      nome: 'Declaração', icone: '📜', desc: 'Pagamento (IR), serviço prestado, liberação de funcionário, matrícula', setores: ['secretaria', 'financeiro'],
+      nome: 'Declaração', icone: '📜', desc: 'Pagamento (IR), serviço prestado, liberação de funcionário, matrícula', setores: ['secretaria', 'financeiro'], fin: ['rec', 'pag'],
       titulo: d => `Declaração — ${MOD_DEC[d.modelo] ? MOD_DEC[d.modelo].curto : ''}${d.nome || d.aluno ? ': ' + (d.modelo === 'pagamento' ? d.aluno || d.resp : d.nome || d.aluno) : ''}`,
       novo: () => ({ data: hoje(), modelo: 'pagamento', turma: '6º ano', anoRef: String(new Date().getFullYear() - 1), cargo: 'Secretária Escolar' }),
       form: d => `${lab('Modelo', `<select id="modelo">${Object.entries(MOD_DEC).map(([k, m]) => `<option value="${k}" ${d.modelo === k ? 'selected' : ''}>${m.nome}</option>`).join('')}</select>`, 1)}
@@ -330,7 +336,7 @@
   const L_ = '________________________';
   const campo = (r, v, w) => `<span class="cf"${w ? ` style="flex:${w}"` : ''}><small>${r}</small><b>${esc(v || '') || '&nbsp;'}</b></span>`;
   TIPOS.contrato = {
-    nome: 'Contrato de matrícula', icone: '✍️', desc: 'Contrato de prestação de serviços educacionais (modelo da escola)', setores: ['secretaria', 'financeiro'],
+    nome: 'Contrato de matrícula', icone: '✍️', desc: 'Contrato de prestação de serviços educacionais (modelo da escola)', setores: ['secretaria', 'financeiro'], fin: ['rec'],
     titulo: d => `Contrato — ${d.aluno || ''} (${(d.turma || '').replace(/ \(.*\)/, '')})`,
     novo: () => { const y = String(new Date().getFullYear()); const p = PRECOS['6º ano']; return { ano: y, turma: '6º ano', turno: 'Manhã', cidade: 'São Miguel do Guamá', uf: 'PA', data: hoje(), mens: brl(p[0]), anuid: brl(p[1]), mensApos: brl(p[2]), anuidApos: brl(p[3]), material: p[4], orgao: 'SEGUP' }; },
     form: d => `<h4>Dados do(a) aluno(a)</h4><div class="g3">${lab('Nome do(a) aluno(a)', inp('aluno', d.aluno))}${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turno', sel('turno', d.turno || 'Manhã', ['Manhã', 'Tarde', 'Noite', 'Integral']))}</div>
@@ -361,29 +367,33 @@
         <p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>
         <div class="doc-ass"><div><span></span><b>${esc(d.resp || 'CONTRATANTE')}</b><br>Contratante</div><div><span></span><b>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA</b><br>Contratado · CNPJ 07.869.021/0001-97</div><div><span></span>${esc(d.t1 || 'Testemunha 1')}</div><div><span></span>${esc(d.t2 || 'Testemunha 2')}</div></div>`; }
   };
-  const REFS = ['Mensalidade', 'Matrícula', 'Taxa do material', 'Outro'];
+  const REFS_G = { rec: ['Mensalidade', 'Matrícula', 'Taxa do material', 'Outro'], pag: ['Salário', 'Vale-transporte', 'Vale-alimentação', 'Serviço prestado', 'Outro'], alug: ['Aluguel de sala', 'Caução', 'Outro'] };
+  const refsDe = d => REFS_G[d.grupo] || REFS_G.rec; const REFS = REFS_G.rec;
+  const finPadrao = o => { if (o.grupo === 'pag' && o.tipo === 'declaracao') o.modelo = 'servico'; if (o.tipo === 'recibo' && o.grupo && !refsDe(o).includes(o.ref)) o.ref = refsDe(o)[0]; return o; };
   TIPOS.recibo = {
-    nome: 'Recibo', icone: '🧾', desc: 'Recibo de pagamento com canhoto (preenchido ou em branco)', setores: ['secretaria', 'financeiro'], livre: true,
-    titulo: d => d.branco === 'sim' ? 'Recibos em branco' : `Recibo — ${d.de || ''} · ${d.ref || ''}${d.ref === 'Mensalidade' && d.mes ? ' ' + d.mes : ''}`,
+    nome: 'Recibo', icone: '🧾', desc: 'Recibo de pagamento com canhoto (preenchido ou em branco)', setores: ['secretaria', 'financeiro'], fin: ['rec', 'pag', 'alug'], livre: true,
+    titulo: d => d.branco === 'sim' ? 'Recibos em branco' : `Recibo — ${d.de || ''} · ${d.ref || ''}${d.mes && d.ref !== 'Matrícula' && d.ref !== 'Taxa do material' && d.ref !== 'Outro' ? ' ' + d.mes : ''}`,
     novo: () => ({ data: hoje(), ref: 'Mensalidade', mes: MESES[new Date().getMonth()], vias: '3', branco: 'nao', assinante: '' }),
     form: d => `<div class="g2">${lab('Tipo', `<select id="branco"><option value="nao" ${d.branco !== 'sim' ? 'selected' : ''}>Preenchido</option><option value="sim" ${d.branco === 'sim' ? 'selected' : ''}>Em branco (para preencher à mão)</option></select>`)}${lab('Recibos por folha', sel('vias', d.vias || '3', ['1', '2', '3']))}</div>
-      <div class="g3">${lab('Recebi de', inp('de', d.de, 'Nome de quem pagou'))}${lab('Valor (R$)', inp('valor', d.valor, 'Ex.: 554,00'))}${lab('Aluno(a) (opcional)', inp('aluno', d.aluno))}</div>
-      <div class="g3">${lab('Referente a', sel('ref', d.ref || 'Mensalidade', REFS))}${lab('Mês (mensalidade)', sel('mes', d.mes || MESES[0], MESES))}${lab('Outro (descreva)', inp('outro', d.outro))}</div>
+      <div class="g3">${lab(d.grupo === 'pag' ? 'Quem recebeu (funcionário)' : d.grupo === 'alug' ? 'Recebi de (locatário)' : 'Recebi de', inp('de', d.de, d.grupo === 'pag' ? 'Nome do professor ou funcionário' : 'Nome de quem pagou'))}${lab('Valor (R$)', inp('valor', d.valor, 'Ex.: 554,00'))}${lab(d.grupo === 'pag' ? 'Função (opcional)' : d.grupo === 'alug' ? 'Sala / período (opcional)' : 'Aluno(a) (opcional)', inp('aluno', d.aluno))}</div>
+      <div class="g3">${lab('Referente a', sel('ref', d.ref || refsDe(d)[0], refsDe(d)))}${lab('Mês de referência', sel('mes', d.mes || MESES[0], MESES))}${lab('Outro (descreva)', inp('outro', d.outro))}</div>
       <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Nº do recibo (opcional)', inp('numero', d.numero))}${lab('Quem assina', inp('assinante', d.assinante, 'Coordenação'))}</div>`,
     campos: ['branco', 'vias', 'de', 'valor', 'aluno', 'ref', 'mes', 'outro', 'data', 'numero', 'assinante'],
     doc: d => { const b = d.branco === 'sim'; const vnum = String(d.valor || '').replace(/\./g, '').replace(',', '.'); const val = b ? '' : reais(d.valor) || ''; const vs = b ? '' : brl(vnum);
-      const refTxt = d.ref === 'Mensalidade' ? 'Mensalidade · ' + (d.mes || '') : d.ref === 'Outro' ? d.outro || '' : d.ref || '';
+      const G = d.grupo || 'rec', PAG = G === 'pag', ALG = G === 'alug'; const comMes = ['Mensalidade', 'Salário', 'Vale-transporte', 'Vale-alimentação', 'Aluguel de sala'];
+      const refTxt = comMes.includes(d.ref) ? d.ref + ' · ' + (d.mes || '') : d.ref === 'Outro' ? d.outro || '' : d.ref || '';
       const chip = (r, t) => `<span class="rc-chip${!b && d.ref === r ? ' on' : ''}"><i>${!b && d.ref === r ? '✓' : ''}</i>${t}</span>`;
+      const chips = refsDe(d).map(r => r === 'Outro' ? chip('Outro', !b && d.ref === 'Outro' ? esc(d.outro || 'Outro') : 'Outro: ________') : comMes.includes(r) && r !== 'Aluguel de sala' && r !== 'Vale-transporte' && r !== 'Vale-alimentação' ? chip(r, `${r}${!b && d.ref === r ? ' · ' + esc(d.mes || '') : ' · mês: ______'}`) : chip(r, r + (!b && d.ref === r && comMes.includes(r) ? ' · ' + esc(d.mes || '') : ''))).join('');
       const um = `<div class="rc"><div class="rc-can"><img class="rc-can-logo" src="assets/docs/logo-sei.png?v=3" alt=""><b>CANHOTO</b>${d.numero ? `<em>Nº ${esc(d.numero)}</em>` : ''}
-          <p><small>Recebi de</small><span>${b ? '' : esc(d.de || '')}</span></p><p><small>Valor</small><span>${esc(vs)}</span></p><p><small>Referente a</small><span>${b ? '' : esc(refTxt)}</span></p><p><small>Data</small><span>${b ? '' : fmt(d.data)}</span></p><p><small>Visto</small><span></span></p></div>
+          <p><small>${PAG ? 'Recebedor(a)' : 'Recebi de'}</small><span>${b ? '' : esc(d.de || '')}</span></p><p><small>Valor</small><span>${esc(vs)}</span></p><p><small>Referente a</small><span>${b ? '' : esc(refTxt)}</span></p><p><small>Data</small><span>${b ? '' : fmt(d.data)}</span></p><p><small>Visto</small><span></span></p></div>
         <div class="rc-main"><img class="rc-agua" src="assets/docs/logo-sei.png?v=3" alt="">
           <div class="rc-top"><img src="assets/docs/logo-sei.png?v=3" alt=""><div class="rc-tit"><b>RECIBO</b><small>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA · CNPJ 07.869.021/0001-97</small></div><div class="rc-val"><small>${d.numero ? 'Nº ' + esc(d.numero) : 'VALOR'}</small><b>${vs ? esc(vs) : 'R$'}</b></div></div>
-          <div class="rc-body"><p class="rc-l"><small>Recebi de</small><span>${b ? '' : esc((d.de || '').toUpperCase())}</span></p>
+          <div class="rc-body">${PAG ? `<p class="rc-l"><small>Eu,</small><span>${b ? '' : esc((d.de || '').toUpperCase())}</span></p><p class="rc-l"><small>Recebi do</small><span>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA</span></p>` : `<p class="rc-l"><small>${ALG ? 'Recebi do(a) locatário(a)' : 'Recebi de'}</small><span>${b ? '' : esc((d.de || '').toUpperCase())}</span></p>`}
             <p class="rc-l"><small>A importância de</small><span class="rc-ext">${esc(val)}</span></p>
-            <p class="rc-l"><small>Aluno(a)</small><span>${b ? '' : esc((d.aluno || '').toUpperCase())}</span></p>
-            <div class="rc-ref"><small>Referente ao pagamento de</small>${chip('Matrícula', 'Matrícula')}${chip('Mensalidade', `Mensalidade${!b && d.ref === 'Mensalidade' ? ' · ' + esc(d.mes || '') : ' · mês: ______'}`)}${chip('Taxa do material', 'Taxa do material')}${chip('Outro', !b && d.ref === 'Outro' ? esc(d.outro || 'Outro') : 'Outro: ________')}</div>
-            <div class="rc-fim"><p class="rc-aviso">⚠️ Prestações até o dia <b>05</b> de cada mês. Após o vencimento: multa de 2% e juros de 0,6% ao dia, com perda de eventual desconto.</p>
-              <div class="rc-ass"><span>${CIDADE.split(' —')[0]}, ${b ? '____/____/______' : extenso(d.data)}</span><i></i><b>${esc(d.assinante || 'Coordenação')}</b></div></div>
+            <p class="rc-l"><small>${PAG ? 'Função' : ALG ? 'Sala / período' : 'Aluno(a)'}</small><span>${b ? '' : esc((d.aluno || '').toUpperCase())}</span></p>
+            <div class="rc-ref"><small>Referente ao pagamento de</small>${chips}</div>
+            <div class="rc-fim">${PAG ? `<p class="rc-aviso rc-ok">✔ Declaro ter recebido a importância acima, dando plena quitação do valor referente ao período indicado.</p>` : ALG ? `<p class="rc-aviso rc-ok">✔ Valor referente à locação de sala do Sistema de Ensino Incentivo, conforme contrato de locação.</p>` : `<p class="rc-aviso">⚠️ Prestações até o dia <b>05</b> de cada mês. Após o vencimento: multa de 2% e juros de 0,6% ao dia, com perda de eventual desconto.</p>`}
+              <div class="rc-ass"><span>${CIDADE.split(' —')[0]}, ${b ? '____/____/______' : extenso(d.data)}</span><i></i><b>${esc(PAG ? (d.de || 'Recebedor(a)') : (d.assinante || 'Coordenação'))}</b>${PAG ? '<br><small>Recebedor(a)</small>' : ''}</div></div>
             <img class="rc-masc" src="assets/docs/mascote-sei.png?v=14" alt=""></div>
           <div class="rc-rod"><span>📍 Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</span><span>📞 (91) 9 8124-8323</span><span>📷 @_sei01</span></div></div></div>`;
       const n = Math.max(1, Math.min(3, +d.vias || 3)); return `<div class="rec-pag rc-n${n}">${Array.from({ length: n }, () => um).join('<div class="rc-corte">✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</div>')}</div>`; }
@@ -391,7 +401,7 @@
   /* ---------- financeiro: controle de mensalidades e orçamento de vales ---------- */
   const MES_ABR = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
   TIPOS.mensalidades = {
-    nome: 'Controle de mensalidades', icone: '💳', desc: 'Ficha do aluno com as 12 parcelas: vencimento, valor, pagamento e visto', setores: ['financeiro', 'secretaria'],
+    nome: 'Controle de mensalidades', icone: '💳', desc: 'Ficha do aluno com as 12 parcelas: vencimento, valor, pagamento e visto', setores: ['financeiro', 'secretaria'], fin: ['rec'],
     titulo: d => `Mensalidades ${d.ano || ''} — ${d.aluno || ''}`,
     novo: () => { const y = String(new Date().getFullYear()); const p = PRECOS['6º ano']; return { ano: y, turma: '6º ano', venc: '05', valor: brl(p[0]), pagos: {}, data: hoje() }; },
     form: d => { const pg = d.pagos || {}; return `<div class="g3">${lab('Aluno(a)', inp('aluno', d.aluno))}${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}${lab('Turma', inp('classe', d.classe))}</div>
@@ -414,7 +424,7 @@
         <div class="doc-ass"><div><span></span>Setor financeiro</div><div><span></span>${esc(d.resp || 'Responsável financeiro')}</div></div>`; }
   };
   TIPOS.vales = {
-    nome: 'Orçamento de vales', icone: '🚌', desc: 'Vale-transporte e vale-alimentação do mês, por professor', setores: ['financeiro'],
+    nome: 'Orçamento de vales', icone: '🚌', desc: 'Vale-transporte e vale-alimentação do mês, por pessoa da equipe', setores: ['financeiro'], fin: ['pag'],
     titulo: d => `Orçamento de vales — ${MESES[+(d.mes || '').slice(5, 7) - 1] || ''} de ${(d.mes || '').slice(0, 4)}`,
     novo: () => { const x = new Date(); return { mes: `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`, itens: 'Vale passagem, Almoço, Jantar', data: hoje() }; },
     form: d => `<div class="g2">${lab('Mês', inp('mes', d.mes, '', 'month'))}${lab('Linhas (separadas por vírgula)', inp('itens', d.itens || 'Vale passagem, Almoço, Jantar'))}</div>
@@ -427,9 +437,61 @@
       const tab = p => `<div class="vl"><div class="vl-h"><small>PROFESSOR(A)</small><b>${esc(p.toUpperCase()) || '&nbsp;'}</b></div><table class="vl-t"><thead><tr><th class="vl-n">DIAS</th>${Array.from({ length: nd }, (_, k) => `<th${cls(k + 1)}>${String(k + 1).padStart(2, '0')}</th>`).join('')}<th class="vl-tot">TOTAL</th></tr></thead><tbody>${its.concat(['TOTAL']).map(it => `<tr${it === 'TOTAL' ? ' class="vl-sum"' : ''}><td class="vl-n">${esc(it.toUpperCase())}</td>${Array.from({ length: nd }, (_, k) => `<td${cls(k + 1)}></td>`).join('')}<td class="vl-tot"></td></tr>`).join('')}</tbody></table></div>`;
       return `${cab('ORÇAMENTO DE VALES')}<table class="mapa-top"><tr><td class="mt-a"><small>MÊS</small><b>${esc((MESES[m - 1] || '').toUpperCase())} ${y}</b></td><td><small>DOCUMENTO</small><b>VALE-TRANSPORTE E VALE-ALIMENTAÇÃO</b></td><td><small>PESSOAS</small><b>${ps.length}</b></td></tr></table>${lista.map(tab).join('')}`; }
   };
+  TIPOS.holerite = {
+    nome: 'Recibo de salário (holerite)', icone: '💼', desc: 'Pagamento do mês: proventos, descontos e valor líquido', setores: ['financeiro'], fin: ['pag'],
+    titulo: d => `Holerite — ${d.nome || ''} · ${MESES[+(d.mes || '').slice(5, 7) - 1] || ''}/${(d.mes || '').slice(0, 4)}`,
+    novo: () => { const x = new Date(); return { mes: `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`, prov: 'Salário base; ', descs: '', forma: 'PIX', data: hoje() }; },
+    form: d => `<div class="g3">${lab('Nome', inp('nome', d.nome))}${lab('Função / cargo', inp('funcao', d.funcao, 'Ex.: Professor de Matemática'))}${lab('Mês de referência', inp('mes', d.mes, '', 'month'))}</div>
+      <div class="g3">${lab('CPF', inp('cpf', d.cpf))}${lab('Admissão (opcional)', inp('adm', d.adm, '', 'date'))}${lab('Forma de pagamento', sel('forma', d.forma || 'PIX', ['PIX', 'Transferência', 'Dinheiro', 'Depósito']))}</div>
+      <div class="g2">${lab('Proventos <small>(um por linha: descrição; valor)</small>', `<textarea id="prov" data-ed="sem" rows="5" placeholder="Salário base; 1.800,00&#10;Aulas extras (8h); 240,00">${esc(d.prov || '')}</textarea>`)}${lab('Descontos <small>(um por linha: descrição; valor)</small>', `<textarea id="descs" data-ed="sem" rows="5" placeholder="Faltas (1 dia); 60,00&#10;Adiantamento; 300,00">${esc(d.descs || '')}</textarea>`)}</div>
+      <div class="g2">${lab('Data do pagamento', inp('data', d.data, '', 'date'))}${lab('Observações (opcional)', inp('obs', d.obs))}</div>`,
+    campos: ['nome', 'funcao', 'mes', 'cpf', 'adm', 'forma', 'prov', 'descs', 'data', 'obs'],
+    doc: d => { const par = t => (t || '').split('\n').map(l => l.split(';')).filter(x => x[0] && x[0].trim()).map(([a, v]) => [a.trim(), num((v || '').replace(/\./g, '')) || 0]);
+      const P = par(d.prov), D = par(d.descs), tp = P.reduce((s2, x) => s2 + x[1], 0), td = D.reduce((s2, x) => s2 + x[1], 0), liq = tp - td; const [y, m] = (d.mes || '').split('-');
+      const linhas = Math.max(P.length, D.length, 4);
+      return `${cab('RECIBO DE PAGAMENTO DE SALÁRIO')}<table class="mapa-top"><tr><td class="mt-a"><small>REFERÊNCIA</small><b>${esc((MESES[+m - 1] || '').toUpperCase())} ${esc(y || '')}</b></td><td><small>NOME</small><b>${esc((d.nome || '—').toUpperCase())}</b></td><td><small>FUNÇÃO</small><b>${esc((d.funcao || '—').toUpperCase())}</b></td><td><small>CPF</small><b>${esc(d.cpf || '—')}</b></td></tr></table>
+        <table class="mapa-t hol-t"><thead><tr><th>PROVENTOS</th><th class="hv">VALOR</th><th>DESCONTOS</th><th class="hv">VALOR</th></tr></thead><tbody>${Array.from({ length: linhas }, (_, i) => `<tr><td>${esc((P[i] || [])[0] || '')}</td><td class="hv">${P[i] ? brl(P[i][1]) : ''}</td><td>${esc((D[i] || [])[0] || '')}</td><td class="hv">${D[i] ? brl(D[i][1]) : ''}</td></tr>`).join('')}
+        <tr class="hol-tot"><td>TOTAL DE PROVENTOS</td><td class="hv">${brl(tp)}</td><td>TOTAL DE DESCONTOS</td><td class="hv">${brl(td)}</td></tr></tbody></table>
+        <div class="hol-liq"><span>VALOR LÍQUIDO A RECEBER</span><b>${brl(liq)}</b><small>${esc((reais(String(liq.toFixed(2)).replace('.', ',')) || '').replace(/^R\$ [\d.,]+ /, ''))}</small></div>
+        <p class="doc-corpo dec" style="min-height:0">Declaro ter recebido do <b>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA</b> a importância líquida acima, referente aos meus serviços no mês de ${esc((MESES[+m - 1] || ''))} de ${esc(y || '')}, por ${esc(d.forma || '')}, dando plena quitação.</p>${d.obs ? `<p class="doc-rev">Obs.: ${esc(d.obs)}</p>` : ''}
+        <p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p><div class="doc-ass"><div><span></span><b>${esc(d.nome || 'Funcionário(a)')}</b><br>Recebedor(a)</div><div><span></span>Setor financeiro<br>Sistema de Ensino Incentivo</div></div>`; }
+  };
+  const LOC_TXT = `*CLÁUSULA 1ª – DO OBJETO.* O LOCADOR cede ao LOCATÁRIO, a título de locação, o uso do espaço descrito acima, nas dependências do Sistema de Ensino Incentivo, exclusivamente para a finalidade indicada neste contrato.
+
+*CLÁUSULA 2ª – DO PRAZO E HORÁRIOS.* A locação vigora no período e nos dias e horários indicados acima. O uso fora desses horários depende de autorização prévia e por escrito da direção.
+
+*CLÁUSULA 3ª – DO VALOR E PAGAMENTO.* O LOCATÁRIO pagará o valor indicado acima até a data de vencimento, mediante recibo emitido pela escola. O atraso implica multa de 2% e juros de 0,6% ao dia sobre o valor devido.
+
+*CLÁUSULA 4ª – DA CONSERVAÇÃO.* O LOCATÁRIO se compromete a zelar pelo espaço, móveis e equipamentos, devolvendo-os nas mesmas condições em que os recebeu, respondendo por eventuais danos causados por si ou por terceiros sob sua responsabilidade.
+
+*CLÁUSULA 5ª – DAS NORMAS DA ESCOLA.* O LOCATÁRIO e seus participantes deverão respeitar o Regimento e as normas de convivência e segurança da escola, sendo proibido o consumo de bebidas alcoólicas, cigarros e qualquer atividade ilícita nas dependências.
+
+*CLÁUSULA 6ª – DA RESCISÃO.* Qualquer das partes poderá rescindir este contrato mediante aviso prévio de 15 (quinze) dias. O descumprimento de qualquer cláusula autoriza a rescisão imediata, sem prejuízo dos valores devidos.
+
+*CLÁUSULA 7ª – DO FORO.* As partes elegem o Foro da Comarca de São Miguel do Guamá, Estado do Pará, para dirimir eventuais questões oriundas deste contrato.`;
+  TIPOS.locacao = {
+    nome: 'Contrato de locação de sala', icone: '🏢', desc: 'Aluguel de salas da escola para cursos, eventos e reuniões', setores: ['financeiro'], fin: ['alug'],
+    titulo: d => `Locação — ${d.locatario || ''} · ${d.sala || ''}`,
+    novo: () => ({ data: hoje(), venc: '05', periodicidade: 'Mensal' }),
+    form: d => `<h4>Locatário</h4><div class="g3">${lab('Nome / razão social', inp('locatario', d.locatario))}${lab('CPF / CNPJ', inp('doc', d.doc))}${lab('Telefone', inp('tel', d.tel, '', 'tel'))}</div>
+      <div class="g2">${lab('Endereço', inp('end', d.end))}${lab('RG (se pessoa física)', inp('rg', d.rg))}</div>
+      <h4>Locação</h4><div class="g3">${lab('Sala / espaço', inp('sala', d.sala, 'Ex.: Sala 05 (térreo)'))}${lab('Finalidade', inp('fim', d.fim, 'Ex.: Curso preparatório'))}${lab('Capacidade (opcional)', inp('cap', d.cap))}</div>
+      <div class="g3">${lab('Início', inp('ini', d.ini, '', 'date'))}${lab('Término', inp('ter', d.ter, '', 'date'))}${lab('Dias e horários', inp('horas', d.horas, 'Ex.: sábados, 8h às 12h'))}</div>
+      <div class="g3">${lab('Valor (R$)', inp('valor', d.valor))}${lab('Cobrança', sel('periodicidade', d.periodicidade || 'Mensal', ['Mensal', 'Por dia de uso', 'Valor único']))}${lab('Vencimento (dia)', inp('venc', d.venc || '05'))}</div>
+      ${lab('Cláusulas <small>(pode editar)</small>', txt('texto', d.texto || LOC_TXT, '', 12), 1)}
+      <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Testemunha 1', inp('t1', d.t1))}${lab('Testemunha 2', inp('t2', d.t2))}</div>`,
+    campos: ['locatario', 'doc', 'tel', 'end', 'rg', 'sala', 'fim', 'cap', 'ini', 'ter', 'horas', 'valor', 'periodicidade', 'venc', 'texto', 'data', 't1', 't2'],
+    doc: d => `${cab('CONTRATO DE LOCAÇÃO DE SALA')}<p class="ct-adm">LOCADOR: INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA · CNPJ 07.869.021/0001-97 · Tv. Padre Sátiro, 442 — São Miguel do Guamá/PA</p>
+      <div class="doc-b"><h4>Locatário</h4><div class="cfs">${campo('Nome / razão social', d.locatario, 3)}${campo('CPF / CNPJ', d.doc, 1.4)}</div><div class="cfs">${campo('Endereço', d.end, 3)}${campo('RG', d.rg, 1)}${campo('Telefone', d.tel, 1.2)}</div></div>
+      <div class="doc-b"><h4>Locação</h4><div class="cfs">${campo('Sala / espaço', d.sala, 2)}${campo('Finalidade', d.fim, 2)}${campo('Capacidade', d.cap, 1)}</div><div class="cfs">${campo('Início', fmt(d.ini), 1)}${campo('Término', fmt(d.ter), 1)}${campo('Dias e horários', d.horas, 2.4)}</div>
+        <div class="cfs">${campo('Valor', reais(d.valor) || d.valor, 3)}${campo('Cobrança', d.periodicidade, 1)}${campo('Vencimento', d.venc ? 'dia ' + d.venc : '', 1)}</div></div>
+      <div class="doc-corpo dec ct-cl">${neg(d.texto || LOC_TXT)}</div>
+      <p class="doc-data">${CIDADE.split(' —')[0]} — PA, ${extenso(d.data)}.</p>
+      <div class="doc-ass"><div><span></span><b>INCENTIVO – SISTEMA DE EDUCAÇÃO BÁSICA LTDA</b><br>Locador</div><div><span></span><b>${esc(d.locatario || 'LOCATÁRIO')}</b><br>Locatário</div><div><span></span>${esc(d.t1 || 'Testemunha 1')}</div><div><span></span>${esc(d.t2 || 'Testemunha 2')}</div></div>`
+  };
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
-    nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao'],
+    nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao', 'financeiro'], fin: ['pag'],
     titulo: d => `Frequência — ${MESES[+(d.mes || '').slice(5, 7) - 1] || ''} de ${(d.mes || '').slice(0, 4)}`,
     novo: () => { const x = new Date(); return { mes: `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`, turnos: 'Manhã e tarde', data: hoje() }; },
     form: d => `<div class="g3">${lab('Mês', inp('mes', d.mes, '', 'month'))}${lab('Turnos', sel('turnos', d.turnos || 'Manhã e tarde', ['Manhã e tarde', 'Manhã', 'Tarde', 'Noite', 'Tarde e noite']))}${lab('Diretor(a)', inp('diretor', d.diretor))}</div>
@@ -552,12 +614,12 @@
     const t = TIPOS[d.tipo]; const ano = (d.data || '').slice(0, 4);
     const docN = t.nome.split(' /')[0] + (d.numero ? ` nº ${d.numero}/${ano}` : '') + (d.modelo && MOD_DEC[d.modelo] ? ' — ' + MOD_DEC[d.modelo].curto : '');
     const quem = d.aluno || d.alunoM ? ['Aluno(a)', d.aluno || d.alunoM] : d.nome ? ['Nome', d.nome] : d.resp ? ['Responsável', d.resp] : d.assunto || d.titulo ? ['Assunto', d.assunto || d.titulo] : d.tipoR ? ['Reunião', d.tipoR] : (d.publico || d.para) ? ['Para', d.publico || d.para] : ['Setor', NOME_SETOR];
-    const tur = d.turma && !(d.tipo === 'declaracao' && ['servico', 'liberacao', 'livre'].includes(d.modelo)) ? ['Turma', [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '')] : ['Segmento', segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : 'Todos'];
+    const tur = d.turma && !(d.tipo === 'declaracao' && ['servico', 'liberacao', 'livre'].includes(d.modelo)) ? ['Turma', [d.turma, d.classe].filter(Boolean).join(' ').replace(/ \((Médio|Convênio)\)/, '')] : d.grupo && GRUPOS[d.grupo] ? ['Área', nomeGrupo(d)] : ['Segmento', segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : 'Todos'];
     return [['Documento', docN], quem, ['Data', (d.tipo === 'frequencia' || d.tipo === 'vales') && d.mes ? (MESES[+d.mes.slice(5, 7) - 1] || '') + ' de ' + d.mes.slice(0, 4) : fmt(d.data) || d.ano || ''], tur];
   }
   async function prepFolha(d) {
     segDoc = d.seg || null; FOLHA = null; titCap = null; nCab = 0; TIPOS[d.tipo].doc(d); const tit = tituloCaso(titCap || TIPOS[d.tipo].nome);
-    const pl = PLACA[SETOR] || PLACA.secretaria; const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : '';
+    const pl = PLACA[SETOR] || PLACA.secretaria; const sg = segDoc && SEGS[segDoc] ? SEGS[segDoc].nome : d.grupo && GRUPOS[d.grupo] ? (d.sub && GRUPOS.pag.subs[d.sub] ? GRUPOS.pag.subs[d.sub].nome : GRUPOS[d.grupo].nome) : '';
     const o = { titulo: tit, curto: tit, placa: { grande: pl[0], linhas: [pl[1], sg.toUpperCase()] }, campos: faixa(d), selo: ['COD. INEP', INEP], rodape: [NOME_SETOR, sg || 'Sistema de Ensino Incentivo'], num: 'SEI', estilo: new URLSearchParams(location.search).get('cab') || 'formal' };
     if (d.copias === '2') { o.agua = 'duas'; o.campos = o.campos.filter(c => c[0] === 'Documento'); }
     if (d.tipo === 'carteirinha' && window.seiFolha.cartaoFundo) CART_BG = { f: await seiFolha.cartaoFundo(false), v: await seiFolha.cartaoFundo(true) };
@@ -1021,7 +1083,7 @@
 
   /* ---------- telas ---------- */
   let lista = [], tipo = null, edit = null;
-  const meus = () => Object.entries(TIPOS).filter(([, t]) => t.setores.includes(SETOR));
+  const meus = () => Object.entries(TIPOS).filter(([, t]) => t.setores.includes(SETOR) && (SETOR !== 'financeiro' || (t.fin || []).includes(fg)));
   let todosHor = [], profs = [], modo = null, planosTodos = [];
   async function carregar() { const t = await todos(); lista = t.filter(d => d.setor === SETOR); todosHor = t.filter(d => d.tipo === 'horario'); profs = t.filter(d => d.tipo === 'professor').sort((a, b) => (a.ordem ?? a.criado ?? 0) - (b.ordem ?? b.criado ?? 0)); planosTodos = t.filter(d => d.tipo === 'plano'); tela(); }
   function tela() {
@@ -1040,24 +1102,32 @@
       p.innerHTML += `<p class="dica">Escolha a etapa para montar os horários de cada turma.</p><div class="etapas">${Object.entries(ETAPAS).map(([k, e]) => e.simples ? `<button class="etapa simples" data-et="${k}" aria-label="${e.nome}"><span class="es-i">${e.simples}</span><b>${e.nome}</b><small>${e.desc}</small>${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>` : `<button class="etapa${e.largo ? ' larga' : ''}" data-et="${k}" style="background-position:${e.pos}" aria-label="${e.nome}">${n(k) ? `<span class="et-n">${n(k)} horário${n(k) === 1 ? '' : 's'}</span>` : ''}</button>`).join('')}</div>`;
       return;
     }
+    if (SETOR === 'financeiro' && !fg) {
+      p.innerHTML = `<p class="dica">Escolha a área. Cada uma tem os seus documentos.</p><div class="tiles-doc segs">${Object.entries(GRUPOS).map(([k, g]) => { const n = lista.filter(d => d.grupo === k).length; return `<button class="tile-doc seg fin-${k}" data-fg="${k}"><span class="ti">${g.icone}</span><b>${g.nome}</b><small>${g.desc}</small><em>${n ? n + ' documento' + (n > 1 ? 's' : '') : 'abrir'}</em></button>`; }).join('')}</div>`;
+      return;
+    }
+    if (SETOR === 'financeiro' && fg === 'pag' && !fs) {
+      p.innerHTML = `<nav class="trilha"><button class="b ghost" data-volta="fg">‹ Financeiro</button><span>›</span><b class="tr-atual">💸 Pagamentos</b></nav><p class="dica">Escolha o grupo da equipe.</p><div class="tiles-doc segs">${Object.entries(GRUPOS.pag.subs).map(([k, g]) => { const n = lista.filter(d => d.grupo === 'pag' && d.sub === k).length; return `<button class="tile-doc seg" data-fs="${k}"><span class="ti">${g.icone}</span><b>${g.nome}</b><small>${g.desc}</small><em>${n ? n + ' documento' + (n > 1 ? 's' : '') : 'abrir'}</em></button>`; }).join('')}</div>`;
+      return;
+    }
     if (SETOR === 'secretaria' && !seg) {
       p.innerHTML = `<p class="dica">Escolha o segmento. Cada um tem os seus documentos.</p><div class="tiles-doc segs">${Object.entries(SEGS).map(([k, g]) => { const n = lista.filter(d => d.seg === k).length; return `<button class="tile-doc seg" data-seg="${k}"><span class="ti">${g.icone}</span><b>${g.nome}</b><small>${g.desc}</small><em>${n ? n + ' documento' + (n > 1 ? 's' : '') : 'abrir'}</em></button>`; }).join('')}</div>`;
       return;
     }
     if (!tipo) {
-      p.innerHTML = `${seg ? `<nav class="trilha"><button class="b ghost" data-volta="seg">‹ Secretaria</button><span>›</span><b class="tr-atual">${SEGS[seg].icone} ${SEGS[seg].nome}</b></nav>` : ''}<div class="tiles-doc">${meus().map(([k, t]) => { const n = lista.filter(d => d.tipo === k && doSeg(d)).length; return `<button class="tile-doc" data-t="${k}"><span class="ti">${t.icone}</span><b>${t.nome}</b><small>${t.desc}</small><em>${n ? n + ' salvo' + (n > 1 ? 's' : '') : 'novo'}</em></button>`; }).join('')}
+      p.innerHTML = `${seg ? `<nav class="trilha"><button class="b ghost" data-volta="seg">‹ Secretaria</button><span>›</span><b class="tr-atual">${SEGS[seg].icone} ${SEGS[seg].nome}</b></nav>` : ''}${fg ? `<nav class="trilha"><button class="b ghost" data-volta="fg">‹ ${fs ? 'Pagamentos' : 'Financeiro'}</button><span>›</span><b class="tr-atual">${fs ? GRUPOS.pag.subs[fs].icone + ' ' + GRUPOS.pag.subs[fs].nome : GRUPOS[fg].icone + ' ' + GRUPOS[fg].nome}</b></nav>` : ''}<div class="tiles-doc">${meus().map(([k, t]) => { const n = lista.filter(d => d.tipo === k && doSeg(d)).length; return `<button class="tile-doc" data-t="${k}"><span class="ti">${t.icone}</span><b>${t.nome}</b><small>${t.desc}</small><em>${n ? n + ' salvo' + (n > 1 ? 's' : '') : 'novo'}</em></button>`; }).join('')}
         ${SETOR === 'coordenacao' ? `<a class="tile-doc" href="aulas.html"><span class="ti">🗒️</span><b>Controle das avaliações</b><small>Em “Minhas aulas”, aba Avaliações: 4 avaliações e 2 recuperações por turma</small><em>abrir</em></a><a class="tile-doc" href="aee.html"><span class="ti">🤝</span><b>AEE</b><small>Alunos atendidos, fichas e PEI</small><em>abrir</em></a>` : ''}</div>`;
       return;
     }
     const t = TIPOS[tipo]; const ordT = d => TURMAS.indexOf(d.turma) * 100 + ((d.classe || ' ').charCodeAt(0) % 100); const l = lista.filter(d => d.tipo === tipo && doSeg(d) && (!etapa || etapaDe(d.turma) === etapa)).sort((a, b) => tipo === 'horario' ? ordT(a) - ordT(b) : (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
-    const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos', financeiro: 'Financeiro' }[SETOR];
+    const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : fs ? GRUPOS.pag.subs[fs].nome : fg ? GRUPOS[fg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos', financeiro: 'Financeiro' }[SETOR];
     p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
       <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button><button class="b" id="verModelo">👁 Ver modelo</button></div>
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
         <div class="acoes"><button class="b main" data-ver="${d.id}">👁 Ver</button><button class="b" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">✏️ Editar</button><button class="b" data-word="${d.id}">⬇ Word</button><button class="b" data-pdf="${d.id}">⬇ PDF</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
         : `<p class="dica">Nenhum documento ainda. Toque em “Novo” para começar.</p>`}`;
-    $('#verModelo').onclick = () => { const o = Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg))); if (seg && o.turma !== undefined) o.turma = SEGS[seg].turmas[0]; if (etapa && o.turma !== undefined) o.turma = ETAPAS[etapa].turmas[0]; verPrevia(o, 'Modelo em branco — toque em “Novo” para preencher'); };
-    $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
+    $('#verModelo').onclick = () => { const o = finPadrao(Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, fg ? { grupo: fg } : {}, fs ? { sub: fs } : {}, t.novo(lista.filter(doSeg)))); if (seg && o.turma !== undefined) o.turma = SEGS[seg].turmas[0]; if (etapa && o.turma !== undefined) o.turma = ETAPAS[etapa].turmas[0]; verPrevia(o, 'Modelo em branco — toque em “Novo” para preencher'); };
+    $('#novoDoc').onclick = () => { edit = finPadrao(Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, fg ? { grupo: fg } : {}, fs ? { sub: fs } : {}, t.novo(lista.filter(doSeg)))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
   }
   async function formulario() {
     const t = TIPOS[edit.tipo];
@@ -1121,7 +1191,9 @@
     if (b.dataset.impquadro) imprimirQuadro();
     if (b.dataset.idet) { ideal = { etapa: b.dataset.idet, turmas: null, previa: null }; tela(); scrollTo(0, 0); }
     if (b.dataset.seg) { seg = b.dataset.seg; tipo = null; tela(); scrollTo(0, 0); }
-    if (b.dataset.volta) { if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
+    if (b.dataset.fg) { fg = b.dataset.fg; fs = null; tipo = null; tela(); scrollTo(0, 0); }
+    if (b.dataset.fs) { fs = b.dataset.fs; tipo = null; tela(); scrollTo(0, 0); }
+    if (b.dataset.volta) { if (b.dataset.volta === 'fg') { if (fs) fs = null; else fg = null; tipo = null; } else if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
     if (b.dataset.ver) verPrevia(lista.find(d => d.id === b.dataset.ver));
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
     if (b.dataset.word) baixar2('word', lista.find(d => d.id === b.dataset.word));

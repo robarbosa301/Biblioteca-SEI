@@ -456,3 +456,8 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .vl-t th{background:#eef4fd!important;color:#0b2a6b}.vl-t .vl-n{width:17mm;text-align:left;padding-left:1mm;font-size:5.8pt;color:#0b2a6b}.vl-t .vl-tot{width:11mm;background:#fff6d6!important}
 .vl-t .vx{background:#e3e8f2!important}.vl-t tr.vl-sum td{background:#f1f5fc!important;font-weight:800}
 .vl-h{display:inline-block!important;color:#fff!important;font:700 6pt Arial,sans-serif}.vl-h small{color:#9fdcff!important;margin-right:2mm}.vl-h b{color:#ffd34d!important;font:800 8.5pt Arial,sans-serif}
+.rc-aviso.rc-ok{color:#0a5a40;background:#e6f6f1;border-left-color:#0a9d74}
+.hol-t td{height:6.4mm}.hol-t .hv{text-align:right;width:28mm;font-weight:700}.hol-t tr.hol-tot td{background:#eef4fd!important;font-weight:800;color:#0b2a6b}
+.hol-liq{display:flex;align-items:center;gap:4mm;margin:3mm 0;background:linear-gradient(90deg,#0b2a6b,#1e4fb8);color:#fff;border-radius:3mm;padding:2.4mm 4mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.hol-liq span{font:800 8pt Arial,sans-serif;letter-spacing:1px;color:#9fdcff}.hol-liq b{font:800 18pt 'SEI Rubik',Arial,sans-serif;color:#ffd34d}.hol-liq small{flex:1;text-align:right;font:7.4pt Arial,sans-serif;color:#dbe9ff}
+.tile-doc.fin-rec{border-left:5px solid #0a9d74}.tile-doc.fin-pag{border-left:5px solid #e53935}.tile-doc.fin-alug{border-left:5px solid #f0a020}
