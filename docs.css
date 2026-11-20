@@ -520,3 +520,20 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .av-ab .av-abl i{display:block;height:6.1mm;border-bottom:.3mm dashed #9ab3de;margin:0 0 0 7mm}
 .av-ab .av-abl i:last-child{border-bottom-style:solid;border-bottom-color:#c9d6ea}
 .av-t td{height:4.55mm}
+/* tabelas de avaliação — visual moderno */
+.av-t{border-collapse:separate;border-spacing:0;border:.3mm solid #c9d6ea;border-radius:2.6mm;overflow:hidden;background:#fff}
+.av-t th{border:none!important;font:800 7pt Arial,sans-serif;letter-spacing:.2px;padding:1.6mm .8mm;vertical-align:middle}
+.av-t th.avi{background:#0b2a6b!important;font-size:7.6pt;padding-left:3mm}
+.av-t.av-auto th.avi{background:#1e4fb8!important}
+.av-t td{border:none;border-top:.25mm solid #e6ecf6}
+.av-t td.avi{padding-left:3mm;color:#1d2b4f}
+.av-t td.avc i{width:3.8mm;height:3.8mm;border-width:.45mm;border-style:solid;background:#fff}
+.av-t tr.avg td{background:#eef4fd!important;border-top:.25mm solid #c9d6ea;color:#0b2a6b;padding-left:2mm;box-shadow:inset 1.2mm 0 0 #e6b422}
+.avg-n{display:inline-block;background:#0b2a6b;color:#ffd34d;border-radius:1mm;font:800 6.4pt Arial,sans-serif;padding:.2mm 1mm;margin-right:1.6mm;letter-spacing:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.av-t tbody tr:nth-child(even):not(.avg) td{background:#f8fafe!important}
+.av-t td.avn{border-left:.25mm solid #e6ecf6}
+.av-nps{border-collapse:separate;border-spacing:1.2mm 0;margin:0 -1.2mm .6mm;width:calc(100% + 2.4mm)}
+.av-nps td{border:none;border-radius:1.6mm;font:800 9.5pt Arial,sans-serif;padding:1.4mm 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.av-npsa tr+tr td{background:#fff!important;border:.3mm solid #c9d6ea;border-radius:1.6mm}
+.av-nps-l{font-weight:700}
+.av-t.av-auto,.av-t.av-cont,.av-t.av-d{break-inside:avoid}

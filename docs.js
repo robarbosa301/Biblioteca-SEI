@@ -566,20 +566,23 @@ Respeito os professores e os colegas`;
   const SAIDA_ALU = ['Mudança de cidade ou escola', 'Valor da mensalidade', 'Vou concluir os estudos', 'Outro'];
   const linhasAv = t => (t || '').split('\n').map(x => x.trim()).filter(Boolean);
   const ehGrupo = l => l === l.toUpperCase() && /[A-ZÁÉÍÓÚÇ]/.test(l);
+  const COR_AV = { 'Ótimo': '#1b8a5a', 'Bom': '#1e4fb8', 'Regular': '#d08a00', 'Ruim': '#c62828', 'N/A': '#7d8aa5', 'Sempre': '#1b8a5a', 'Às vezes': '#d08a00', 'Raramente': '#c62828', 'Tenho dificuldade': '#7b4fb8', 'Total': '#0b1f4d', '% positivo': '#0b1f4d' };
   const blocoAv = (itens, sc = ESC, tit = 'Avalie cada item marcando um X', cls = '', apur) => {
-    const cols = apur ? [...sc, 'Total', '% positivo'] : sc;
-    const h = linhasAv(itens).map(l => ehGrupo(l) ? `<tr class="avg"><td colspan="${cols.length + 1}">${esc(l)}</td></tr>` : `<tr><td class="avi">${esc(l)}</td>${cols.map(() => apur ? '<td class="avn"></td>' : '<td class="avc"><i></i></td>').join('')}</tr>`).join('');
-    return `<table class="av-t${cls ? ' ' + cls : ''}${apur ? ' av-ap' : ''}"><thead><tr><th class="avi">${esc(tit)}</th>${cols.map(e => `<th>${esc(e)}</th>`).join('')}</tr></thead><tbody>${h}</tbody></table>`; };
+    const cols = apur ? [...sc, 'Total', '% positivo'] : sc; let g = 0;
+    const h = linhasAv(itens).map(l => ehGrupo(l) ? `<tr class="avg"><td colspan="${cols.length + 1}"><span class="avg-n">${String(++g).padStart(2, '0')}</span>${esc(l)}</td></tr>` : `<tr><td class="avi">${esc(l)}</td>${cols.map(e => apur ? '<td class="avn"></td>' : `<td class="avc"><i style="border-color:${COR_AV[e] || '#1e4fb8'}"></i></td>`).join('')}</tr>`).join('');
+    return `<table class="av-t${cls ? ' ' + cls : ''}${apur ? ' av-ap' : ''}"><thead><tr><th class="avi">${esc(tit)}</th>${cols.map(e => `<th style="background:${COR_AV[e] || '#1e4fb8'};color:#ffffff">${esc(e)}</th>`).join('')}</tr></thead><tbody>${h}</tbody></table>`; };
   const abertas = (qs, n = 3) => qs.map((q, k) => `<div class="av-ab"><div class="av-abq"><span class="av-n">${k + 1}</span><b>${esc(q)}</b></div><div class="av-abl">${'<i></i>'.repeat(n)}</div></div>`).join('');
   const marca = (q, ops, obs) => `<p class="av-ck"><b>${esc(q)}</b>${obs ? ` <small>${esc(obs)}</small>` : ''}<br>${ops.map(o => `<span>☐ ${esc(o)}</span>`).join('&nbsp;&nbsp;&nbsp; ')}</p>`;
-  const nps = q => `<p class="av-ck"><b>${esc(q)}</b> <small>(circule uma nota)</small></p><table class="av-nps"><tr>${Array.from({ length: 11 }, (_, i) => `<td width="9%">${i}</td>`).join('')}</tr></table><p class="av-nps-l">0 = de jeito nenhum · 10 = com certeza</p>`;
-  const contagem = (tit, ops) => `<table class="av-t av-ap av-cont"><thead><tr><th class="avi">${esc(tit)}</th><th>Total</th></tr></thead><tbody>${ops.map(o => `<tr><td class="avi">${esc(o.replace(/:\s*_+$/, ''))}</td><td class="avn"></td></tr>`).join('')}</tbody></table>`;
+  const NPS_COR = i => i < 7 ? 'background:#fdecea;color:#c62828' : i < 9 ? 'background:#fff3d1;color:#a86b00' : 'background:#dff3e8;color:#1b8a5a';
+  const npsLinha = () => `<tr>${Array.from({ length: 11 }, (_, i) => `<td width="9%" style="${NPS_COR(i)}">${i}</td>`).join('')}</tr>`;
+  const nps = q => `<p class="av-ck"><b>${esc(q)}</b> <small>(circule uma nota)</small></p><table class="av-nps">${npsLinha()}</table><p class="av-nps-l"><span style="color:#c62828">0 a 6: não indicaria</span> · <span style="color:#a86b00">7 e 8: talvez</span> · <span style="color:#1b8a5a">9 e 10: com certeza</span></p>`;
+  const contagem = (tit, ops) => `<table class="av-t av-ap av-cont"><thead><tr><th class="avi">${esc(tit)}</th><th style="background:#0b1f4d;color:#ffffff">Total</th></tr></thead><tbody>${ops.map(o => `<tr><td class="avi">${esc(o.replace(/:\s*_+$/, ''))}</td><td class="avn"></td></tr>`).join('')}</tbody></table>`;
   const proxAno = d => (+d.ano || new Date().getFullYear()) + 1;
   const entrega = d => `<p class="av-instr"><b>Como responder:</b> marque um X em cada linha${d.na ? ' (N/A = não se aplica / não sei avaliar)' : ''}. Entregue até <b>${d.prazo ? esc(fmt(d.prazo)) : '____/____'}</b> ${esc(d.local || 'na coordenação pedagógica')}.</p>`;
   const apuracao = (d, pub, blocos, conts, abertasT) => `${cab('APURAÇÃO DA AVALIAÇÃO — ' + pub.toUpperCase())}<p class="av-int"><b>Folha de apuração — uso da coordenação.</b> Conte as marcações de todos os questionários e anote os totais em cada linha. <b>% positivo</b> = (Ótimo + Bom) ÷ total de respostas × 100. Itens com menos de 60% merecem um plano de ação.</p>
       <div class="cfs av-id">${campo('Questionários recebidos', '', 1.3)}${campo('Público', pub, 1)}${campo('Apurado por', '', 2)}${campo('Data', '', 1)}</div>
       ${blocos.map(([it, sc, t]) => blocoAv(it, sc, t, '', 1)).join('')}
-      <p class="av-sec">RECOMENDAÇÃO (0 A 10) — QUANTOS MARCARAM CADA NOTA</p><table class="av-nps av-npsa"><tr>${Array.from({ length: 11 }, (_, i) => `<td width="9%">${i}</td>`).join('')}</tr><tr>${Array.from({ length: 11 }, () => '<td width="9%">&nbsp;</td>').join('')}</tr></table>
+      <p class="av-sec">RECOMENDAÇÃO (0 A 10) — QUANTOS MARCARAM CADA NOTA</p><table class="av-nps av-npsa">${npsLinha()}<tr>${Array.from({ length: 11 }, () => '<td width="9%">&nbsp;</td>').join('')}</tr></table>
       <p class="av-nps-l">Nota de recomendação = % de notas 9 e 10 − % de notas 0 a 6. Acima de 50 é muito bom; abaixo de 0 pede atenção.</p>
       ${conts.map(([t, o]) => contagem(t, o)).join('')}
       <div class="av-abs">${abertas(abertasT)}</div>
