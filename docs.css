@@ -465,3 +465,6 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .rc-tit-img{display:block;height:11.5mm;filter:drop-shadow(0 .5mm .8mm rgba(0,0,0,.4))}
 .rc-n2 .rc-top img,.rc-n1 .rc-top img{height:21mm}.rc-n2 .rc-tit-img,.rc-n1 .rc-tit-img{height:14mm}
 .rc-top{padding:1.2mm 3mm}.rc-top img{height:15.5mm}.rc-tit-img{height:10.5mm}.rc-tit small{margin-top:.4mm}.rc-body{min-height:0;overflow:hidden;padding-top:1.6mm}.rc-l{margin-bottom:1.1mm}.rc-ref{margin:.3mm 0 .8mm}.rc-rod{flex:none}.rc-masc{height:24mm}
+.rc-top{padding:1mm 3mm}.rc-top>img{height:20mm}.rc-can-logo{height:17mm}.rc-tit-img{height:9mm}.rc-tit small{margin-top:1.2mm}.rc-n2 .rc-top>img,.rc-n1 .rc-top>img{height:26mm}.rc-n2 .rc-tit-img,.rc-n1 .rc-tit-img{height:12mm}
+.rc-tit-img{height:8mm;max-width:100%;object-fit:contain;object-position:left}.rc-tit{overflow:hidden}
+.rc-top .rc-tit-img{height:9mm;width:auto;max-width:100%;object-fit:contain;object-position:left center}.rc-n2 .rc-top .rc-tit-img,.rc-n1 .rc-top .rc-tit-img{height:12mm}
