@@ -1008,10 +1008,11 @@
     const t = TIPOS[tipo]; const ordT = d => TURMAS.indexOf(d.turma) * 100 + ((d.classe || ' ').charCodeAt(0) % 100); const l = lista.filter(d => d.tipo === tipo && doSeg(d) && (!etapa || etapaDe(d.turma) === etapa)).sort((a, b) => tipo === 'horario' ? ordT(a) - ordT(b) : (b.data || b.ano || '').localeCompare(a.data || a.ano || '') || (b.criado || 0) - (a.criado || 0));
     const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos' }[SETOR];
     p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
-      <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button></div>
+      <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button><button class="b" id="verModelo">👁 Ver modelo</button></div>
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
-        <div class="acoes"><button class="b main" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">✏️ Editar</button><button class="b" data-word="${d.id}">⬇ Word</button><button class="b" data-pdf="${d.id}">⬇ PDF</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
+        <div class="acoes"><button class="b main" data-ver="${d.id}">👁 Ver</button><button class="b" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">✏️ Editar</button><button class="b" data-word="${d.id}">⬇ Word</button><button class="b" data-pdf="${d.id}">⬇ PDF</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
         : `<p class="dica">Nenhum documento ainda. Toque em “Novo” para começar.</p>`}`;
+    $('#verModelo').onclick = () => { const o = Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg))); if (seg && o.turma !== undefined) o.turma = SEGS[seg].turmas[0]; if (etapa && o.turma !== undefined) o.turma = ETAPAS[etapa].turmas[0]; verPrevia(o, 'Modelo em branco — toque em “Novo” para preencher'); };
     $('#novoDoc').onclick = () => { edit = Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
   }
   async function formulario() {
@@ -1043,6 +1044,14 @@
     $('#salvaWord').onclick = tenta(d => baixar2('word', d));
     $('#salvaPdf').onclick = tenta(d => baixar2('pdf', d));
   }
+  // prévia em janela (lista de documentos)
+  async function verPrevia(d, sub) {
+    let w = $('#pvJan'); if (!w) { document.body.insertAdjacentHTML('beforeend', '<div id="pvJan" class="pv-jan no-print"><div class="pv-jan-in"><div class="pv-bar"><b>👁 Prévia</b><small id="pvJanSub"></small><button type="button" class="b ghost" id="pvJanX">✕ Fechar</button></div><div class="pv-box" id="pvJanBox"><div class="pv-pag sei-pdf" id="pvJanPag"></div></div></div></div>'); w = $('#pvJan'); $('#pvJanX').onclick = () => { w.hidden = true; }; w.onclick = e => { if (e.target === w) w.hidden = true; }; }
+    $('#pvJanSub').textContent = sub || TIPOS[d.tipo].titulo(d); w.hidden = false; const pag = $('#pvJanPag'); pag.innerHTML = '<p style="padding:20mm;text-align:center;font-size:14pt">Carregando…</p>';
+    if (window.seiFolha) await prepFolha(d); segDoc = d.seg || null; nCab = 0; pag.innerHTML = via1(TIPOS[d.tipo].doc(d)); pag.style.setProperty('--pvfundo', FOLHA && FOLHA.fundo ? `url(${FOLHA.fundo})` : 'none');
+    await Promise.all([...pag.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    const box = $('#pvJanBox'); const k = box.clientWidth / pag.offsetWidth; pag.style.transform = `scale(${k})`; box.style.height = Math.ceil(pag.offsetHeight * k) + 'px';
+  }
   // Word / PDF: o mesmo documento da impressão
   const via1 = h => FOLHA && FOLHA.duas ? h.replace(/<img class="folha-banda"[^>]*>/, '') : h;
   const htmlDe = d => { segDoc = d.seg || null; nCab = 0; return via1(TIPOS[d.tipo].doc(d)) + (d.copias === '2' ? '' : rodape()); };
@@ -1069,6 +1078,7 @@
     if (b.dataset.idet) { ideal = { etapa: b.dataset.idet, turmas: null, previa: null }; tela(); scrollTo(0, 0); }
     if (b.dataset.seg) { seg = b.dataset.seg; tipo = null; tela(); scrollTo(0, 0); }
     if (b.dataset.volta) { if (b.dataset.volta === 'seg') { seg = null; tipo = null; } else if (b.dataset.volta === '1') { if (etapa) etapa = null; else tipo = null; } edit = null; tela(); }
+    if (b.dataset.ver) verPrevia(lista.find(d => d.id === b.dataset.ver));
     if (b.dataset.imp) imprimir(lista.find(d => d.id === b.dataset.imp));
     if (b.dataset.word) baixar2('word', lista.find(d => d.id === b.dataset.word));
     if (b.dataset.pdf) baixar2('pdf', lista.find(d => d.id === b.dataset.pdf));

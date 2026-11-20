@@ -406,3 +406,9 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 }
 @media print{.pv,.pv-abre{display:none!important}}
 .form-pv .ev{grid-template-columns:1fr 1fr 40px;grid-template-areas:"de ate x" "tipo desc desc";gap:5px;margin-bottom:8px}.form-pv .ev .ev-de{grid-area:de}.form-pv .ev .ev-ate{grid-area:ate}.form-pv .ev .ev-tipo{grid-area:tipo}.form-pv .ev .ev-desc{grid-area:desc}.form-pv .ev .ev-x{grid-area:x;padding:0;min-width:0}
+.pv-jan{position:fixed;inset:0;z-index:60;background:rgba(4,16,48,.6);display:flex;justify-content:center;align-items:flex-start;overflow:auto;padding:16px}
+.pv-jan[hidden]{display:none}
+.pv-jan-in{width:min(760px,100%);background:#e9eef7;border-radius:14px;padding:10px}
+.pv-jan .pv-bar{flex-wrap:wrap}.pv-jan .pv-bar .b{margin-left:auto}
+@media (max-width:600px){.pv-jan{padding:0}.pv-jan-in{border-radius:0;min-height:100%}}
+.hor-t td.hc.vazio{border:.35mm dashed #c9d6ea!important;border-radius:2mm;background:#f7f9fd!important;height:17mm}
