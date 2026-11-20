@@ -538,3 +538,5 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .av-nps-l{font-weight:700}
 .av-t.av-auto,.av-t.av-cont,.av-t.av-d{break-inside:avoid}
 .av-ab{padding:1.6mm 1.4mm 1.2mm 2.2mm}.av-ab .av-abl i{margin:0;height:6.4mm}
+.eq-faixa.arte{background-color:#0a2f86;background-size:100% 100%;background-repeat:no-repeat;border-radius:2.6mm;min-height:15.2mm;padding:2.2mm 4mm;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.4mm}
+.eq-faixa.arte small{color:#ffd34d;letter-spacing:2.2px;font-size:6.6pt}.eq-faixa.arte b{color:#fff;font-size:11.5pt;letter-spacing:.4px;text-shadow:0 .4mm 1mm rgba(0,0,0,.55)}

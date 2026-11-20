@@ -799,7 +799,7 @@ Certidão de antecedentes criminais`;
       const pr = new Map(); secs.forEach(x => x.l.forEach(([n, c]) => { if (!n) return; const k = chaveNome(n); if (!pr.has(k)) pr.set(k, { n, l: [] }); pr.get(k).l.push(segCurto(x.t) + ' — ' + (c || '—')); }));
       const profs = [...pr.values()].sort((a, b) => chaveNome(a.n).localeCompare(chaveNome(b.n)));
       const quebra = ' style="break-before:page;page-break-before:always"';
-      const faixa = (s, b) => `<div class="eq-faixa"><small>${s}</small><b>${b}</b></div>`;
+      const faixa = (s, b) => FOLHA && FOLHA.faixa ? `<div class="eq-faixa arte" style="background-image:url(${FOLHA.faixa})"><small>${s}</small><b>${b}</b></div>` : `<div class="eq-faixa"><small>${s}</small><b>${b}</b></div>`;
       const resumo = secs.map(x => { const ns = new Set(x.l.filter(r => r[0]).map(r => chaveNome(r[0]))); return `<tr><td>${esc(segCurto(x.t))}</td><td align="center">${ns.size}</td><td align="center">${x.l.filter(r => r[0]).length}</td></tr>`; }).join('');
       const admN = adm.filter(a => a[1]).length;
       const capa = `<h2 class="eq-tit">EQUIPE DO INCENTIVO PARA ${ano}</h2>

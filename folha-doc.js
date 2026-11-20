@@ -260,6 +260,19 @@
   }
   const cache = new Map();
   /* o: { titulo, placa: {grande, linhas[]}, campos: [[rótulo, valor] x4], selo: [a, b], rodape: [a, b], num, curto } */
+  // faixa de título no estilo do cabeçalho (fundo azul com desenhos e moldura dourada, sem texto)
+  function faixaArte() {
+    const W = 1172, H = 96, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    x.save(); rr(x, 3, 3, W - 6, H - 6, 18); x.clip();
+    const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#0a2f86'); g.addColorStop(.5, '#071c55'); g.addColorStop(1, '#0a2f86'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    const gl = x.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, 420); gl.addColorStop(0, 'rgba(60,150,255,.28)'); gl.addColorStop(1, 'rgba(60,150,255,0)'); x.fillStyle = gl; x.fillRect(0, 0, W, H);
+    x.globalAlpha = .05; x.strokeStyle = '#9fdcff'; x.lineWidth = 2; for (let k = -200; k < W + 200; k += 22) { x.beginPath(); x.moveTo(k, H); x.lineTo(k + 96, 0); x.stroke(); } x.globalAlpha = 1;
+    x.save(); x.translate(-30, -4); x.scale(1, .36); desenhos(x, 'rgba(120,200,255,.20)'); x.restore();
+    x.restore();
+    rr(x, 3, 3, W - 6, H - 6, 18); const gd = x.createLinearGradient(0, 0, W, 0); gd.addColorStop(0, '#b8860b'); gd.addColorStop(.5, '#ffe58a'); gd.addColorStop(1, '#b8860b'); x.strokeStyle = gd; x.lineWidth = 3; x.stroke();
+    return cv.toDataURL('image/jpeg', .9);
+  }
   async function compor(o) {
     const k = JSON.stringify(o); if (cache.has(k)) return cache.get(k);
     const { c, f, l, lt } = await preparar();
@@ -277,7 +290,7 @@
     const fundo = fv.toDataURL('image/jpeg', .88);
     // faixa de cima da folha 2 (para os avisos com 2 cópias por folha)
     const bv = document.createElement('canvas'); if (o.estilo === 'folha') { bv.width = 1240; bv.height = 146; bv.getContext('2d').drawImage(fv, 0, 0); } else { bv.width = 1172; bv.height = 132; bv.getContext('2d').drawImage(fv, 34, 8, 1172, 132, 0, 0, 1172, 132); }
-    const r = { cab, fundo, banda: bv.toDataURL('image/jpeg', .9) }; cache.set(k, r); return r;
+    const r = { cab, fundo, banda: bv.toDataURL('image/jpeg', .9), faixa: faixaArte() }; cache.set(k, r); return r;
   }
   window.seiFolha = { compor, preparar, cartaoFundo: v => preparar().then(() => cartaoFundo(v)) };
 })();
