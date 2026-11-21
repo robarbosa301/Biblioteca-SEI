@@ -555,3 +555,12 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .eq-post.eq-novo .eq-pc{background:#e9eef7}.eq-post.eq-novo .eq-pc b{font-size:6.6pt}
 .eq-post.eq-novo .eq-pt{background:#fff}
 .eq-post.eq-novo{border-style:solid;border-color:#c9d6ea}
+/* convite, lista de presença */
+.doc-aviso h2.cv-tit,.cv-tit{text-align:center;font:800 15pt/1.2 'SEI Rubik',Arial,sans-serif;color:#0b2a6b;margin:1mm 0 4mm}
+.cv-txt{min-height:0;font-size:11.5pt;line-height:1.5;margin:2mm 0 4mm}
+.cv-ev{border-collapse:separate;border-spacing:2mm 0;margin:0 -2mm 4mm;width:calc(100% + 4mm);min-width:0}
+.cv-ev td{background:linear-gradient(135deg,#0a2f86,#071c55)!important;border-radius:2.4mm;padding:2.4mm 3mm;border:.4mm solid #d4a72c;vertical-align:middle;position:static;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cv-ev small{display:block;font:800 7pt Arial,sans-serif;letter-spacing:1.2px;color:#ffd34d}.cv-ev b{display:block;font:800 10.5pt/1.25 Arial,sans-serif;color:#fff;margin-top:.6mm}
+.cv-lei{font:italic 8.6pt/1.45 Arial,sans-serif;color:#33415f;background:#f7f9fd;border-left:1.4mm solid #d4a72c;border-radius:1.5mm;padding:2mm 3mm;margin:3mm 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cv-fim{text-align:center;font:800 11pt Arial,sans-serif;color:#1e4fb8;margin:4mm 0 1mm}
+.pr-t td{height:10.5mm}.pr-t td:first-child{color:#5a6b8c;font-weight:700}
