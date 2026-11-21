@@ -834,14 +834,15 @@ Certidão de antecedentes criminais`;
   const diaExt = dt => { if (!dt) return ''; const [y, m, dd] = dt.split('-').map(Number); const w = SEMANA[new Date(y, m - 1, dd).getDay()]; return `${w.charAt(0).toUpperCase() + w.slice(1)}, ${extenso(dt)}`; };
   const horaExt = h => { if (!h) return ''; const [a, b] = h.split(':'); return `${+a}h${b && b !== '00' ? b : ''}`; };
   const PUB_EV = ['Famílias (pais e responsáveis)', 'Funcionários', 'Professores', 'Toda a comunidade escolar'];
-  const PPP_TXT = `O Projeto Político-Pedagógico (PPP) é o documento que define a identidade da nossa escola e orienta todo o trabalho educativo. Ele é construído de forma coletiva, e a participação das famílias é fundamental nesse processo.
-
-Por isso, o Sistema de Ensino Incentivo convida a família a se fazer presente na instituição para esse importantíssimo momento de construção do nosso PPP. A sua voz vai ajudar a definir a escola que queremos para os nossos filhos.`;
+  const PPP_TXT = `O Projeto Político-Pedagógico (PPP) é o documento que define a identidade da nossa escola e orienta todo o trabalho educativo. Ele é construído coletivamente, e a sua participação é fundamental para decidirmos juntos os caminhos da educação dos nossos filhos.`;
+  const PPP_CHAMADA = 'Venha construir com a gente a escola dos nossos filhos!';
+  const MOT_FAM = [['🗣️', 'Sua voz conta', 'Você ajuda a decidir o que a escola deve priorizar.'], ['🤝', 'Escola e família juntas', 'A educação acontece em parceria, todos os dias.'], ['🌱', 'Um futuro melhor', 'O PPP guia o trabalho da escola nos próximos anos.']];
+  const ICO_PROG = ['☕', '📘', '🎯', '💬', '✅', '⭐', '📌', '🎉'];
   const PPP_LEI = `De acordo com a Lei de Diretrizes e Bases da Educação Nacional (LDB – Lei nº 9.394/1996), a escola deve elaborar e executar sua proposta pedagógica articulando-se com as famílias e a comunidade (art. 12), observando os princípios da gestão democrática e da participação da comunidade escolar (art. 14).`;
-  const PPP_PAUTA = `Acolhida e boas-vindas
+  const PPP_PAUTA = `Acolhida e boas-vindas às famílias
 O que é o PPP e por que ele é importante
 Missão, visão e valores do Incentivo
-Escuta das famílias: que escola queremos?
+Roda de conversa: que escola queremos?
 Encaminhamentos e encerramento`;
   const OF_TXT = `Convidamos toda a equipe para a Oficina de Orientação da Biblioteca Digital SEI, a nova ferramenta da escola para criar, editar, imprimir e baixar documentos padronizados (avisos, declarações, boletins, horários, calendário, recibos e muito mais) pelo celular, tablet ou computador.
 
@@ -853,6 +854,18 @@ Editar, salvar e baixar em PDF e em Word
 Cuidados com os dados dos alunos e da equipe
 Prática e tira-dúvidas`;
   const cartaoEv = d => `<table class="cv-ev" width="100%"><tr>${[['📅 DATA', diaExt(d.dia) || '____/____/______', 46], ['⏰ HORÁRIO', horaExt(d.hora) || '______', 18], ['📍 LOCAL', d.local || 'Sede do Sistema de Ensino Incentivo', 36]].map(([r, x, w]) => `<td width="${w}%" style="background:#0b2a6b;color:#ffffff"><small style="color:#ffd34d">${r}</small><br><b style="color:#ffffff">${esc(x)}</b></td>`).join('')}</tr></table>`;
+  const conviteFam = d => { const pauta = linhasAv(d.pauta || ''), dt = (d.dia || '').split('-'), w = dt[2] ? SEMANA[new Date(+dt[0], +dt[1] - 1, +dt[2]).getDay()] : '';
+    return `${cab('CONVITE')}<p class="fm-ola">Querida família,</p><h2 class="fm-tit">${esc(d.chamada || PPP_CHAMADA)}</h2>
+      <div class="doc-corpo fm-txt">${br(d.texto || '')}</div>
+      <table class="fm-ev" width="100%"><tr><td class="fm-dia" width="25%" align="center" style="background:#0b2a6b;color:#ffffff"><small style="color:#ffd34d">${esc(w.toUpperCase()) || 'DIA'}</small><br><b class="fm-dn" style="color:#ffffff;font-size:26pt">${dt[2] ? +dt[2] : '___'}</b><br><b style="color:#ffd34d">${dt[1] ? MESES[+dt[1] - 1].toUpperCase() : ''}</b></td><td width="2%"></td>
+        <td class="fm-inf" width="73%"><p class="fm-l">⏰ <b>Horário:</b> ${esc(horaExt(d.hora)) || '__________'}</p><p class="fm-l">📍 <b>Local:</b> ${esc(d.local || 'Sede do Sistema de Ensino Incentivo')}</p><p class="fm-l">👪 <b>Para:</b> pais, mães e responsáveis</p><p class="fm-l">✨ <b>Evento:</b> ${esc(d.evento || '')}</p></td></tr></table>
+      <p class="fm-sec">POR QUE PARTICIPAR?</p>
+      <table class="fm-mot" width="100%"><tr>${MOT_FAM.map(([ic, t, x], i) => `<td width="32%" align="center" style="background:${['#e8f1ff', '#fff4d6', '#e3f5ec'][i]};color:#0b2a6b"><span class="fm-ic">${ic}</span><br><b>${t}</b><br><small style="color:#33415f">${x}</small></td>${i < 2 ? '<td width="2%"></td>' : ''}`).join('')}</tr></table>
+      ${pauta.length ? `<p class="fm-sec">COMO VAI SER O NOSSO ENCONTRO</p><table class="fm-prog" width="100%">${pauta.map((x, i) => `<tr><td width="7%" align="center" class="fm-pi" style="background:#e8f1ff;color:#0b2a6b">${ICO_PROG[i] || '•'}</td><td width="93%">${esc(x)}</td></tr>`).join('')}</table>` : ''}
+      <p class="fm-ppp"><b>💡 O que é o PPP?</b> É como o “mapa” da escola: mostra quem somos, aonde queremos chegar e como vamos chegar lá. E a família faz parte dessa construção!${d.lei ? `<br><small>${esc(d.lei)}</small>` : ''}</p>
+      <p class="cv-fim">Sua presença faz toda a diferença. Esperamos por você! 💙</p>
+      <p class="doc-fim fm-ass">${CIDADE.split(' —')[0]}, ${extenso(d.data)}.<br><b>${esc(d.assinante || 'A Direção')}</b></p>
+      ${d.canhoto === 'Não' ? '' : `<div class="fm-can"><p class="fm-can-t">✂ CONFIRMAÇÃO DE PRESENÇA <small>(destaque e entregue ao professor da turma ou traga no dia)</small></p><table class="w-cfs fm-cant" width="100%"><tr><td width="50%"><small>Responsável</small><br>______________________________</td><td width="34%"><small>Aluno(a)</small><br>______________________</td><td width="16%"><small>Turma</small><br>_________</td></tr></table><p class="fm-can-o">☐ Estarei presente   ☐ Não poderei ir, mas quero contribuir</p></div>`}`; };
   TIPOS.convite = {
     nome: 'Convite para evento', icone: '💌', desc: 'Convite com data, horário, local, programação e base legal (reuniões, PPP, oficinas, eventos)', setores: ['coordenacao', 'secretaria', 'avisos'],
     titulo: d => `Convite — ${d.evento || ''}`,
@@ -860,15 +873,17 @@ Prática e tira-dúvidas`;
     form: d => `<div class="g2">${lab('Evento', inp('evento', d.evento, 'Ex.: Construção do PPP'))}${lab('Para', sel('publico', d.publico || PUB_EV[0], PUB_EV))}</div>
       <p class="dica">Modelos prontos: <button type="button" class="b" id="cvPPP">PPP com as famílias</button> <button type="button" class="b" id="cvOf">Oficina da Biblioteca Digital (funcionários)</button></p>
       <div class="g3">${lab('Dia do evento', inp('dia', d.dia, '', 'date'))}${lab('Horário', inp('hora', d.hora, '', 'time'))}${lab('Local', inp('local', d.local, 'Sede do Sistema de Ensino Incentivo'))}</div>
+      ${lab('Frase de destaque (convite às famílias)', inp('chamada', d.chamada, PPP_CHAMADA), 1)}
       ${lab('Mensagem', txt('texto', d.texto, '', 7), 1)}
       ${lab('Programação / pauta <small>(um item por linha; deixe vazio para não mostrar)</small>', `<textarea id="pauta" data-ed="sem" rows="5">${esc(d.pauta || '')}</textarea>`, 1)}
       ${lab('Base legal ou observação em destaque (opcional)', `<textarea id="lei" data-ed="sem" rows="3">${esc(d.lei || '')}</textarea>`, 1)}
-      <div class="g3">${lab('Quem assina', inp('assinante', d.assinante, 'Ex.: Gestão Educacional do Incentivo'))}${lab('Data do documento', inp('data', d.data, '', 'date'))}${lab('Convites por folha', sel('copias', d.copias || '1', ['1', '2']))}</div>`,
-    campos: ['evento', 'publico', 'dia', 'hora', 'local', 'texto', 'pauta', 'lei', 'assinante', 'data', 'copias'],
+      <div class="g3">${lab('Quem assina', inp('assinante', d.assinante, 'Ex.: Gestão Educacional do Incentivo'))}${lab('Data do documento', inp('data', d.data, '', 'date'))}${lab('Convites por folha', sel('copias', d.copias || '1', ['1', '2']))}</div>${lab('Canhoto de confirmação (famílias)', sel('canhoto', d.canhoto || 'Sim', ['Sim', 'Não']))}`,
+    campos: ['evento', 'publico', 'dia', 'hora', 'local', 'chamada', 'texto', 'pauta', 'lei', 'assinante', 'data', 'copias', 'canhoto'],
     depois: () => { const poe = (o) => { Object.entries(o).forEach(([k, x]) => { const el = $('#' + k); if (!el) return; el.value = x; }); $('#evento').dispatchEvent(new Event('input', { bubbles: true })); };
       $('#cvPPP').onclick = () => poe({ evento: 'Construção do Projeto Político-Pedagógico (PPP)', publico: PUB_EV[0], texto: PPP_TXT, lei: PPP_LEI, pauta: PPP_PAUTA, assinante: 'Gestão Educacional do Incentivo' });
       $('#cvOf').onclick = () => poe({ evento: 'Oficina de Orientação da Biblioteca Digital SEI', publico: 'Funcionários', texto: OF_TXT, lei: '', pauta: OF_PAUTA, assinante: 'Direção Pedagógica' }); },
-    doc: d => { const fam = /Fam/.test(d.publico || ''); const sauda = fam ? 'Senhores pais, mães e responsáveis,' : /Funcion/.test(d.publico || '') ? 'Prezada equipe de funcionários,' : /Profess/.test(d.publico || '') ? 'Prezados professores,' : 'Prezada comunidade escolar,';
+    arte: d => { if (!/Fam/.test(d.publico || '')) return {}; const dt = (d.dia || '').split('-'); return { estilo: 'folha', titulo: 'Convite às Famílias', curto: 'Convite às Famílias — ' + (d.evento || ''), placa: { grande: dt[2] ? `${dt[2]}/${dt[1]}` : 'CONVITE', linhas: [dt[2] ? SEMANA[new Date(+dt[0], +dt[1] - 1, +dt[2]).getDay()].toUpperCase() : '', d.hora ? 'ÀS ' + horaExt(d.hora).toUpperCase() : ''] }, campos: [['Evento', (d.evento || '').replace(/\s*\(.*\)/, '')], ['Para', 'Pais, mães e responsáveis'], ['Local', d.local || 'Sede do SEI'], ['Horário', horaExt(d.hora)]] }; },
+    doc: d => { if (/Fam/.test(d.publico || '') && d.copias !== '2') return conviteFam(d); const fam = /Fam/.test(d.publico || ''); const sauda = fam ? 'Senhores pais, mães e responsáveis,' : /Funcion/.test(d.publico || '') ? 'Prezada equipe de funcionários,' : /Profess/.test(d.publico || '') ? 'Prezados professores,' : 'Prezada comunidade escolar,';
       const pauta = linhasAv(d.pauta || ''), dois = d.copias === '2';
       const um = `<div class="doc-aviso">${cab('CONVITE')}<h2 class="cv-tit">${esc(d.evento || '')}</h2>
         <p class="doc-para">${sauda}</p><div class="doc-corpo cv-txt">${br(d.texto || '')}</div>
@@ -887,30 +902,32 @@ Prática e tira-dúvidas`;
       <div class="g3">${lab('Dia', inp('dia', d.dia, '', 'date'))}${lab('Horário', inp('hora', d.hora, '', 'time'))}${lab('Local', inp('local', d.local))}</div>
       <div class="g2">${lab('Responsável pelo evento', inp('resp', d.resp, 'Ex.: Direção Pedagógica'))}${lab('Quantidade de linhas', sel('linhas', d.linhas || '30', ['15', '30', '45', '60']))}</div>`,
     campos: ['evento', 'publico', 'dia', 'hora', 'local', 'resp', 'linhas', 'data'],
+    arte: d => { if (!/Fam|comunidade/.test(d.publico || '')) return {}; const dt = (d.dia || '').split('-'); return { estilo: 'folha', titulo: 'Lista de Presença', curto: 'Lista de presença — ' + (d.evento || ''), placa: { grande: dt[2] ? `${dt[2]}/${dt[1]}` : 'PRESENÇA', linhas: [dt[2] ? SEMANA[new Date(+dt[0], +dt[1] - 1, +dt[2]).getDay()].toUpperCase() : '', d.hora ? 'ÀS ' + horaExt(d.hora).toUpperCase() : ''] }, campos: [['Evento', (d.evento || '').replace(/\s*\(.*\)/, '')], ['Para', 'Pais, mães e responsáveis'], ['Local', d.local || 'Sede do SEI'], ['Responsável', d.resp || '']] }; },
     doc: d => { const fam = /Fam|comunidade/.test(d.publico || ''); const n = +d.linhas || 30;
       const cols = fam ? [['NOME DO RESPONSÁVEL', 31], ['ALUNO(A) E TURMA', 25], ['TELEFONE', 14], ['ASSINATURA', 25]] : [['NOME', 38], ['FUNÇÃO / SETOR', 24], ['ASSINATURA', 33]];
       const pags = []; for (let i = 0; i < n; i += i ? 20 : 15) pags.push(i); const por_ = p => p ? 20 : 15;
       return pags.map((ini, p) => `<div class="pr-pag"${p ? ' style="break-before:page;page-break-before:always"' : ''}>${cab('LISTA DE PRESENÇA')}
-        <h2 class="cv-tit">${esc(d.evento || '')}</h2>
-        ${p ? '' : `<table class="mapa-top"><tr><td class="mt-a"><small>DATA</small><b>${esc(fmt(d.dia)) || '___/___/_____'}</b></td><td><small>HORÁRIO</small><b>${esc(horaExt(d.hora)) || '&nbsp;'}</b></td><td><small>LOCAL</small><b>${esc((d.local || '').toUpperCase()) || '&nbsp;'}</b></td><td><small>RESPONSÁVEL</small><b>${esc((d.resp || '').toUpperCase()) || '&nbsp;'}</b></td></tr></table>`}
+        <h2 class="cv-tit">${esc(d.evento || '')}</h2>${fam && !p ? '<p class="fm-obr">Obrigado pela sua presença! A participação da família fortalece a nossa escola. 💙</p>' : ''}
+        ${p || fam ? '' : `<table class="mapa-top"><tr><td class="mt-a"><small>DATA</small><b>${esc(fmt(d.dia)) || '___/___/_____'}</b></td><td><small>HORÁRIO</small><b>${esc(horaExt(d.hora)) || '&nbsp;'}</b></td><td><small>LOCAL</small><b>${esc((d.local || '').toUpperCase()) || '&nbsp;'}</b></td><td><small>RESPONSÁVEL</small><b>${esc((d.resp || '').toUpperCase()) || '&nbsp;'}</b></td></tr></table>`}
         <table class="eq-r pr-t"><thead><tr><th width="5%">Nº</th>${cols.map(([c, w]) => `<th width="${w}%">${c}</th>`).join('')}</tr></thead><tbody>${Array.from({ length: Math.min(por_(p), n - ini) }, (_, k) => `<tr class="pr-l"><td align="center">${String(ini + k + 1).padStart(2, '0')}</td>${cols.map(() => '<td></td>').join('')}</tr>`).join('')}</tbody></table>
         ${p === pags.length - 1 ? `<p class="eq-obs">Total de participantes: ______ · Conferido por: ______________________________</p>` : ''}</div>`).join(''); }
   };
-  const ESC_PPP = ['O que você mais valoriza no Incentivo hoje?', 'Que escola queremos para os nossos filhos? O que não pode faltar?', 'Como a família pode participar mais da vida escolar?', 'Deixe sua sugestão para o nosso PPP'];
+  const ESC_PPP = ['💙 O que você mais valoriza no Incentivo hoje?', '🏫 Que escola queremos para os nossos filhos? O que não pode faltar?', '🤝 Como a família pode participar mais da vida escolar?', '💡 Deixe a sua sugestão para o nosso PPP'];
   const VAL_PPP = ['Respeito', 'Responsabilidade', 'Honestidade', 'Solidariedade', 'Autonomia', 'Disciplina', 'Criatividade', 'Fé e espiritualidade', 'Cuidado com o meio ambiente', 'Amor ao estudo'];
   const PRI_PPP = ['Aprendizagem e bons resultados', 'Preparação para ENEM e vestibulares', 'Formação de valores', 'Tecnologia na educação', 'Inclusão (AEE)', 'Esporte, arte e cultura', 'Segurança', 'Comunicação escola–família', 'Saúde emocional', 'Leitura e escrita'];
   TIPOS.escuta = {
-    nome: 'Escuta das famílias (PPP)', icone: '👨‍👩‍👧', desc: 'Ficha para os pais contribuírem com o Projeto Político-Pedagógico', setores: ['coordenacao', 'secretaria'],
+    nome: 'Escuta das famílias (PPP)', icone: '👪', desc: 'Ficha para os pais contribuírem com o Projeto Político-Pedagógico', setores: ['coordenacao', 'secretaria'],
     titulo: d => `Escuta das famílias — PPP ${d.ano || ''}`,
     novo: () => ({ ano: String(new Date().getFullYear()), data: hoje(), pergs: ESC_PPP.join('\n') }),
     form: d => `<div class="g2">${lab('Ano', inp('ano', d.ano))}${lab('Data', inp('data', d.data, '', 'date'))}</div>
       ${lab('Perguntas abertas <small>(uma por linha)</small>', `<textarea id="pergs" data-ed="sem" rows="5">${esc(d.pergs || ESC_PPP.join('\n'))}</textarea>`, 1)}`,
     campos: ['ano', 'data', 'pergs'],
-    doc: d => `${cab('ESCUTA DAS FAMÍLIAS — PPP')}<p class="av-int"><b>Família, a sua opinião constrói a nossa escola!</b> Estamos construindo juntos o Projeto Político-Pedagógico (PPP) do Incentivo. Responda com sinceridade; não é preciso se identificar.</p>
-      ${marca('Sou responsável por aluno(s) do segmento:', SEGS_AV)}
-      ${marca('Quais valores a escola deve fortalecer nos nossos filhos?', VAL_PPP, '(marque até 3)')}
-      ${marca('Quais devem ser as prioridades da escola?', PRI_PPP, '(marque até 3)')}
-      ${marca('Como você avalia a comunicação da escola com a família?', ['Ótima', 'Boa', 'Regular', 'Ruim'])}
+    arte: d => ({ estilo: 'folha', titulo: 'Que escola queremos?', curto: 'Escuta das famílias — PPP ' + (d.ano || ''), placa: { grande: 'PPP', linhas: ['ESCUTA DAS', 'FAMÍLIAS'] }, campos: [['Documento', 'Escuta das famílias'], ['Ano', d.ano || ''], ['Para', 'Pais e responsáveis'], ['Nome', 'Não precisa'] ] }),
+    doc: d => `${cab('ESCUTA DAS FAMÍLIAS — PPP')}<h2 class="fm-tit">Sua opinião vai ajudar a construir o nosso PPP!</h2><p class="av-int"><b>Querida família,</b> estamos construindo juntos o Projeto Político-Pedagógico (PPP) do Incentivo: o “mapa” que mostra quem somos e aonde queremos chegar. Responda com sinceridade; não é preciso se identificar. 💙</p>
+      ${marca('👪 Sou responsável por aluno(s) do segmento:', SEGS_AV)}
+      ${marca('💎 Quais valores a escola deve fortalecer nos nossos filhos?', VAL_PPP, '(marque até 3)')}
+      ${marca('🎯 Quais devem ser as prioridades da escola?', PRI_PPP, '(marque até 3)')}
+      ${marca('📣 Como você avalia a comunicação da escola com a família?', ['Ótima', 'Boa', 'Regular', 'Ruim'])}
       <div class="av-abs">${abertas(linhasAv(d.pergs || ESC_PPP.join('\n')))}</div>
       <p class="av-fim">Obrigado por construir o Incentivo com a gente! 💙 — Gestão Educacional do Incentivo</p>`
   };
