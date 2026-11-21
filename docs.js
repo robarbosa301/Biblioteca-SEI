@@ -914,6 +914,11 @@ Prática e tira-dúvidas`;
       <div class="av-abs">${abertas(linhasAv(d.pergs || ESC_PPP.join('\n')))}</div>
       <p class="av-fim">Obrigado por construir o Incentivo com a gente! 💙 — Gestão Educacional do Incentivo</p>`
   };
+  // documentos prontos para usar (aparecem acima da lista de cada tipo)
+  const OF_D = { evento: 'Oficina de Orientação da Biblioteca Digital SEI', publico: 'Funcionários', texto: OF_TXT, lei: '', pauta: OF_PAUTA, assinante: 'Direção Pedagógica' };
+  TIPOS.convite.prontos = [{ nome: 'Convite — PPP com as famílias', sub: 'Segunda-feira, 23/11/2026, às 9h', dados: { dia: '2026-11-23', hora: '09:00' } }, { nome: 'Convite — Oficina da Biblioteca Digital', sub: 'Funcionários · segunda-feira, 23/11/2026', dados: Object.assign({ dia: '2026-11-23' }, OF_D) }];
+  TIPOS.presenca.prontos = [{ nome: 'Presença — PPP com as famílias', sub: '23/11/2026, às 9h · 45 linhas', dados: { dia: '2026-11-23', hora: '09:00', resp: 'Gestão Educacional', linhas: '45' } }, { nome: 'Presença — Oficina da Biblioteca Digital', sub: 'Funcionários · 23/11/2026 · 30 linhas', dados: { evento: OF_D.evento, publico: 'Funcionários', dia: '2026-11-23', resp: 'Direção Pedagógica', linhas: '30' } }];
+  TIPOS.escuta.prontos = [{ nome: 'Escuta das famílias — PPP 2026', sub: 'Para o encontro de 23/11/2026', dados: { ano: '2026' } }];
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
     nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao', 'financeiro'], fin: ['pag'],
@@ -1548,10 +1553,14 @@ Prática e tira-dúvidas`;
     const voltaTxt = etapa ? 'Etapas' : unico ? '' : seg ? SEGS[seg].nome : fs ? GRUPOS.pag.subs[fs].nome : fg ? GRUPOS[fg].nome : { secretaria: 'Secretaria', coordenacao: 'Coordenação', avisos: 'Avisos', financeiro: 'Financeiro' }[SETOR];
     p.innerHTML = `${voltaTxt && (!unico || etapa) ? `<nav class="trilha"><button class="b ghost" data-volta="1">‹ ${esc(voltaTxt)}</button><span>›</span><b class="tr-atual">${t.icone} ${etapa ? ETAPAS[etapa].nome : t.nome}</b></nav>` : ''}
       <div class="acoes"><button class="b main" id="novoDoc">➕ Novo ${t.nome.toLowerCase().split(' /')[0]}</button><button class="b" id="verModelo">👁 Ver modelo</button></div>
+      ${t.prontos ? `<h4 class="pr-h">📌 Prontos para usar</h4><div class="cards prontos">${t.prontos.map((x, i) => `<article class="aula pronto"><div class="topo"><b>Pronto</b><span class="tag">${t.icone}</span></div><h3>${esc(x.nome)}</h3><p class="dica">${esc(x.sub || '')}</p><div class="acoes"><button class="b" data-pver="${i}">👁 Ver</button><button class="b main" data-pusar="${i}">✏️ Usar este</button></div></article>`).join('')}</div>${l.length ? '<h4 class="pr-h">Meus documentos</h4>' : ''}` : ''}
       ${l.length ? `<div class="cards">${l.map(d => `<article class="aula"><div class="topo"><b>${fmt(d.data) || esc(d.ano || '')}</b><span class="tag">${t.icone}</span></div><h3>${esc(t.titulo(d))}</h3>
         <div class="acoes"><button class="b main" data-ver="${d.id}">👁 Ver</button><button class="b" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">✏️ Editar</button><button class="b" data-word="${d.id}">⬇ Word</button><button class="b" data-pdf="${d.id}">⬇ PDF</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
-        : `<p class="dica">Nenhum documento ainda. Toque em “Novo” para começar.</p>`}`;
+        : `<p class="dica">${t.prontos ? 'Toque em “Usar este” para aproveitar um pronto, ou em “Novo” para criar o seu.' : 'Nenhum documento ainda. Toque em “Novo” para começar.'}</p>`}`;
     $('#verModelo').onclick = () => { const o = finPadrao(Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, fg ? { grupo: fg } : {}, fs ? { sub: fs } : {}, t.novo(lista.filter(doSeg)))); if (seg && o.turma !== undefined) o.turma = SEGS[seg].turmas[0]; if (etapa && o.turma !== undefined) o.turma = ETAPAS[etapa].turmas[0]; verPrevia(o, 'Modelo em branco — toque em “Novo” para preencher'); };
+    const doPronto = i => Object.assign({ tipo, setor: SETOR }, t.novo(lista.filter(doSeg)), t.prontos[i].dados);
+    p.querySelectorAll('[data-pver]').forEach(b => { b.onclick = () => verPrevia(doPronto(+b.dataset.pver), 'Documento pronto — toque em “Usar este” para salvar, editar, baixar ou imprimir'); });
+    p.querySelectorAll('[data-pusar]').forEach(b => { b.onclick = () => { edit = doPronto(+b.dataset.pusar); tela(); }; });
     $('#novoDoc').onclick = () => { edit = finPadrao(Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, fg ? { grupo: fg } : {}, fs ? { sub: fs } : {}, t.novo(lista.filter(doSeg)))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
   }
   async function formulario() {

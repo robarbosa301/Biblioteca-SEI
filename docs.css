@@ -564,3 +564,4 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .cv-lei{font:italic 8.6pt/1.45 Arial,sans-serif;color:#33415f;background:#f7f9fd;border-left:1.4mm solid #d4a72c;border-radius:1.5mm;padding:2mm 3mm;margin:3mm 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .cv-fim{text-align:center;font:800 11pt Arial,sans-serif;color:#1e4fb8;margin:4mm 0 1mm}
 .pr-t td{height:10.5mm}.pr-t td:first-child{color:#5a6b8c;font-weight:700}
+.pr-h{margin:14px 0 6px;color:var(--azul,#0b2a6b);font-size:1rem}.cards.prontos .aula.pronto{border-left:5px solid #e6b422;background:linear-gradient(180deg,#fffbea,#fff)}.cards.prontos .aula.pronto .dica{margin:2px 0 6px}
