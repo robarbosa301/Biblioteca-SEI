@@ -1530,7 +1530,9 @@ Prática e tira-dúvidas`;
 
   /* ---------- telas ---------- */
   let lista = [], tipo = null, edit = null;
-  const meus = () => Object.entries(TIPOS).filter(([, t]) => t.setores.includes(SETOR) && (SETOR !== 'financeiro' || (t.fin || []).includes(fg)));
+  // folhas do diretor: ficam escondidas no site até a direção liberar ("publique as folhas do diretor")
+  const OCULTOS = new Set(['avprof', 'avaluno', 'equipe']);
+  const meus = () => Object.entries(TIPOS).filter(([k, t]) => !OCULTOS.has(k) && t.setores.includes(SETOR) && (SETOR !== 'financeiro' || (t.fin || []).includes(fg)));
   let todosHor = [], profs = [], modo = null, planosTodos = [];
   async function carregar() { const t = await todos(); lista = t.filter(d => d.setor === SETOR); todosHor = t.filter(d => d.tipo === 'horario'); profs = t.filter(d => d.tipo === 'professor').sort((a, b) => (a.ordem ?? a.criado ?? 0) - (b.ordem ?? b.criado ?? 0)); planosTodos = t.filter(d => d.tipo === 'plano'); tela(); }
   function tela() {
