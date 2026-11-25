@@ -604,3 +604,12 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .ml-av{border-collapse:separate;border-spacing:1.6mm 0;margin:0 -1.6mm 2mm;width:calc(100% + 3.2mm);min-width:0}
 .ml-av td{border:none;position:static;border-radius:2.6mm;padding:2mm 2.4mm;font:8.8pt/1.35 Arial,sans-serif;vertical-align:top;-webkit-print-color-adjust:exact;print-color-adjust:exact}.ml-av small{font:800 7pt Arial,sans-serif;letter-spacing:.6px;display:block;margin-bottom:.5mm}
 .ml-fim{text-align:center;font:800 11pt Arial,sans-serif;margin:2mm 0 0}
+/* lista de material simples (2 por folha) */
+.doc-aviso h2.ml-tit,.ml-tit{font:800 13pt 'SEI Rubik',Arial,sans-serif;text-align:center;margin:1.5mm 0 2mm;letter-spacing:.3px}
+.ml-g td{padding:0 2mm!important}
+.ml-i{font:9.6pt/1.25 Arial,sans-serif;padding:.85mm 1mm;border-bottom:.25mm dashed #e3eaf5}.ml-i:last-child{border-bottom:.25mm dashed #e3eaf5}
+.ml-rod{font:8.4pt/1.45 Arial,sans-serif;color:#1d2b4f;border:.4mm solid #ef6c00;border-radius:2.2mm;padding:1.4mm 2.6mm;margin:2mm 0 0;background:#f7f9fd;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ml-via:not(.ml-2) .ml-i{font-size:11pt;padding:2mm 1mm}.ml-via:not(.ml-2) .ml-tit{font-size:16pt;margin:3mm 0 4mm}.ml-via:not(.ml-2) .ml-rod{font-size:10pt;padding:2.4mm 3mm;margin-top:5mm}
+.ml-2 .ml-i{font-size:9.2pt;padding:.55mm 1mm}.ml-2 .ml-tit{margin:1mm 0 1.4mm;font-size:12pt}.ml-2 .ml-rod{margin-top:1.4mm;padding:1.1mm 2.4mm}
+.ml-2 .ml-i{font-size:9pt;line-height:1.15;padding:.42mm 1mm}.ml-2 .ml-tit{margin:.6mm 0 1mm}
+.ml-2 .ml-i{padding:.28mm 1mm}.ml-2 .ml-rod{line-height:1.3;margin-top:1mm}
