@@ -976,13 +976,13 @@ Prática e tira-dúvidas`;
       <div class="g2">${lab('Observação importante', inp('obs', d.obs))}${lab('Informações (telefone)', inp('contato', d.contato))}</div>
       <div class="g2">${lab('Local de entrega', inp('local', d.local))}${lab('Listas por folha', sel('copias', d.copias || '2', ['2', '1']))}</div>`,
     campos: ['turma', 'ano', 'prazo', 'itens', 'obs', 'contato', 'local', 'copias', 'data'],
-    arte: d => ({ estilo: 'folha', metades: d.copias !== '1', titulo: 'Lista de Material', curto: `Lista de Material ${d.ano || ''} — ${d.turma || ''}`, placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
+    arte: d => ({ estilo: 'folha', metades: d.copias !== '1', titulo: 'Lista de Material', curto: `Lista de Material ${d.ano || ''}`, placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: d.copias !== '1' ? [['Turma', d.turma || ''], ['Entrega', d.prazo ? 'até ' + fmt(d.prazo) : '']] : [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
     doc: d => { const [cor] = TEMA_MAT[d.turma] || TEMA_MAT.Maternal, dois = d.copias !== '1';
       const its = (d.itens || '').split('\n').map(x => x.trim()).filter(x => x && !x.startsWith('##')).map(l => { const m = /^(\d+)\s*[-–—]?\s*(.*)$/.exec(l); return m ? [m[1].padStart(2, '0'), m[2]] : ['', l]; });
       const meio = Math.ceil(its.length / 2), col = a => a.map(([q, x]) => `<p class="ml-i"><span class="ml-ck">☐</span> ${q ? `<b class="ml-q" style="color:${cor}">${esc(q)}</b> ` : ''}${esc(x)}</p>`).join('');
-      const um = `<div class="doc-aviso ml-via${dois ? ' ml-2' : ''}">${cab('LISTA DE MATERIAL')}<h2 class="ml-tit" style="color:${cor}">LISTA DE MATERIAL ${esc(d.ano || '')} — ${esc((d.turma || '').toUpperCase())}</h2>
+      const um = `<div class="doc-aviso ml-via${dois ? ' ml-2' : ''}">${cab('LISTA DE MATERIAL')}${dois ? '' : `<h2 class="ml-tit" style="color:${cor}">Materiais para ${esc(d.ano || '')}</h2>`}
         <table class="ml-g" width="100%"><tr><td width="50%" valign="top">${col(its.slice(0, meio))}</td><td width="50%" valign="top">${col(its.slice(meio))}</td></tr></table>
-        <p class="ml-rod" style="border-color:${cor}"><b style="color:${cor}">⚠️ ${esc(d.obs || OBS_MAT)}</b><br>📅 Entregar na escola até <b>${d.prazo ? fmt(d.prazo) : '___/___/_____'}</b> · 📍 ${esc(d.local || '')} · 📞 ${esc(d.contato || '')}</p></div>`;
+        <p class="ml-rod" style="border-color:${cor}"><b style="color:${cor}">⚠️ ${esc(d.obs || OBS_MAT)}</b><br>${dois ? '' : `📅 Entregar na escola até <b>${d.prazo ? fmt(d.prazo) : '___/___/_____'}</b> · `}📍 Entregar em: ${esc(d.local || '')} · 📞 ${esc(d.contato || '')}</p></div>`;
       return dois ? `<div class="doc-2 metade">${um}<div class="ml-gap"></div>${um}</div>` : um; }
   };
   TIPOS.material.prontos = [{ nome: 'Lista de material 2027 — Maternal', sub: 'Entrega até 15/01/2027 · 2 listas por folha', dados: { ano: '2027', turma: 'Maternal', itens: MAT_MATERNAL, prazo: '2027-01-15', copias: '2' } }];
