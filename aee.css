@@ -145,3 +145,21 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .pv-pag{position:absolute;left:0;top:0;width:210mm;min-height:297mm;padding:27mm 12mm 14mm;box-sizing:border-box;transform-origin:0 0;background:#fff var(--pvfundo) 0 0/210mm 297mm repeat-y;font:10.5pt/1.35 Arial,sans-serif;color:#111;pointer-events:none}
 .pv-pag .folha-cab{width:210mm;margin:-27mm -12mm 3mm}.pv-pag .sei-rod{display:none}
 @media (max-width:600px){.pv-jan{padding:0}.pv-jan-in{border-radius:0;min-height:100%}}
+/* relatórios AEE (EOCA, PDI, RDA, REA) */
+.doc-linha{display:flex;flex-wrap:wrap;align-items:center;gap:6px;border-top:1px dashed #d5def0;padding:6px 0;font-size:.9rem}.doc-linha .acoes{margin:0;gap:4px}.doc-linha .b{padding:4px 8px}
+.rea-l{display:grid;grid-template-columns:130px 1fr 1fr 1fr auto;gap:6px;margin:0 0 6px;align-items:start}
+@media (max-width:760px){.rea-l{grid-template-columns:1fr}}
+.ae-sec{background:#0b2a6b;color:#fff;font:800 8.6pt Arial,sans-serif;letter-spacing:1px;padding:1.5mm 2.5mm;margin:4mm 0 2mm;border-radius:1.2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-after:avoid}
+.ae-q{font:10pt/1.4 Arial,sans-serif;color:#1d2b4f;margin:2mm 0 .5mm;break-after:avoid}.ae-q small{color:#5a6b8c}
+.ae-r{font:10pt/1.45 Arial,sans-serif;color:#1d2b4f;margin:0 0 2mm;padding-left:2mm;border-left:.8mm solid #c9d6ea}
+.ae-l{border-bottom:.3mm solid #9aa9c8;height:6.6mm;margin:0}
+.ae-int{font:9.4pt/1.45 Arial,sans-serif;background:#eef4fd;border-left:1.2mm solid #1e4fb8;border-radius:1.5mm;padding:2mm 3mm;margin:0 0 3mm;text-align:justify;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ae-op{font:10pt/1.5 Arial,sans-serif;margin:1.5mm 0}
+.ae-sub{text-align:center;font:800 10.5pt Arial,sans-serif;color:#1e4fb8;margin:0 0 3mm}
+.ae-data{text-align:right;margin-top:8mm}
+.ae-ck{width:100%;border-collapse:collapse;margin:1mm 0 2mm;min-width:0}.ae-ck td{font:9.4pt/1.35 Arial,sans-serif;padding:.7mm 1mm;border:none;vertical-align:top}
+.ae-tb{width:100%;border-collapse:collapse;margin:1mm 0 3mm;min-width:0}.ae-tb th{background:#0b2a6b!important;color:#fff!important;font:800 8pt Arial,sans-serif;padding:1.5mm 2mm;text-align:left;border:.3mm solid #0b2a6b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ae-tb td{border:.3mm solid #b9c6dd;font:9.4pt/1.35 Arial,sans-serif;padding:1.2mm 2mm;vertical-align:top}.ae-tb tr{break-inside:avoid}
+.ae-alto tbody td{height:16mm}.ae-rea tr.ae-rl td{height:19mm}
+.ae-l{height:5.9mm}.ae-bl{margin-bottom:0}.ae-bl h4{margin-bottom:0}
+.ae-alto tbody td{height:12.5mm}.ae-rea tr.ae-rl td{height:17mm}.doc-ass{break-inside:avoid}.ae-data{margin-top:5mm}
