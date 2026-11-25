@@ -936,6 +936,66 @@ Prática e tira-dúvidas`;
   TIPOS.convite.prontos = [{ nome: 'Convite — PPP com as famílias', sub: 'Segunda-feira, 23/11/2026, às 9h', dados: { dia: '2026-11-23', hora: '09:00' } }, { nome: 'Convite — Oficina da Biblioteca Digital', sub: 'Funcionários · segunda-feira, 23/11/2026', dados: Object.assign({ dia: '2026-11-23' }, OF_D) }];
   TIPOS.presenca.prontos = [{ nome: 'Presença — PPP com as famílias', sub: '23/11/2026, às 9h · 58 linhas (3 páginas)', dados: { dia: '2026-11-23', hora: '09:00', resp: 'Gestão Educacional', linhas: '58' } }, { nome: 'Presença — Oficina da Biblioteca Digital', sub: 'Funcionários · 23/11/2026 · 37 linhas (2 páginas)', dados: { evento: OF_D.evento, publico: 'Funcionários', dia: '2026-11-23', resp: 'Direção Pedagógica', linhas: '37' } }];
   TIPOS.escuta.prontos = [{ nome: 'Escuta das famílias — PPP 2026', sub: 'Para o encontro de 23/11/2026', dados: { ano: '2026' } }];
+  /* ---------- lista de material (Educação Infantil) ---------- */
+  const TURMAS_MAT = ['Maternal', 'Pré I', 'Pré II', 'Pré III'];
+  const TEMA_MAT = { 'Maternal': ['#ef6c00', '#fff3e0'], 'Pré I': ['#2e7d32', '#e8f5e9'], 'Pré II': ['#1565c0', '#e3f2fd'], 'Pré III': ['#6a1b9a', '#f3e5f5'] };
+  const COR_GRUPO = ['#1e88e5', '#ef6c00', '#8e24aa', '#2e7d32', '#e53935', '#00897b'];
+  const icoGrupo = n => { const k = normal(n); return /arte|pintur/.test(k) ? '🎨' : /leitur|livr|brinc/.test(k) ? '📚' : /higien/.test(k) ? '🧼' : /pessoal|lanche/.test(k) ? '🎒' : /escolar|caderno/.test(k) ? '✏️' : '📦'; };
+  const MAT_MATERNAL = `## Material escolar
+02 - Caderno brochura
+01 - Caderno de desenho grande
+02 - Lápis jumbo
+01 - Caixa de lápis de madeira
+01 - Tesoura pequena
+01 - Cola branca grande
+01 - Resma de papel A4 (500 folhas)
+01 - Caixa para armazenar o material do aluno
+## Artes e pintura
+01 - Caixa de giz de cera grande (6 unid.)
+01 - Caixa de porosa grande (6 unid.)
+02 - Caixas de tinta guache
+01 - Pincel nº 14
+01 - Caixa de massa de modelar grande (12 unid.)
+01 - Avental
+01 - Pacote de palito de picolé
+01 - Pacote de prendedor de madeira
+05 - Metros de TNT azul-escuro (grosso)
+04 - Papel crepom: 02 amarelo, 02 vermelho e 02 verde
+01 - Lã azul-escuro e vermelho
+03 - Pacotes de balões: 01 verde
+## Leitura e brincadeiras
+02 - Livros de história
+01 - Brinquedo pedagógico (de encaixe)
+## Higiene e uso pessoal
+01 - Sabonete líquido
+01 - Creme dental
+01 - Escova de dente
+01 - Toalhinha para o lanche
+01 - Garrafinha para água ou copo`;
+  const OBS_MAT = 'Todo o material deve vir marcado com o nome do aluno.';
+  const gruposMat = t => { const gs = []; let g = null; (t || '').split('\n').map(x => x.trim()).filter(Boolean).forEach(l => { if (l.startsWith('##')) { g = { n: l.slice(2).trim(), l: [] }; gs.push(g); return; } if (!g) { g = { n: 'Material', l: [] }; gs.push(g); } const m = /^(\d+)\s*[-–—]?\s*(.*)$/.exec(l); g.l.push(m ? [m[1].padStart(2, '0'), m[2]] : ['', l]); }); return gs; };
+  TIPOS.material = {
+    nome: 'Lista de material', icone: '🎒', desc: 'Lista de material escolar por turma, com arte para entregar às famílias', setores: ['secretaria', 'coordenacao', 'avisos'],
+    titulo: d => `Lista de material ${d.ano || ''} — ${d.turma || ''}`,
+    novo: () => ({ ano: String(new Date().getFullYear() + 1), turma: 'Maternal', itens: MAT_MATERNAL, obs: OBS_MAT, local: 'Trav. Padre Sátiro, 442, São Manoel — São Miguel do Guamá', contato: '(91) 9 8124-8323', data: hoje() }),
+    form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma || 'Maternal', TURMAS_MAT))}${lab('Ano letivo', inp('ano', d.ano))}${lab('Entregar até', inp('prazo', d.prazo, '', 'date'))}</div>
+      ${lab('Materiais <small>(linhas com ## viram grupos; cada item: quantidade - descrição)</small>', `<textarea id="itens" data-ed="sem" rows="16">${esc(d.itens || '')}</textarea>`, 1)}
+      <div class="g2">${lab('Observação importante', inp('obs', d.obs))}${lab('Informações (telefone)', inp('contato', d.contato))}</div>
+      ${lab('Local de entrega', inp('local', d.local), 1)}`,
+    campos: ['turma', 'ano', 'prazo', 'itens', 'obs', 'contato', 'local', 'data'],
+    arte: d => ({ estilo: 'folha', titulo: 'Lista de Material', curto: 'Lista de Material — ' + (d.turma || ''), placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
+    doc: d => { const [cor, claro] = TEMA_MAT[d.turma] || TEMA_MAT.Maternal; const gs = gruposMat(d.itens);
+      const cols = [[], []], tam = [0, 0]; gs.map((g, i) => Object.assign(g, { c: COR_GRUPO[i % COR_GRUPO.length] })).sort((a, b) => b.l.length - a.l.length).forEach(g => { const k = tam[0] <= tam[1] ? 0 : 1; cols[k].push(g); tam[k] += g.l.length + 1.5; });
+      cols.forEach(c => c.sort((a, b) => gs.indexOf(a) - gs.indexOf(b)));
+      const bloco = g => `<div class="ml-grp" style="border-color:${g.c}"><p class="ml-gh" style="background:${g.c};color:#ffffff">${icoGrupo(g.n)} ${esc(g.n.toUpperCase())}</p>${g.l.map(([q, x]) => `<p class="ml-i"><span class="ml-ck">☐</span> ${q ? `<b class="ml-q" style="color:${g.c}">${esc(q)}</b> ` : ''}${esc(x)}</p>`).join('')}</div>`;
+      const n = gs.reduce((s, g) => s + g.l.length, 0);
+      return `${cab('LISTA DE MATERIAL')}<table class="ml-top" width="100%"><tr><td width="72%" class="ml-tx"><p class="ml-ola">Querida família,</p><p class="ml-txt">preparamos com carinho a lista de materiais que vai acompanhar a criança nas descobertas e brincadeiras do ano letivo de ${esc(d.ano || '')}. São ${n} itens; marque cada um conforme for comprando! 🎒✨</p></td><td width="3%"></td>
+        <td width="25%" align="center" class="ml-tur" style="background:${cor};color:#ffffff"><small style="color:#ffffff">TURMA</small><br><b style="color:#ffffff;font-size:15pt">${esc((d.turma || '').toUpperCase())}</b><br><small style="color:#ffffff">ANO LETIVO ${esc(d.ano || '')}</small></td></tr></table>
+        <table class="ml-g" width="100%"><tr><td width="49%" valign="top">${cols[0].map(bloco).join('')}</td><td width="2%"></td><td width="49%" valign="top">${cols[1].map(bloco).join('')}</td></tr></table>
+        <table class="ml-av" width="100%"><tr>${[['🏷️', 'ATENÇÃO', d.obs || OBS_MAT], ['📅', 'ENTREGA', d.prazo ? `Até ${fmt(d.prazo)}` : 'Até ___/___/_____'], ['📍', 'ONDE ENTREGAR', d.local || ''], ['📞', 'INFORMAÇÕES', d.contato || '']].map(([ic, r, x], i) => `<td width="${[31, 18, 31, 20][i]}%" style="background:${i % 2 ? claro : '#f3f7fe'};color:#1d2b4f"><small style="color:${cor}">${ic} ${r}</small><br>${esc(x)}</td>`).join('')}</tr></table>
+        <p class="ml-fim" style="color:${cor}">Obrigado pela parceria! Juntos, fazemos a diferença na vida dos nossos pequenos. 💛</p>`; }
+  };
+  TIPOS.material.prontos = [{ nome: 'Lista de material 2027 — Maternal', sub: 'Entrega até 15/01/2027', dados: { ano: '2027', turma: 'Maternal', itens: MAT_MATERNAL, prazo: '2027-01-15' } }];
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
     nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao', 'financeiro'], fin: ['pag'],
@@ -1575,7 +1635,7 @@ Prática e tira-dúvidas`;
         <div class="acoes"><button class="b main" data-ver="${d.id}">👁 Ver</button><button class="b" data-imp="${d.id}">🖨 Imprimir</button><button class="b" data-ed="${d.id}">✏️ Editar</button><button class="b" data-word="${d.id}">⬇ Word</button><button class="b" data-pdf="${d.id}">⬇ PDF</button><button class="b" data-dup="${d.id}">Duplicar</button><button class="b ghost" data-del="${d.id}">Excluir</button></div></article>`).join('')}</div>`
         : `<p class="dica">${t.prontos ? 'Toque em “Usar este” para aproveitar um pronto, ou em “Novo” para criar o seu.' : 'Nenhum documento ainda. Toque em “Novo” para começar.'}</p>`}`;
     $('#verModelo').onclick = () => { const o = finPadrao(Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, fg ? { grupo: fg } : {}, fs ? { sub: fs } : {}, t.novo(lista.filter(doSeg)))); if (seg && o.turma !== undefined) o.turma = SEGS[seg].turmas[0]; if (etapa && o.turma !== undefined) o.turma = ETAPAS[etapa].turmas[0]; verPrevia(o, 'Modelo em branco — toque em “Novo” para preencher'); };
-    const doPronto = i => Object.assign({ tipo, setor: SETOR }, t.novo(lista.filter(doSeg)), t.prontos[i].dados);
+    const doPronto = i => Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, t.novo(lista.filter(doSeg)), t.prontos[i].dados);
     p.querySelectorAll('[data-pver]').forEach(b => { b.onclick = () => verPrevia(doPronto(+b.dataset.pver), 'Documento pronto — toque em “Usar este” para salvar, editar, baixar ou imprimir'); });
     p.querySelectorAll('[data-pusar]').forEach(b => { b.onclick = () => { edit = doPronto(+b.dataset.pusar); tela(); }; });
     $('#novoDoc').onclick = () => { edit = finPadrao(Object.assign({ tipo, setor: SETOR }, seg ? { seg } : {}, fg ? { grupo: fg } : {}, fs ? { sub: fs } : {}, t.novo(lista.filter(doSeg)))); if (seg && edit.turma !== undefined) edit.turma = SEGS[seg].turmas[0]; if (etapa && edit.turma !== undefined) edit.turma = ETAPAS[etapa].turmas[0]; tela(); };
