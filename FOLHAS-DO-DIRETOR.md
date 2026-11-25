@@ -11,8 +11,9 @@ Elas **não devem ir para o site** até o usuário dizer exatamente:
 - Melhorias do "Baixar Word" (arte completa, larguras fixas, quadros de resposta etc.)
 
 ## Como publicar (quando autorizado)
-1. Juntar este ramo ao `main` (merge de `folhas-do-diretor`).
-2. Antes, tirar este arquivo `FOLHAS-DO-DIRETOR.md` do merge.
-3. Enviar ao `main` e acompanhar o "Publicar Biblioteca SEI".
+O código já está no `main` desde 25/11/2026, mas os três tipos ficam escondidos
+pela lista `OCULTOS` em `docs.js` (`avprof`, `avaluno`, `equipe`).
+1. No `main`, esvaziar `OCULTOS` (ou tirar só o que for liberado) e subir a versão de `docs.js` e do `sw.js`.
+2. Enviar ao `main` e acompanhar a publicação.
 
 Os arquivos Word já entregues ao diretor foram gerados a partir deste ramo.
