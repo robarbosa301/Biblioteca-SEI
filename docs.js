@@ -937,8 +937,8 @@ Prática e tira-dúvidas`;
   TIPOS.presenca.prontos = [{ nome: 'Presença — PPP com as famílias', sub: '23/11/2026, às 9h · 58 linhas (3 páginas)', dados: { dia: '2026-11-23', hora: '09:00', resp: 'Gestão Educacional', linhas: '58' } }, { nome: 'Presença — Oficina da Biblioteca Digital', sub: 'Funcionários · 23/11/2026 · 37 linhas (2 páginas)', dados: { evento: OF_D.evento, publico: 'Funcionários', dia: '2026-11-23', resp: 'Direção Pedagógica', linhas: '37' } }];
   TIPOS.escuta.prontos = [{ nome: 'Escuta das famílias — PPP 2026', sub: 'Para o encontro de 23/11/2026', dados: { ano: '2026' } }];
   /* ---------- lista de material (Educação Infantil) ---------- */
-  const TURMAS_MAT = ['Maternal', 'Pré I', 'Pré II', 'Pré III'];
-  const TEMA_MAT = { 'Maternal': ['#ef6c00', '#fff3e0'], 'Pré I': ['#2e7d32', '#e8f5e9'], 'Pré II': ['#1565c0', '#e3f2fd'], 'Pré III': ['#6a1b9a', '#f3e5f5'] };
+  const TURMAS_MAT = ['Maternal', 'Pré I', 'Pré II', 'Pré III', '1º ano', '2º ano', '3º ano', '4º ano', '5º ano'];
+  const TEMA_MAT = { 'Maternal': ['#ef6c00', '#fff3e0'], 'Pré I': ['#2e7d32', '#e8f5e9'], 'Pré II': ['#1565c0', '#e3f2fd'], 'Pré III': ['#6a1b9a', '#f3e5f5'], '1º ano': ['#c62828', '#ffebee'], '2º ano': ['#00838f', '#e0f7fa'], '3º ano': ['#ad1457', '#fce4ec'], '4º ano': ['#283593', '#e8eaf6'], '5º ano': ['#00695c', '#e0f2f1'] };
   const MAT_MATERNAL = `01 - Pacote de palito de picolé
 02 - Livros de história
 01 - Brinquedo pedagógico (encaixe)
@@ -966,9 +966,174 @@ Prática e tira-dúvidas`;
 03 - Pacotes de balões: 01 verde
 01 - Caixa de lápis de madeira
 02 - Cadernos brochura`;
+  const MAT_TURMAS = { 'Maternal': MAT_MATERNAL, 'Pré I': `01 - Caderno de desenho grande
+05 - Bastões de cola quente (grossa)
+02 - Colas de isopor grandes
+01 - Caixa de giz de cera grande (06 unid.)
+01 - Caixa de porosa grande (06 unid.)
+02 - Lápis
+02 - Borrachas de lápis
+01 - Pincel (nº 14)
+02 - Caixas de tinta guache
+01 - Avental
+01 - Caixa de massa de modelar grande (12 unid.)
+01 - Tesoura pequena
+01 - Resma de papel A4 (500 fls)
+05 - Metros de TNT preto grosso
+06 - Papel crepom: 02 verde, 02 azul, 02 vermelho
+01 - Lã vermelha
+01 - Sabonete líquido
+01 - Creme dental
+01 - Escova de dente
+01 - Caixa para armazenar o material
+01 - Toalhinha para o lanche
+01 - Garrafinha para água ou copo
+03 - Pacotes de balão amarelo
+02 - Cadernos
+01 - Caixa de lápis de cor de madeira
+01 - Palito de picolé
+01 - Jogo pedagógico
+01 - Livro de história
+01 - Prendedor de madeira
+01 - Algodão`, 'Pré II': `01 - Estojo
+01 - Caderno de desenho grande
+02 - Cadernos brochura
+02 - Colas de isopor grandes
+01 - Pacote de palito de picolé
+01 - Caixa de giz de cera grande (12 unid.)
+01 - Caixa de lápis de madeira
+02 - Caixas de porosa grande (12 unid.)
+03 - Lápis
+03 - Borrachas
+01 - Pincel
+02 - Caixas de tinta guache
+01 - Avental
+01 - Caixa de massa de modelar grande (12 unid.)
+01 - Tesoura pequena
+01 - Resma de papel A4 (500 fls)
+05 - Metros de TNT branco grosso
+01 - Papel crepom: 02 amarelo, 02 laranja, 02 verde
+01 - Lã azul
+01 - Sabonete líquido
+01 - Creme dental
+01 - Escova de dente
+01 - Caixa para armazenar o material do aluno
+01 - Toalhinha para o lanche
+01 - Garrafinha para água ou copo
+03 - Pacotes de balões azuis
+01 - Prendedor de madeira
+01 - Livro de história
+01 - Brinquedo pedagógico`, '1º ano': `02 - Cadernos brochura
+01 - Caderno de desenho grande
+01 - Caderno de caligrafia pequeno (somente com linhas)
+01 - Caderno pequeno (agenda)
+01 - Cola de isopor grande
+01 - Apontador
+02 - Canetas pretas
+02 - Canetas azuis
+03 - Lápis
+02 - Borrachas
+01 - Tesoura ponta redonda
+01 - Caixa de tinta guache
+01 - Caixa de hidrocor
+01 - Caixa de lápis de cor
+03 - Metros de TNT branco
+01 - Pincel
+01 - Resma de papel A4 (500 fls)
+03 - Pacotes de balão colorido
+01 - Fita espuma adesiva`, '2º ano': `04 - Cadernos brochura grandes
+01 - Caderno de caligrafia pequeno (só com linhas)
+01 - Caderno de desenho grande
+05 - Bastões de cola quente fino
+01 - Cola branca grande
+01 - Cola de isopor grande
+01 - Caixa de porosa grande (12 unid.)
+01 - Caixa de lápis de cor grande (12 unid.)
+03 - Lápis
+02 - Borrachas
+01 - Pincel (nº 14)
+01 - Caixa de tinta guache
+01 - Tesoura pequena
+01 - Resma de papel A4 (500 fls)
+05 - Metros de TNT vermelho grosso
+03 - Papel crepom: 01 vermelho, 01 amarelo, 01 verde
+03 - Pacotes de balão azul
+01 - Caixa para armazenar o material do aluno
+01 - Toalhinha para o lanche
+01 - Garrafinha para água ou copo
+03 - Pacotes de balão vermelho
+01 - Fita espuma dupla face`, '3º ano': `01 - Caderno de desenho grande
+01 - Caderno de caligrafia pequeno (só com linhas)
+05 - Cadernos brochura
+05 - Bastões de cola quente fino
+01 - Cola de isopor grande
+01 - Caixa de lápis de cor grande (12 unid.)
+01 - Caixa de porosa grande (12 unid.)
+05 - Lápis
+05 - Borrachas de lápis
+01 - Pincel (nº 14)
+01 - Caixa de tinta guache
+01 - Tesoura pequena
+01 - Resma de papel A4 (500 fls)
+05 - Metros de TNT verde
+04 - Papel crepom: 02 azul, 02 laranja
+03 - Pacotes de balão azul-escuro
+01 - Caixa para armazenar o material do aluno
+01 - Toalhinha para o lanche
+01 - Garrafinha para água ou copo
+01 - Apontador de lápis
+01 - Régua
+02 - Canetas azuis
+02 - Canetas pretas
+01 - Livro infantil
+01 - Fita adesiva banana`, '4º ano': `05 - Cadernos brochura grandes
+01 - Caderno de caligrafia pequeno (só com linhas)
+01 - Caderno de desenho grande
+05 - Bastões de cola quente fino
+01 - Cola de isopor grande
+01 - Caixa de giz de cera grande (12 unid.)
+05 - Caixas de porosa grande (12 unid.)
+05 - Lápis
+02 - Borrachas de lápis
+02 - Canetas azuis
+02 - Canetas pretas
+01 - Pincel (nº 14)
+01 - Caixa de tinta guache
+01 - Tesoura pequena
+01 - Resma de papel A4 (500 fls)
+05 - Metros de TNT amarelo
+03 - Papel crepom: 01 branco, 01 azul, 01 vermelho
+03 - Pacotes de balão branco
+01 - Caixa para armazenar os materiais
+01 - Toalhinha para o lanche
+01 - Garrafa para água ou copo
+01 - Kit de réguas (pequeno)
+01 - Material dourado (pequeno)
+01 - Fita espuma adesiva`, '5º ano': `04 - Cadernos brochura
+01 - Caderno de desenho grande
+01 - Caderno de caligrafia grande (somente com linhas)
+01 - Caderno pequeno (agenda)
+01 - Cola de isopor grande
+01 - Apontador
+02 - Canetas pretas
+02 - Canetas azuis
+03 - Lápis
+02 - Borrachas
+01 - Tesoura ponta redonda
+01 - Caixa de tinta guache
+01 - Caixa de hidrocor
+01 - Caixa de lápis de cor
+03 - Metros de TNT amarelo
+01 - Pincel
+01 - Resma de papel A4 (500 fls)
+03 - Pacotes de balões pretos
+01 - Garrafa para água ou copo
+01 - Toalhinha para o lanche
+01 - Fita espuma adesiva dupla face
+01 - Kit de réguas (pequeno)` };
   const OBS_MAT = 'Todo o material deve vir marcado com o nome do aluno.';
   TIPOS.material = {
-    nome: 'Lista de material', icone: '🎒', desc: 'Lista de material escolar por turma, simples e econômica (2 por folha)', setores: ['secretaria', 'coordenacao', 'avisos'],
+    nome: 'Lista de material', icone: '🎒', desc: 'Lista de material por turma (Educação Infantil e Anos Iniciais), simples e econômica: 2 por folha', setores: ['secretaria', 'coordenacao', 'avisos'],
     titulo: d => `Lista de material ${d.ano || ''} — ${d.turma || ''}`,
     novo: () => ({ ano: String(new Date().getFullYear() + 1), turma: 'Maternal', itens: '', obs: OBS_MAT, local: 'Trav. Padre Sátiro, 442, São Manoel — São Miguel do Guamá', contato: '(91) 9 8124-8323', copias: '2', data: hoje() }),
     form: d => `<div class="g3">${lab('Turma', sel('turma', d.turma || 'Maternal', TURMAS_MAT))}${lab('Ano letivo', inp('ano', d.ano))}${lab('Entregar até', inp('prazo', d.prazo, '', 'date'))}</div>
@@ -976,16 +1141,17 @@ Prática e tira-dúvidas`;
       <div class="g2">${lab('Observação importante', inp('obs', d.obs))}${lab('Informações (telefone)', inp('contato', d.contato))}</div>
       <div class="g2">${lab('Local de entrega', inp('local', d.local))}${lab('Listas por folha', sel('copias', d.copias || '2', ['2', '1']))}</div>`,
     campos: ['turma', 'ano', 'prazo', 'itens', 'obs', 'contato', 'local', 'copias', 'data'],
-    arte: d => ({ estilo: 'folha', metades: d.copias !== '1', titulo: 'Lista de Material', curto: `Lista de Material ${d.ano || ''}`, placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: d.copias !== '1' ? [['Turma', d.turma || ''], ['Entrega', d.prazo ? 'até ' + fmt(d.prazo) : '']] : [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
+    depois: () => { const it = $('#itens'); const usa = () => { const atual = it.value.trim(); if (!atual || Object.values(MAT_TURMAS).some(x => x.trim() === atual)) it.value = MAT_TURMAS[v('turma')] || ''; it.dispatchEvent(new Event('input', { bubbles: true })); }; $('#turma').addEventListener('change', usa); if (!it.value.trim()) usa(); },
+    arte: d => ({ estilo: 'folha', metades: d.copias !== '1', titulo: 'Lista de Material', curto: `Lista de Material ${d.ano || ''}`, placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: d.copias !== '1' ? [['Turma', d.turma || ''], ['Entrega', d.prazo ? 'até ' + fmt(d.prazo) : '']] : [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', /ano/.test(d.turma || '') ? 'Anos Iniciais' : 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
     doc: d => { const [cor] = TEMA_MAT[d.turma] || TEMA_MAT.Maternal, dois = d.copias !== '1';
       const its = (d.itens || '').split('\n').map(x => x.trim()).filter(x => x && !x.startsWith('##')).map(l => { const m = /^(\d+)\s*[-–—]?\s*(.*)$/.exec(l); return m ? [m[1].padStart(2, '0'), m[2]] : ['', l]; });
-      const meio = Math.ceil(its.length / 2), col = a => a.map(([q, x]) => `<p class="ml-i"><span class="ml-ck">☐</span> ${q ? `<b class="ml-q" style="color:${cor}">${esc(q)}</b> ` : ''}${esc(x)}</p>`).join('');
+      const meio = Math.ceil(its.length / 2), tamI = its.length > 27 ? ' ml-id' : its.length <= 22 ? ' ml-ig' : '', col = a => a.map(([q, x]) => `<p class="ml-i${tamI}"><span class="ml-ck">☐</span> ${q ? `<b class="ml-q" style="color:${cor}">${esc(q)}</b> ` : ''}${esc(x)}</p>`).join('');
       const um = `<div class="doc-aviso ml-via${dois ? ' ml-2' : ''}">${cab('LISTA DE MATERIAL')}${dois ? '' : `<h2 class="ml-tit" style="color:${cor}">Materiais para ${esc(d.ano || '')}</h2>`}
         <table class="ml-g" width="100%"><tr><td width="50%" valign="top">${col(its.slice(0, meio))}</td><td width="50%" valign="top">${col(its.slice(meio))}</td></tr></table>
         <p class="ml-rod" style="border-color:${cor}"><b style="color:${cor}">⚠️ ${esc(d.obs || OBS_MAT)}</b><br>${dois ? '' : `📅 Entregar na escola até <b>${d.prazo ? fmt(d.prazo) : '___/___/_____'}</b> · `}📍 Entregar em: ${esc(d.local || '')} · 📞 ${esc(d.contato || '')}</p></div>`;
       return dois ? `<div class="doc-2 metade">${um}<div class="ml-gap"></div>${um}</div>` : um; }
   };
-  TIPOS.material.prontos = [{ nome: 'Lista de material 2027 — Maternal', sub: 'Entrega até 15/01/2027 · 2 listas por folha', dados: { ano: '2027', turma: 'Maternal', itens: MAT_MATERNAL, prazo: '2027-01-15', copias: '2' } }];
+  TIPOS.material.prontos = Object.keys(MAT_TURMAS).map(t => ({ nome: 'Lista de material 2027 — ' + t, sub: 'Entrega até 15/01/2027 · 2 listas por folha', dados: { ano: '2027', turma: t, itens: MAT_TURMAS[t], prazo: '2027-01-15', copias: '2' } }));
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   TIPOS.frequencia = {
     nome: 'Frequência de funcionários', icone: '🕘', desc: 'Folha de ponto do mês (uma página por funcionário)', setores: ['secretaria', 'coordenacao', 'financeiro'], fin: ['pag'],
