@@ -613,3 +613,8 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .ml-2 .ml-i{font-size:9.2pt;padding:.55mm 1mm}.ml-2 .ml-tit{margin:1mm 0 1.4mm;font-size:12pt}.ml-2 .ml-rod{margin-top:1.4mm;padding:1.1mm 2.4mm}
 .ml-2 .ml-i{font-size:9pt;line-height:1.15;padding:.42mm 1mm}.ml-2 .ml-tit{margin:.6mm 0 1mm}
 .ml-2 .ml-i{padding:.28mm 1mm}.ml-2 .ml-rod{line-height:1.3;margin-top:1mm}
+/* 2 por folha cortando exatamente no meio (A5 + A5) */
+.doc-2.metade .doc-aviso,body.folha #imprimir .doc-2.metade .doc-aviso,.sei-pdf .doc-2.metade .doc-aviso{height:106mm;overflow:hidden}
+.doc-2.metade .ml-gap{height:39.5mm}
+.doc-2.metade .ml-tit{margin-top:0}
+.doc-2.metade .doc-aviso,body.folha #imprimir .doc-2.metade .doc-aviso,.sei-pdf .doc-2.metade .doc-aviso{height:105mm}.doc-2.metade .ml-gap{height:43.5mm}

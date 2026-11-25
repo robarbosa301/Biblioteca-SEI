@@ -976,14 +976,14 @@ Prática e tira-dúvidas`;
       <div class="g2">${lab('Observação importante', inp('obs', d.obs))}${lab('Informações (telefone)', inp('contato', d.contato))}</div>
       <div class="g2">${lab('Local de entrega', inp('local', d.local))}${lab('Listas por folha', sel('copias', d.copias || '2', ['2', '1']))}</div>`,
     campos: ['turma', 'ano', 'prazo', 'itens', 'obs', 'contato', 'local', 'copias', 'data'],
-    arte: d => ({ estilo: 'folha', titulo: 'Lista de Material', curto: `Lista de Material ${d.ano || ''} — ${d.turma || ''}`, placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
+    arte: d => ({ estilo: 'folha', metades: d.copias !== '1', titulo: 'Lista de Material', curto: `Lista de Material ${d.ano || ''} — ${d.turma || ''}`, placa: { grande: (d.turma || '').toUpperCase(), linhas: ['ANO LETIVO', d.ano || ''] }, campos: [['Turma', d.turma || ''], ['Ano letivo', d.ano || ''], ['Segmento', 'Educação Infantil'], ['Entrega', d.prazo ? fmt(d.prazo) : '']] }),
     doc: d => { const [cor] = TEMA_MAT[d.turma] || TEMA_MAT.Maternal, dois = d.copias !== '1';
       const its = (d.itens || '').split('\n').map(x => x.trim()).filter(x => x && !x.startsWith('##')).map(l => { const m = /^(\d+)\s*[-–—]?\s*(.*)$/.exec(l); return m ? [m[1].padStart(2, '0'), m[2]] : ['', l]; });
       const meio = Math.ceil(its.length / 2), col = a => a.map(([q, x]) => `<p class="ml-i"><span class="ml-ck">☐</span> ${q ? `<b class="ml-q" style="color:${cor}">${esc(q)}</b> ` : ''}${esc(x)}</p>`).join('');
       const um = `<div class="doc-aviso ml-via${dois ? ' ml-2' : ''}">${cab('LISTA DE MATERIAL')}<h2 class="ml-tit" style="color:${cor}">LISTA DE MATERIAL ${esc(d.ano || '')} — ${esc((d.turma || '').toUpperCase())}</h2>
         <table class="ml-g" width="100%"><tr><td width="50%" valign="top">${col(its.slice(0, meio))}</td><td width="50%" valign="top">${col(its.slice(meio))}</td></tr></table>
         <p class="ml-rod" style="border-color:${cor}"><b style="color:${cor}">⚠️ ${esc(d.obs || OBS_MAT)}</b><br>📅 Entregar na escola até <b>${d.prazo ? fmt(d.prazo) : '___/___/_____'}</b> · 📍 ${esc(d.local || '')} · 📞 ${esc(d.contato || '')}</p></div>`;
-      return dois ? `<div class="doc-2">${um}<hr class="doc-corte">${um}</div>` : um; }
+      return dois ? `<div class="doc-2 metade">${um}<div class="ml-gap"></div>${um}</div>` : um; }
   };
   TIPOS.material.prontos = [{ nome: 'Lista de material 2027 — Maternal', sub: 'Entrega até 15/01/2027 · 2 listas por folha', dados: { ano: '2027', turma: 'Maternal', itens: MAT_MATERNAL, prazo: '2027-01-15', copias: '2' } }];
   const DSEM = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
@@ -1103,7 +1103,7 @@ Prática e tira-dúvidas`;
   const cab0 = titulo => `<div class="sei-cab"><div class="sei-cab-tx"><strong class="${titulo.length > 24 ? 'duas' : ''}" style="font-size:${tamTit(titulo)}pt">${esc(titulo)}</strong></div></div><div class="sei-fita"><b>SISTEMA DE ENSINO INCENTIVO</b> · ${NOME_SETOR}${segDoc && SEGS[segDoc] ? ' — ' + SEGS[segDoc].nome : ''}</div>`;
   // Folha no estilo das folhas de aula (mascote, placa, título e barra). FOLHA é preenchido antes de imprimir/baixar.
   let FOLHA = null, titCap = null, nCab = 0;
-  const cab = titulo => { if (!titCap) titCap = titulo; if (!FOLHA) return cab0(titulo); return FOLHA.duas ? `<img class="folha-banda" src="${FOLHA.banda}" alt="">` : nCab++ ? '' : `<img class="folha-cab" src="${FOLHA.cab}" alt="">`; };
+  const cab = titulo => { if (!titCap) titCap = titulo; if (!FOLHA) return cab0(titulo); if (FOLHA.metades) return ''; return FOLHA.duas ? `<img class="folha-banda" src="${FOLHA.banda}" alt="">` : nCab++ ? '' : `<img class="folha-cab" src="${FOLHA.cab}" alt="">`; };
   const PEQ = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'em', 'para']);
   const tituloCaso = t => t.toLowerCase().split(' ').map((w, i) => i && PEQ.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const PLACA = { secretaria: ['SECRETARIA', 'ESCOLAR'], coordenacao: ['COORDENAÇÃO', 'PEDAGÓGICA'], avisos: ['AVISOS', 'E COMUNICADOS'], calendario: ['CALENDÁRIO', 'ESCOLAR'], horarios: ['HORÁRIOS', 'DE AULA'], financeiro: ['FINANCEIRO', 'SEI'] };
@@ -1122,7 +1122,7 @@ Prática e tira-dúvidas`;
     if (d.tipo === 'carteirinha' && window.seiFolha.cartaoFundo) CART_BG = { f: await seiFolha.cartaoFundo(false), v: await seiFolha.cartaoFundo(true) };
     if (TIPOS[d.tipo].livre) { const c = document.createElement('canvas'); c.width = 124; c.height = 175; const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, 124, 175); FOLHA = { fundo: c.toDataURL('image/jpeg'), cab: '', banda: '', livre: true }; nCab = 0; document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`); return; }
     if (TIPOS[d.tipo].arte) Object.assign(o, TIPOS[d.tipo].arte(d));
-    FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2' }); nCab = 0;
+    FOLHA = Object.assign(await window.seiFolha.compor(o), { duas: d.copias === '2', metades: !!o.metades }); nCab = 0;
     document.body.style.setProperty('--fundo-doc', `url(${FOLHA.fundo})`);
   }
   if (window.seiFolha) document.body.classList.add('folha');

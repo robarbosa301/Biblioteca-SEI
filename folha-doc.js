@@ -282,11 +282,19 @@
     const cab = cv.toDataURL('image/jpeg', .9);
     const fv = document.createElement('canvas'); fv.width = 1240; fv.height = 1754; x = fv.getContext('2d'); x.drawImage(f, 0, 0);
     // marca-d'água: a logo da escola, bem clara, no centro da área branca (todas as páginas)
-    if (o.agua === 'duas' && lt) { const w = 470, h = w * lt.height / lt.width; x.save(); x.globalAlpha = .07; [460, 1358].forEach(cy => x.drawImage(lt, 620 - w / 2, cy - h / 2, w, h)); x.restore(); }
+    if (o.metades) { /* marca-d'água em cada metade */ }
+    else if (o.agua === 'duas' && lt) { const w = 470, h = w * lt.height / lt.width; x.save(); x.globalAlpha = .07; [460, 1358].forEach(cy => x.drawImage(lt, 620 - w / 2, cy - h / 2, w, h)); x.restore(); }
     else if (o.agua !== false && lt) { const w = 760, h = w * lt.height / lt.width; x.save(); x.globalAlpha = .07; x.drawImage(lt, 620 - w / 2, 1000 - h / 2, w, h); x.restore(); }
+    if (o.metades && o.estilo === 'folha') { // duas metades iguais (A5) para cortar exatamente no meio
+      x.fillStyle = '#fff'; x.fillRect(0, 0, 1240, 1754);
+      [0, 877].forEach(dy => { x.save(); x.translate(0, dy); x.drawImage(f, 0, 0, 1240, 700, 0, 0, 1240, 700); x.drawImage(f, 0, 1577, 1240, 177, 0, 700, 1240, 177);
+        if (lt) { const w = 380, h = w * lt.height / lt.width; x.save(); x.globalAlpha = .06; x.drawImage(lt, 620 - w / 2, 470 - h / 2, w, h); x.restore(); }
+        banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2)); rodape(x, ...(o.rodape || ['', '']), o.num || '', 838, 1175); x.restore(); });
+      x.save(); x.strokeStyle = 'rgba(255,255,255,.85)'; x.lineWidth = 2; x.setLineDash([14, 10]); x.beginPath(); x.moveTo(0, 877); x.lineTo(1240, 877); x.stroke(); x.restore();
+    } else {
     if (o.estilo === 'folha') banda(x, o.curto || o.titulo, (o.rodape || []).filter(Boolean).join(' — '), (o.campos || []).filter(cp => cp[1]).slice(0, 2));
     else bandaFormal(x, o, lt);
-    rodape(x, ...(o.rodape || ['', '']), o.num || '', 1715, 1175);
+    rodape(x, ...(o.rodape || ['', '']), o.num || '', 1715, 1175); }
     const fundo = fv.toDataURL('image/jpeg', .88);
     // faixa de cima da folha 2 (para os avisos com 2 cópias por folha)
     const bv = document.createElement('canvas'); if (o.estilo === 'folha') { bv.width = 1240; bv.height = 146; bv.getContext('2d').drawImage(fv, 0, 0); } else { bv.width = 1172; bv.height = 132; bv.getContext('2d').drawImage(fv, 34, 8, 1172, 132, 0, 0, 1172, 132); }
