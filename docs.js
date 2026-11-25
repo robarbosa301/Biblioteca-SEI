@@ -937,7 +937,7 @@ Prática e tira-dúvidas`;
   TIPOS.presenca.prontos = [{ nome: 'Presença — PPP com as famílias', sub: '23/11/2026, às 9h · 58 linhas (3 páginas)', dados: { dia: '2026-11-23', hora: '09:00', resp: 'Gestão Educacional', linhas: '58' } }, { nome: 'Presença — Oficina da Biblioteca Digital', sub: 'Funcionários · 23/11/2026 · 37 linhas (2 páginas)', dados: { evento: OF_D.evento, publico: 'Funcionários', dia: '2026-11-23', resp: 'Direção Pedagógica', linhas: '37' } }];
   TIPOS.escuta.prontos = [{ nome: 'Escuta das famílias — PPP 2026', sub: 'Para o encontro de 23/11/2026', dados: { ano: '2026' } }];
   /* ---------- lista de material (Educação Infantil) ---------- */
-  const TURMAS_MAT = ['Maternal', 'Pré I', 'Pré II', 'Pré III', '1º ano', '2º ano', '3º ano', '4º ano', '5º ano'];
+  const TURMAS_MAT = ['Maternal', 'Pré I', 'Pré II', '1º ano', '2º ano', '3º ano', '4º ano', '5º ano'];
   const TEMA_MAT = { 'Maternal': ['#ef6c00', '#fff3e0'], 'Pré I': ['#2e7d32', '#e8f5e9'], 'Pré II': ['#1565c0', '#e3f2fd'], 'Pré III': ['#6a1b9a', '#f3e5f5'], '1º ano': ['#c62828', '#ffebee'], '2º ano': ['#00838f', '#e0f7fa'], '3º ano': ['#ad1457', '#fce4ec'], '4º ano': ['#283593', '#e8eaf6'], '5º ano': ['#00695c', '#e0f2f1'] };
   const MAT_MATERNAL = `01 - Pacote de palito de picolé
 02 - Livros de história
@@ -954,7 +954,7 @@ Prática e tira-dúvidas`;
 01 - Tesoura pequena
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT azul-escuro (grosso)
-04 - Papel crepom: 02 amarelo, 02 vermelho e 02 verde
+06 - Papel crepom: 02 amarelo, 02 vermelho e 02 verde
 01 - Lã azul-escuro e vermelho
 01 - Pacote de prendedor de madeira
 01 - Sabonete líquido
@@ -963,7 +963,7 @@ Prática e tira-dúvidas`;
 01 - Caixa para armazenar o material do aluno
 01 - Toalhinha para o lanche
 01 - Garrafinha para água ou copo
-03 - Pacotes de balões: 01 verde
+03 - Pacotes de balões coloridos
 01 - Caixa de lápis de madeira
 02 - Cadernos brochura`;
   const MAT_TURMAS = { 'Maternal': MAT_MATERNAL, 'Pré I': `01 - Caderno de desenho grande
@@ -1012,7 +1012,7 @@ Prática e tira-dúvidas`;
 01 - Tesoura pequena
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT branco grosso
-01 - Papel crepom: 02 amarelo, 02 laranja, 02 verde
+06 - Papel crepom: 02 amarelo, 02 laranja e 02 verde
 01 - Lã azul
 01 - Sabonete líquido
 01 - Creme dental
