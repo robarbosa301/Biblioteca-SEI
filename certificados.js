@@ -161,7 +161,7 @@
     baixar(await docx(corpo, [], cabs), `Certificados-${st.bim}-Bimestre-${st.ano}.docx`);
   }
   // posições (mm) do texto no certificado — as mesmas do CSS (.ca-para, .ca-nome, .ca-msg)
-  const Mm = { para: 86, lParaN: 8, lNome: 22, antesMsg: 3, lMsg: 8.2, lado: 30, msgRec: 0 };
+  const Mm = { para: 89, lParaN: 8, lNome: 22, antesMsg: 3, lMsg: 8.2, lado: 30, msgRec: 0 };
   async function medalhasWord(aviso) {
     const l = lista(); if (!l.length) return alert('Coloque pelo menos um nome.'); aviso('⏳ Desenhando…'); const imgs = await medalhasImgs(), g = grade(), midias = [], rid = {};
     for (const t of Object.keys(imgs)) { rid[t] = 'rM' + t; midias.push({ arq: `medalha-${t}.png`, rid: rid[t], dados: await (await fetch(imgs[t])).arrayBuffer() }); }
