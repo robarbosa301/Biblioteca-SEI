@@ -66,13 +66,17 @@
 .cz.festa .cz-acoes{background:rgba(255,255,255,.08);border-top:.08em solid rgba(255,255,255,.18);color:#e9eeff}
 .cz.leve .cz-acoes{background:#fff;border-top:.08em solid #e3e6f3;color:#140a52}
 .cz-acoes span:nth-child(2){flex:1}.cz-ic{letter-spacing:.2em}.cz-tags{color:#7df9ff;font-weight:700}.cz.leve .cz-tags{color:#007a90}
+.pr-nav{display:flex;gap:6px;max-width:1100px;margin:14px auto 0;padding:0 16px;flex-wrap:wrap}
+.pr-nav a{font:700 15px system-ui,Arial;border-radius:12px 12px 0 0;padding:10px 16px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none}
+.pr-nav a.on{background:#fff;color:#0b2a5b}
 </style>
 </head>
 <body>
 <header class="no-print">
   <a class="b" href="index.html">‹ Biblioteca</a>
-  <h1>🏆 Listão dos Aprovados <small>Painel em várias folhas A4</small></h1>
+  <h1>🏆 Premiação <small>Listão, certificados e medalhas</small></h1>
 </header>
+<nav class="pr-nav"><a href="listao.html" class="on">🎓 Listão dos aprovados</a><a href="certificados.html">🏅 Certificados e medalhas</a></nav>
 <main id="lt"></main>
 <footer class="no-print"><p>O rascunho fica guardado <b>neste aparelho</b>. Imprima sempre em <b>tamanho real (100%)</b>, depois corte nas marcas e monte o painel seguindo o número de cada folha.</p></footer>
 <script src="escola-dados.js?v=2"></script>
