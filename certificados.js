@@ -86,7 +86,7 @@
       <p class="ca-msg"${some}>${esc(msg(tipo))}</p>
       <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(0,217,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao">${esc(T.balao)}</div></div>
       <div class="ca-data">São Miguel do Guamá – PA, ____ de ___________ de ${esc(st.ano)}.</div><div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
-      <div class="ca-um"><img src="${umPng || UM}" alt=""></div>`;
+      <div class="ca-legal">Sistema de Ensino Incentivo · Credenciado pelo Certificado nº 059, de 17/04/2006<br>Autorizado pela Resolução nº 614, de 14/11/2024 – CEE/PA · Código INEP 15590798</div><div class="ca-um"><img src="${umPng || UM}" alt=""></div>`;
     return el;
   }
   // medalha redonda (desenhada a 60 mm e reduzida na folha)
