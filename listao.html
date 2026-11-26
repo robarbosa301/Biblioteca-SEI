@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Listão dos Aprovados · SEI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b2a5b">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="aulas.css?v=3-aval">
+<link rel="stylesheet" href="escola.css?v=2">
+<meta name="description" content="Monte o painel dos aprovados da escola em várias folhas A4.">
+<link rel="icon" type="image/png" href="favicon.png?v=2"><link rel="apple-touch-icon" href="assets/portal/apple-touch-icon.png?v=2">
+<style>
+@font-face{font-family:SeiRubik;src:url(assets/fonts/Rubik-ExtraBold.ttf)}@font-face{font-family:SeiPoppins;src:url(assets/fonts/Poppins-Bold.ttf)}
+.lt-turmas{display:flex;flex-direction:column;gap:12px}
+.lt-turma{background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(11,42,91,.10);border-left:6px solid var(--c,#1e4fb8);display:flex;flex-direction:column;gap:8px}
+.lt-turma .es-linha select,.lt-turma .es-linha input{font:inherit;padding:7px 10px;border:1px solid var(--bd);border-radius:9px}
+.lt-turma textarea{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:9px;min-height:130px;width:100%}
+.lt-prev{background:#0b2a5b;border-radius:14px;padding:12px;overflow:auto;text-align:center}
+.lt-prev canvas{max-width:100%;height:auto;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.lt-prev p{color:#dfeaff;margin:8px 0 0;font-size:14px}
+/* a arte (em milímetros) — estilo post, cores neon */
+.cz{position:relative;overflow:hidden;font-family:SeiPoppins,Arial,sans-serif;color:#0b1a4a;box-sizing:border-box;display:flex;flex-direction:column}
+.cz>*{position:relative}
+.cz .cz-disc{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.cz.festa{background:radial-gradient(circle at 12% 18%,rgba(255,43,214,.45) 0,rgba(255,43,214,0) 30%),radial-gradient(circle at 90% 22%,rgba(0,229,255,.4) 0,rgba(0,229,255,0) 32%),radial-gradient(circle at 50% 85%,rgba(157,92,255,.4) 0,rgba(157,92,255,0) 50%),linear-gradient(180deg,#160b5a 0,#0b0638 55%,#06031f 100%)}
+.cz.leve{background:linear-gradient(180deg,#fdf7ff 0,#f1f8ff 100%)}
+.cz-topo{display:flex;align-items:center;gap:.6em;flex:0 0 auto}
+.cz.festa .cz-topo{background:rgba(255,255,255,.08);border-bottom:.08em solid rgba(255,255,255,.18);color:#fff}
+.cz.leve .cz-topo{background:#fff;border-bottom:.08em solid #e3e6f3;color:#140a52}
+.cz-avatar{flex:0 0 auto;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .14em #ff2bd6,0 0 0 .28em #00d9ff}
+.cz-perfil{display:flex;flex-direction:column;line-height:1.15;flex:1}.cz-perfil small{font-size:.75em;opacity:.8}
+.cz-pontos{font-size:1.2em;opacity:.8;letter-spacing:.1em}
+.cz-hero{display:flex;align-items:center;flex:0 0 auto}
+.cz-palco{position:relative;flex:0 0 auto}
+.cz-podio{position:absolute;left:4%;right:4%;bottom:0;display:flex;align-items:flex-end;gap:2%}
+.cz-podio span{flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:.15em;border-radius:.25em .25em 0 0;font-family:SeiRubik,Arial Black,sans-serif;color:#fff}
+.cz-podio .g0{background:linear-gradient(180deg,#fff35c,#ffb400);color:#4a3200;box-shadow:0 0 .45em #ffd600}
+.cz-podio .g1{background:linear-gradient(180deg,#8ff8ff,#00a7c4);color:#003845;box-shadow:0 0 .45em #00d9ff}
+.cz-podio .g2{background:linear-gradient(180deg,#ff9be8,#d61fb0);box-shadow:0 0 .45em #ff2bd6}
+.cz-masc{position:absolute;left:50%;transform:translateX(-50%)}
+.cz-sombra{position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.35)}
+.cz-balao{position:absolute;background:#fff;color:#0b1a4a;border:.18em solid #ff2bd6;border-radius:1em 1em 1em .2em;line-height:1.2;text-align:center;padding:.45em .6em;box-shadow:0 0 .6em rgba(255,43,214,.8)}
+.cz-tit{flex:1;text-align:center;line-height:1;display:flex;flex-direction:column;align-items:center}
+.cz-tit .cz-grande{display:block;font-family:SeiRubik,Arial Black,sans-serif;color:#fff200;text-shadow:0 0 .06em #fff200,0 0 .18em #ff2bd6,0 .06em 0 #ff2bd6;letter-spacing:.01em}
+.cz.leve .cz-tit .cz-grande{color:#ff2bd6;text-shadow:0 .05em 0 #7a0a63,0 0 .15em rgba(255,43,214,.45)}
+.cz-chama{display:inline-block;color:#7df9ff;border:.12em solid #00e5ff;border-radius:99em;padding:.2em .9em;font-family:SeiRubik,Arial Black,sans-serif;text-shadow:0 0 .3em #00e5ff;box-shadow:0 0 .5em rgba(0,229,255,.7)}
+.cz.leve .cz-chama{color:#007a90;text-shadow:none;background:#e6fcff}
+.cz-pill{display:inline-block;font-style:normal;background:#ff2bd6;color:#fff;border-radius:99em;font-family:SeiRubik,Arial Black,sans-serif;padding:.08em .7em;box-shadow:0 0 .5em #ff2bd6}
+.cz-pill.t{background:#00d9ff;color:#06031f;box-shadow:0 0 .5em #00d9ff}.cz-pill.v{background:#39e600;color:#06210a;box-shadow:0 0 .5em #39e600}
+.cz-sub{display:block;color:#fff}.cz.leve .cz-sub{color:#140a52}
+.cz-falas{display:flex;gap:.6em;flex-wrap:wrap;justify-content:center}
+.cz-fala{background:#fff;color:#0b1a4a;border-radius:1em 1em 1em .2em;padding:.3em .8em;box-shadow:0 .15em .4em rgba(0,0,0,.3)}
+.cz-fala.f1{background:#e9fbff;border-radius:1em 1em .2em 1em}.cz-fala b{color:#d61fb0}.cz-fala.f1 b{color:#007a90}
+.cz-corpo{flex:1 1 auto;overflow:hidden;padding:0 .4%}
+.cz-bloco{background:rgba(255,255,255,.97);color:#0b1a4a;border-radius:.7em;overflow:hidden}
+.cz-faixa{display:flex;align-items:center;gap:.5em;padding:.35em .6em}
+.cz-faixa h3{margin:0;font-family:SeiRubik,Arial Black,sans-serif;font-weight:800;line-height:1.1;color:#0b1a4a;white-space:nowrap}
+.cz-grito{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;color:#0b1a4a;opacity:.85}
+.cz-qt{background:#0b1a4a;color:#fff;border-radius:99em;padding:.05em .6em;white-space:nowrap}
+.cz-nomes{display:flex;padding:.45em .55em .25em}
+.cz-bloco ol{margin:0;padding:0;list-style:none;line-height:1.25}
+.cz-bloco li{white-space:nowrap;overflow:hidden;border-radius:99em;border-left:.32em solid;padding:.12em .6em;margin-bottom:.22em;font-weight:700}
+.cz-acoes{flex:0 0 auto;display:flex;align-items:center;gap:1em;white-space:nowrap}
+.cz.festa .cz-acoes{background:rgba(255,255,255,.08);border-top:.08em solid rgba(255,255,255,.18);color:#e9eeff}
+.cz.leve .cz-acoes{background:#fff;border-top:.08em solid #e3e6f3;color:#140a52}
+.cz-acoes span:nth-child(2){flex:1}.cz-ic{letter-spacing:.2em}.cz-tags{color:#7df9ff;font-weight:700}.cz.leve .cz-tags{color:#007a90}
+.pr-nav{display:flex;gap:6px;max-width:1100px;margin:14px auto 0;padding:0 16px;flex-wrap:wrap}
+.pr-nav a{font:700 15px system-ui,Arial;border-radius:12px 12px 0 0;padding:10px 16px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none}
+.pr-nav a.on{background:#fff;color:#0b2a5b}
+</style>
+</head>
+<body>
+<header class="no-print">
+  <a class="b" href="index.html">‹ Biblioteca</a>
+  <h1>🏆 Premiação <small>Listão, certificados e medalhas</small></h1>
+</header>
+<nav class="pr-nav"><a href="listao.html" class="on">🎓 Listão dos aprovados</a><a href="certificados.html">🏅 Certificados e medalhas</a></nav>
+<main id="lt"></main>
+<footer class="no-print"><p>O rascunho fica guardado <b>neste aparelho</b>. Imprima sempre em <b>tamanho real (100%)</b>, depois corte nas marcas e monte o painel seguindo o número de cada folha.</p></footer>
+<script src="escola-dados.js?v=2"></script>
+<script src="listao.js?v=3"></script>
+<script src="offline.js?v=3"></script>
+</body>
+</html>
