@@ -7,7 +7,7 @@
   const V = 'assets/vendor/firebase/firebase-', VER = '-compat-10.14.1.js';
   const AREA = document.body.dataset.nuvem || 'equipe';
   const EQUIPE = ['direcao', 'secretaria', 'coordenacao', 'professor', 'aee', 'financeiro'], GESTAO = ['direcao', 'secretaria', 'coordenacao'];
-  const COLS = ['cronograma', 'pessoas', 'alunos', 'notas', 'frequencia'];
+  const COLS = ['cronograma', 'pessoas', 'alunos', 'notas', 'frequencia', 'boletins'];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const carregar = src => new Promise((ok, erro) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => erro(new Error('não carregou ' + src)); document.head.appendChild(s); });
 
@@ -56,7 +56,7 @@
   }
   async function enviarLocais(u) { // primeira vez neste aparelho: manda o que só existe aqui
     const chave = 'sei-enviado-' + u.email; if (localStorage.getItem(chave)) return;
-    const podeEscrever = col => u.perfil === 'direcao' || (GESTAO.includes(u.perfil) && col !== 'usuarios') || (u.perfil === 'professor' && ['notas', 'frequencia'].includes(col));
+    const podeEscrever = col => u.perfil === 'direcao' || (GESTAO.includes(u.perfil) && col !== 'usuarios') || (u.perfil === 'professor' && ['notas', 'frequencia', 'boletins'].includes(col));
     for (const col of COLS) { if (!podeEscrever(col)) continue; for (const o of await D.listar(col)) { try { const s = await ref(col, o.id).get(); if (!s.exists || (s.data().atualizado || 0) < (o.atualizado || 0)) await ref(col, o.id).set(limpo(o)); } catch (e) { console.warn('envio', col, e.code); } } }
     localStorage.setItem(chave, '1');
   }
@@ -103,6 +103,7 @@
   D.nuvem = {
     usuario: null, ligada: true,
     enviar: (col, o) => db ? ref(col, o.id).set(limpo(o)).catch(e => negado(e, col, o.id)) : Promise.resolve(),
+    mesclar: (col, id, patch) => db ? ref(col, id).set(limpo(patch), { merge: true }).catch(e => negado(e, col, id)) : Promise.resolve(),
     apagar: (col, id) => db ? ref(col, id).delete().catch(e => negado(e, col, id)) : Promise.resolve(),
     sair: () => auth && auth.signOut(),
     // administração de acessos (Direção)

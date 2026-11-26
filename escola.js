@@ -35,7 +35,7 @@
   let ano = anoAtual();
   const eu = () => D.usuario();
   const gestor = () => ['direcao', 'secretaria', 'coordenacao'].includes(eu().perfil);
-  async function carregar() { [pessoas, alunos, crono] = await Promise.all([D.listar('pessoas'), D.listar('alunos'), D.listar('cronograma')]); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
+  async function carregar() { [pessoas, alunos, crono, boletins, notasDocs, freqDocs] = await Promise.all(['pessoas', 'alunos', 'cronograma', 'boletins', 'notas', 'frequencia'].map(c => D.listar(c))); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
 
   /* ---------- regras do cronograma ---------- */
   const profsDe = it => pessoas.filter(p => p.ativo !== false && p.perfil === 'professor' && (!(it.etapas || []).length || !(p.etapas || []).length || p.etapas.some(e => it.etapas.includes(e))));
@@ -257,6 +257,65 @@
     alert(n ? n + ' professor(es) trazido(s) do Horário de aula. Complete o WhatsApp de cada um.' : 'Nenhum professor novo encontrado no Horário de aula deste aparelho.'); await desenhar();
   }
 
+  /* ---------- DIÁRIO: notas, frequência e relatórios ---------- */
+  const DISC_PAD = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Inglês', 'Arte', 'Educação Física', 'Estudos Amazônicos', 'Redação', 'Literatura', 'Biologia', 'Física', 'Química', 'Filosofia', 'Sociologia', 'Ensino Religioso'];
+  const AVAL = ['1ª Avaliação', '2ª Avaliação', '3ª Avaliação', '4ª Avaliação', 'Recuperação'], SEMESTRES = ['1º semestre', '2º semestre'];
+  let dTurma = '', dDisc = '', dModo = 'notas', dAv = '1ª Avaliação', dData = '', boletins = [], notasDocs = [], freqDocs = [];
+  const anoD = () => hoje().slice(0, 4); // diário: sempre o ano letivo em curso
+  const minhaPessoa = () => pessoas.find(p => p.id === eu().pessoaId);
+  function turmasMinhas() { const p = eu().perfil === 'professor' ? minhaPessoa() : null; return p && (p.etapas || []).length ? TURMAS.filter(t => p.etapas.includes(etapaDe(t))) : TURMAS; }
+  function discsMinhas() { const p = eu().perfil === 'professor' ? minhaPessoa() : null; if (p && (p.disciplinas || []).length) return p.disciplinas; const l = [...new Set(pessoas.flatMap(x => x.disciplinas || []).concat(DISC_PAD))]; return l; }
+  const daTurma = t => alunos.filter(a => a.turma === t && (a.situacao || 'Ativo') === 'Ativo');
+  const idNota = () => `${anoD()}|${dTurma}|${dDisc}|${dAv}`, idFreq = () => `${dTurma}|${dDisc}|${dData}`;
+  function telaDiario() {
+    if (!gestor() && dModo === 'bol') dModo = 'notas'; const ts = turmasMinhas(); if (!ts.includes(dTurma)) dTurma = ''; const ei = etapaDe(dTurma) === 'ei'; if (ei && dModo === 'notas') dModo = 'rel'; if (!ei && dModo === 'rel') dModo = 'notas';
+    if (!dData) dData = hoje(); const ds0 = discsMinhas(), ds = ei ? ['Turma (professora regente)'].concat(ds0.filter(d => /Física|Inglês|Arte/.test(d))) : ds0; if (dDisc && !ds.includes(dDisc)) dDisc = '';
+    let x = `<section class="es-sec"><h2>📒 Diário <small>${esc(eu().nome || '')}</small></h2>
+      <div class="es-g3" style="margin-bottom:12px"><label class="es-form" style="padding:8px">Turma<select id="d-turma"><option value="">Escolha…</option>${ts.map(t => `<option ${t === dTurma ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      ${dModo === 'bol' ? '' : `<label class="es-form" style="padding:8px">${ei ? 'Campo / professor(a)' : 'Disciplina'}<select id="d-disc"><option value="">Escolha…</option>${ds.map(d => `<option ${d === dDisc ? 'selected' : ''}>${esc(d)}</option>`).join('')}</select></label>`}</div>
+      <div class="es-sub">${(ei ? [['rel', '📝 Relatório'], ['freq', '✅ Frequência']] : [['notas', '📊 Notas'], ['freq', '✅ Frequência']]).concat(gestor() ? [['bol', '📋 Boletim da turma']] : []).map(([k, v]) => `<button data-dmodo="${k}" class="${k === dModo ? 'on' : ''}">${v}</button>`).join('')}</div>`;
+    if (!dTurma || (!dDisc && dModo !== 'bol')) return x + `<div class="es-vazio"><b>Escolha a turma${dModo === 'bol' ? '' : ' e a disciplina'}.</b>${alunos.length ? '' : 'Antes, cadastre os alunos na aba 👥 Cadastro.'}</div></section>`;
+    const al = daTurma(dTurma); if (!al.length) return x + '<div class="es-vazio"><b>Nenhum aluno ativo nesta turma.</b>Cadastre os alunos na aba 👥 Cadastro.</div></section>';
+    if (dModo === 'notas') { const doc = notasDocs.find(n => n.id === idNota()) || { valores: {} };
+      x += `<form class="es-form" id="d-fn"><div class="es-linha"><b>Avaliação</b> <select id="d-av" style="width:auto">${AVAL.map(a => `<option ${a === dAv ? 'selected' : ''}>${a}</option>`).join('')}</select>${doc.por ? `<span class="chip ok">salvo por ${esc(doc.por)}</span>` : ''}</div>
+        <ul class="es-pend">${al.map((a, i) => `<li><b>${i + 1}. ${esc(a.nome)}</b><input name="n_${a.id}" inputmode="decimal" style="width:90px" placeholder="0 a 10" value="${doc.valores[a.id] ?? ''}"></li>`).join('')}</ul>
+        <div class="es-acoes"><button class="b main">💾 Salvar notas</button></div></form>`; }
+    else if (dModo === 'freq') { const doc = freqDocs.find(f => f.id === idFreq()) || { faltas: [] }; const dias = freqDocs.filter(f => f.turma === dTurma && f.disciplina === dDisc).length;
+      x += `<form class="es-form" id="d-ff"><div class="es-linha"><b>Dia da aula</b> <input type="date" id="d-data" value="${dData}" style="width:auto"><span class="chip">${dias} aula${dias === 1 ? '' : 's'} registrada${dias === 1 ? '' : 's'}</span>${doc.por ? `<span class="chip ok">salvo por ${esc(doc.por)}</span>` : ''}</div>
+        <p class="es-dica">Todos começam <b>presentes</b>. Toque em quem <b>faltou</b>.</p>
+        <ul class="es-pend">${al.map((a, i) => `<li><b>${i + 1}. ${esc(a.nome)}</b><label class="es-marcas" style="flex-direction:row;font-weight:700"><input type="checkbox" name="f_${a.id}" ${doc.faltas.includes(a.id) ? 'checked' : ''} style="width:22px;height:22px"> Faltou</label></li>`).join('')}</ul>
+        <div class="es-acoes"><button class="b main">💾 Salvar frequência</button></div></form>`; }
+    else if (dModo === 'rel') { const sem = dAv.includes('semestre') ? dAv : SEMESTRES[0];
+      x += `<form class="es-form" id="d-fr"><div class="es-linha"><b>Período</b> <select id="d-sem" style="width:auto">${SEMESTRES.map(s => `<option ${s === sem ? 'selected' : ''}>${s}</option>`).join('')}</select></div><p class="es-dica">Relatório descritivo de cada criança (aparece para a família). Escreva como a criança está se desenvolvendo, o que conquistou e o que vamos estimular.</p>
+        ${al.map(a => { const b = boletins.find(x => x.id === a.id), t = (((b || {}).anos || {})[anoD()] || {}).relatorios || {}; return `<label>${esc(a.nome)}<textarea name="r_${a.id}">${esc((t[dDisc] || {})[sem] || '')}</textarea></label>`; }).join('')}
+        <div class="es-acoes"><button class="b main">💾 Salvar relatórios</button></div></form>`; }
+    else { const dsT = [...new Set(boletins.flatMap(b => Object.keys((((b.anos || {})[anoD()] || {}).notas) || {})))].sort();
+      x += `<div class="es-linha" style="margin-bottom:8px"><b>Avaliação</b> <select id="d-av" class="es-busca" style="flex:0 0 auto">${AVAL.map(a => `<option ${a === dAv ? 'selected' : ''}>${a}</option>`).join('')}</select></div>`;
+      x += dsT.length ? `<div style="overflow:auto;background:#fff;border-radius:12px"><table style="min-width:0;font-size:14px"><thead><tr><th style="text-align:left;padding:6px">Aluno</th>${dsT.map(d => `<th style="padding:6px">${esc(d)}</th>`).join('')}<th style="padding:6px">Faltas</th></tr></thead><tbody>${al.map(a => { const b = (((boletins.find(x => x.id === a.id) || {}).anos || {})[anoD()]) || {}; const fal = Object.values(b.faltas || {}).reduce((s, n) => s + n, 0);
+        return `<tr><td style="padding:6px;border-top:1px solid #e3eaf5">${esc(a.nome)}</td>${dsT.map(d => { const v = ((b.notas || {})[d] || {})[dAv]; return `<td style="text-align:center;padding:6px;border-top:1px solid #e3eaf5;${v !== undefined && +v < 6 ? 'color:#b3261e;font-weight:700' : ''}">${v ?? '—'}</td>`; }).join('')}<td style="text-align:center;padding:6px;border-top:1px solid #e3eaf5">${fal}</td></tr>`; }).join('')}</tbody></table></div><p class="es-dica" style="margin-top:8px">Notas abaixo de 6 em vermelho.</p>` : '<div class="es-vazio"><b>Nenhuma nota lançada nesta turma ainda.</b></div>'; }
+    return x + '</section>';
+  }
+  async function salvarNotas(f) {
+    const al = daTurma(dTurma), valores = {}; let erro = '';
+    for (const a of al) { let v = (f.get('n_' + a.id) || '').trim().replace(',', '.'); if (v === '') continue; if (isNaN(v) || +v < 0 || +v > 10) { erro = a.nome; break; } valores[a.id] = Math.round(+v * 10) / 10; }
+    if (erro) return alert('Nota inválida para ' + erro + '. Use números de 0 a 10.');
+    await D.salvar('notas', { id: idNota(), ano: anoD(), turma: dTurma, disciplina: dDisc, av: dAv, valores, alunos: al.map(a => a.id), profId: eu().pessoaId || '' });
+    for (const a of al) if (a.id in valores) await D.mesclar('boletins', a.id, { nome: a.nome, turma: a.turma, anos: { [anoD()]: { turma: a.turma, notas: { [dDisc]: { [dAv]: valores[a.id] } } } } });
+    alert('Notas salvas: ' + Object.keys(valores).length + ' aluno(s).'); desenhar();
+  }
+  async function salvarFreq(f) {
+    const al = daTurma(dTurma), faltas = al.filter(a => f.get('f_' + a.id)).map(a => a.id);
+    await D.salvar('frequencia', { id: idFreq(), ano: dData.slice(0, 4), turma: dTurma, disciplina: dDisc, data: dData, faltas, alunos: al.map(a => a.id) });
+    const docs = (await D.listar('frequencia')).filter(x => x.turma === dTurma && x.disciplina === dDisc && x.ano === dData.slice(0, 4));
+    for (const a of al) { const n = docs.filter(x => (x.faltas || []).includes(a.id)).length; await D.mesclar('boletins', a.id, { nome: a.nome, turma: a.turma, anos: { [dData.slice(0, 4)]: { turma: a.turma, faltas: { [dDisc]: n }, aulas: { [dDisc]: docs.length } } } }); }
+    alert(`Frequência de ${fmt(dData)} salva: ${faltas.length} falta(s).`); desenhar();
+  }
+  async function salvarRel(f) {
+    const sem = $('#d-sem').value;
+    for (const a of daTurma(dTurma)) { const t = (f.get('r_' + a.id) || '').trim(); await D.mesclar('boletins', a.id, { nome: a.nome, turma: a.turma, anos: { [anoD()]: { turma: a.turma, relatorios: { [dDisc]: { [sem]: t } } } } }); }
+    alert('Relatórios salvos.'); desenhar();
+  }
+
   /* ---------- ACESSOS (só com a nuvem ligada, só a Direção) ---------- */
   let pararUs = null, usuarios = [];
   const NOME_P = { direcao: 'Direção', secretaria: 'Secretaria', coordenacao: 'Coordenação', professor: 'Professor(a)', aee: 'AEE', financeiro: 'Financeiro', familia: 'Família' };
@@ -286,7 +345,10 @@
     const nv = D.nuvem && D.nuvem.usuario, dir = nv && nv.perfil === 'direcao'; $('[data-aba=acessos]').hidden = !dir; if (aba === 'acessos' && !dir) aba = 'hoje';
     if (nv) $('#es-onde').innerHTML = `☁️ Conectado como <b>${esc(nv.nome)}</b> (${esc(nv.email)}). Tudo o que você salva aparece nos outros aparelhos da escola. <button class="b" id="es-sair">Sair</button>`;
     if (aba === 'acessos') return telaAcessos();
-    $('#es').innerHTML = aba === 'hoje' ? telaHoje() : aba === 'crono' ? telaCrono() : telaCad();
+    $('#es').innerHTML = aba === 'hoje' ? telaHoje() : aba === 'crono' ? telaCrono() : aba === 'diario' ? telaDiario() : telaCad();
+    if (aba === 'diario') { const on = (sel, f) => { const el = $(sel); if (el) el.onchange = f; };
+      on('#d-turma', e => { dTurma = e.target.value; desenhar(); }); on('#d-disc', e => { dDisc = e.target.value; desenhar(); }); on('#d-av', e => { dAv = e.target.value; desenhar(); }); on('#d-data', e => { dData = e.target.value; desenhar(); }); on('#d-sem', e => { dAv = e.target.value; desenhar(); });
+      const fs = { '#d-fn': salvarNotas, '#d-ff': salvarFreq, '#d-fr': salvarRel }; for (const [k, fn] of Object.entries(fs)) { const fm = $(k); if (fm) fm.onsubmit = e => { e.preventDefault(); fn(new FormData(fm)); }; } }
     const bu = $('#es-busca'); if (bu) bu.oninput = () => { busca = bu.value; const p = bu.selectionStart; desenhar().then(() => { const n = $('#es-busca'); n.focus(); n.setSelectionRange(p, p); }); };
     const an = $('#es-ano'); if (an) an.onchange = () => { ano = an.value; filtroG = ''; desenhar(); };
   }
@@ -309,6 +371,7 @@
     if (d.entreguei) { await marcar(d.entreguei, eu().pessoaId, true); return desenhar(); }
     if (d.recebi || d.desf) { const [id, pid] = (d.recebi || d.desf).split('|'); const ali = emEntregas; await marcar(id, pid, !!d.recebi); if (ali) { await carregar(); return telaEntregas(item(id)); } return desenhar(); }
     if (d.sub) { sub = d.sub; busca = ''; return desenhar(); }
+    if (d.dmodo) { dModo = d.dmodo; return desenhar(); }
     if (b.id === 'es-novoal') return telaAluno();
     if (b.id === 'es-colar') return telaColar();
     if (b.id === 'es-novofu') return telaFunc();
@@ -321,9 +384,9 @@
   // cópia de segurança
   $('#es-exp').onclick = async () => { const l = await D.tudo(); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ sei: 'escola', em: new Date().toISOString(), itens: l })], { type: 'application/json' })); a.download = `SEI-gestao-${hoje()}.json`; document.body.append(a); a.click(); a.remove(); };
   $('#es-imp').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (j.sei !== 'escola') throw new Error('arquivo de outro tipo'); await D.importar(j.itens || []); alert('Cópia importada.'); await desenhar(); } catch (er) { alert('Não consegui importar: ' + er.message); } e.target.value = ''; };
-  D.ouvir(() => { if (!document.querySelector('#es form') && !emEntregas) desenhar(); });
+  D.ouvir(() => { if (!document.querySelector('#es form') && !emEntregas && aba !== 'diario') desenhar(); });
   document.addEventListener('sei-nuvem', () => desenhar());
   document.addEventListener('click', e => { if (e.target.id === 'es-sair' && D.nuvem) D.nuvem.sair(); });
-  const h = location.hash.slice(1); if (['hoje', 'crono', 'cad', 'acessos'].includes(h)) aba = h;
+  const h = location.hash.slice(1); if (['hoje', 'crono', 'diario', 'cad', 'acessos'].includes(h)) aba = h;
   desenhar();
 })();

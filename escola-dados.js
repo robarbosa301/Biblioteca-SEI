@@ -32,6 +32,14 @@
       if (!daNuvem && D.nuvem) D.nuvem.apagar(col, id).catch(e => console.warn('nuvem', e));
       avisar({ col, id, tipo: 'apagado' });
     },
+    // mesclar: muda só alguns campos (vários professores podem mexer no mesmo boletim ao mesmo tempo)
+    async mesclar(col, id, patch) {
+      const fundir = (a, b) => { for (const [k, v] of Object.entries(b)) { if (v && typeof v === 'object' && !Array.isArray(v)) a[k] = fundir(a[k] && typeof a[k] === 'object' ? a[k] : {}, v); else a[k] = v; } return a; };
+      const atual = (await D.obter(col, id)) || { id }; fundir(atual, patch); atual.atualizado = Date.now();
+      await tx('readwrite', s => s.put({ k: col + '/' + id, col, d: atual, t: atual.atualizado }));
+      if (D.nuvem) D.nuvem.mesclar(col, id, Object.assign({}, patch, { atualizado: atual.atualizado })).catch(e => console.warn('nuvem', e));
+      avisar({ col, id, tipo: 'salvo' }); return atual;
+    },
     async tudo() { return (await tx('readonly', s => s.getAll())) || []; },
     async importar(l) { for (const r of l) if (r && r.col && r.d && r.d.id) await D.salvar(r.col, r.d); },
     ouvir(f) { ouvintes.add(f); return () => ouvintes.delete(f); },
