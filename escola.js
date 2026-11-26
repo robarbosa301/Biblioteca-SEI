@@ -34,6 +34,7 @@
   const anoAtual = () => { const d = new Date(); return String(d.getMonth() >= 9 ? d.getFullYear() + 1 : d.getFullYear()); };
   let ano = anoAtual();
   const eu = () => D.usuario();
+  const gestor = () => ['direcao', 'secretaria', 'coordenacao'].includes(eu().perfil);
   async function carregar() { [pessoas, alunos, crono] = await Promise.all([D.listar('pessoas'), D.listar('alunos'), D.listar('cronograma')]); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
 
   /* ---------- regras do cronograma ---------- */
@@ -122,7 +123,7 @@
     const l = crono.filter(it => it.ano === ano && (!filtroG || it.grupo === filtroG)).sort((a, b) => (a.de || a.ate || '').localeCompare(b.de || b.ate || ''));
     const anos = [...new Set(crono.map(it => it.ano).concat([ano, anoAtual()]))].sort();
     let x = `<section class="es-sec"><h2>🗓️ Cronograma de atividades <select id="es-ano" class="es-busca" style="flex:0 0 auto;min-width:96px;font-size:15px">${anos.map(a => `<option ${a === ano ? 'selected' : ''}>${a}</option>`).join('')}</select></h2>
-      <div class="es-acoes"><button class="b main" id="es-gerar">⚙️ ${crono.some(it => it.ano === ano && /Avaliação/.test(it.grupo)) ? 'Refazer prazos das avaliações' : 'Montar as 4 avaliações'}</button><button class="b" id="es-nova">➕ Nova atividade</button>${l.length ? '<button class="b" id="es-pdf">📄 PDF para o mural</button><button class="b" id="es-word">⬇ Word</button>' : ''}</div>
+      ${gestor() ? '' : '<p class="es-dica">Só a direção, a secretaria e a coordenação mudam o cronograma.</p>'}<div class="es-acoes">${gestor() ? `<button class="b main" id="es-gerar">⚙️ ${crono.some(it => it.ano === ano && /Avaliação/.test(it.grupo)) ? 'Refazer prazos das avaliações' : 'Montar as 4 avaliações'}</button><button class="b" id="es-nova">➕ Nova atividade</button>` : ''}${l.length ? '<button class="b" id="es-pdf">📄 PDF para o mural</button><button class="b" id="es-word">⬇ Word</button>' : ''}</div>
       <div class="es-sub">${['', ...GRUPOS].filter(g => !g || crono.some(it => it.ano === ano && it.grupo === g)).map(g => `<button data-fg="${g}" class="${g === filtroG ? 'on' : ''}">${g || 'Tudo'}</button>`).join('')}</div>`;
     if (!l.length) x += `<div class="es-vazio"><b>Cronograma de ${ano} vazio.</b>Toque em <b>⚙️ Montar as 4 avaliações</b>: informe as semanas de provas e o site calcula os prazos de entrega das questões (15 dias antes), provas prontas (3 dias antes) e notas (7 dias depois).</div>`;
     let mes = '';
@@ -130,7 +131,7 @@
       const ps = it.controle ? profsDe(it) : [], ok = ps.filter(p => entregue(it, p)).length;
       return cab + `<article class="es-card" style="--c:${COR[it.grupo] || '#1a73e8'}"><div class="es-linha"><span class="chip ${cl}">${txt}</span><span class="chip">${esc(it.grupo)}</span></div><h3>${ETAPA_AV[it.etapa] || '📌'} ${esc(it.titulo)}</h3><div class="es-data">🗓️ ${periodo(it)}</div>
         <p>👥 ${(it.quem || []).map(q => PERFIS[q] || q).join(' · ') || '—'}${(it.cobra || []).length ? `<br>📣 Acompanha: ${it.cobra.map(q => PERFIS[q] || q).join(' · ')}` : ''}</p>${it.controle ? `<div class="es-barra"><i style="width:${ps.length ? Math.round(ok * 100 / ps.length) : 0}%"></i></div><p>${ok} de ${ps.length} entregaram</p>` : ''}
-        <div class="es-linha"><button class="b" data-ed="${it.id}">✏️ Editar</button>${it.controle ? `<button class="b" data-acomp="${it.id}">📋 Entregas</button>` : `<button class="b" data-feito="${it.id}">${it.feito ? '↩ Reabrir' : '✅ Concluído'}</button>`}<button class="b" data-del="${it.id}" title="Apagar">🗑️</button></div></article>`; }).join('').replace(/^<\/div>/, '') + (l.length ? '</div>' : '');
+        ${gestor() ? `<div class="es-linha"><button class="b" data-ed="${it.id}">✏️ Editar</button>${it.controle ? `<button class="b" data-acomp="${it.id}">📋 Entregas</button>` : `<button class="b" data-feito="${it.id}">${it.feito ? '↩ Reabrir' : '✅ Concluído'}</button>`}<button class="b" data-del="${it.id}" title="Apagar">🗑️</button></div>` : ''}</article>`; }).join('').replace(/^<\/div>/, '') + (l.length ? '</div>' : '');
     return x + '</section>';
   }
   async function telaGerar() {
@@ -199,18 +200,18 @@
   /* ---------- CADASTRO ---------- */
   function telaCad() {
     const q = busca.trim().toLowerCase(); let x = `<section class="es-sec"><div class="es-sub"><button data-sub="alunos" class="${sub === 'alunos' ? 'on' : ''}">🎒 Alunos (${alunos.length})</button><button data-sub="func" class="${sub === 'func' ? 'on' : ''}">👩‍🏫 Funcionários (${pessoas.length})</button></div>
-      <div class="es-acoes"><input class="es-busca" id="es-busca" type="search" placeholder="🔎 Procurar pelo nome" value="${esc(busca)}">${sub === 'alunos' ? '<button class="b main" id="es-novoal">➕ Novo aluno</button><button class="b" id="es-colar">📋 Colar lista de nomes</button>' : '<button class="b main" id="es-novofu">➕ Novo funcionário</button><button class="b" id="es-trazer">↧ Trazer professores do Horário</button>'}</div>`;
+      <div class="es-acoes"><input class="es-busca" id="es-busca" type="search" placeholder="🔎 Procurar pelo nome" value="${esc(busca)}">${!gestor() ? '' : sub === 'alunos' ? '<button class="b main" id="es-novoal">➕ Novo aluno</button><button class="b" id="es-colar">📋 Colar lista de nomes</button>' : '<button class="b main" id="es-novofu">➕ Novo funcionário</button><button class="b" id="es-trazer">↧ Trazer professores do Horário</button>'}</div>`;
     if (sub === 'alunos') {
       const l = alunos.filter(a => !q || a.nome.toLowerCase().includes(q));
       if (!alunos.length) x += '<div class="es-vazio"><b>Nenhum aluno cadastrado.</b>Cadastre um por um ou use <b>📋 Colar lista de nomes</b> para lançar a turma inteira de uma vez.</div>';
       for (const t of TURMAS.concat([''])) { const lt = l.filter(a => (a.turma || '') === t); if (!lt.length) continue;
         x += `<div class="es-turma">${t ? esc(t) : 'Sem turma'} <span>${lt.length} aluno${lt.length > 1 ? 's' : ''}</span></div><div class="es-grid">` + lt.map(a => { const r = a.responsaveis || [];
-          return `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(a.nome)}</h3><div class="es-linha">${a.aee ? '<span class="chip">🤝 AEE</span>' : ''}${a.situacao && a.situacao !== 'Ativo' ? `<span class="chip atrasado">${esc(a.situacao)}</span>` : ''}${r.some(x => x.acesso && x.email) ? '<span class="chip ok">👨‍👩‍👧 acesso dos pais</span>' : ''}</div>${r.filter(x => x.nome).map(x => `<p>👤 ${esc(x.nome)}${x.parentesco ? ` (${esc(x.parentesco)})` : ''}${x.whatsapp ? ` · 📱 ${esc(x.whatsapp)}` : ''}</p>`).join('')}<div class="es-linha"><button class="b" data-edal="${a.id}">✏️ Editar</button></div></article>`; }).join('') + '</div>'; }
+          return `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(a.nome)}</h3><div class="es-linha">${a.aee ? '<span class="chip">🤝 AEE</span>' : ''}${a.situacao && a.situacao !== 'Ativo' ? `<span class="chip atrasado">${esc(a.situacao)}</span>` : ''}${r.some(x => x.acesso && x.email) ? '<span class="chip ok">👨‍👩‍👧 acesso dos pais</span>' : ''}</div>${r.filter(x => x.nome).map(x => `<p>👤 ${esc(x.nome)}${x.parentesco ? ` (${esc(x.parentesco)})` : ''}${x.whatsapp ? ` · 📱 ${esc(x.whatsapp)}` : ''}</p>`).join('')}${gestor() ? `<div class="es-linha"><button class="b" data-edal="${a.id}">✏️ Editar</button></div>` : ''}</article>`; }).join('') + '</div>'; }
     } else {
       const l = pessoas.filter(p => !q || p.nome.toLowerCase().includes(q));
       if (!pessoas.length) x += '<div class="es-vazio"><b>Nenhum funcionário cadastrado.</b>Cadastre a equipe com a função e o WhatsApp: é com ele que a secretaria cobra os prazos em um toque. Se os professores já estão no Horário de aula, use <b>↧ Trazer professores do Horário</b>.</div>';
       for (const [fn, pf] of FUNCOES) { const lf = l.filter(p => p.perfil === pf); if (!lf.length) continue;
-        x += `<div class="es-turma">${esc(fn)} <span>${lf.length}</span></div><div class="es-grid">` + lf.map(p => `<article class="es-card" style="--c:#2e7d32"><h3>${esc(p.nome)}</h3><div class="es-linha">${p.ativo === false ? '<span class="chip atrasado">inativo</span>' : ''}${(p.etapas || []).map(e => `<span class="chip">${esc(ETAPAS[e] ? ETAPAS[e][0] : e)}</span>`).join('')}</div>${(p.disciplinas || []).length ? `<p>📚 ${esc(p.disciplinas.join(', '))}</p>` : ''}${p.whatsapp ? `<p>📱 ${esc(p.whatsapp)}</p>` : ''}<div class="es-linha"><button class="b" data-edfu="${p.id}">✏️ Editar</button></div></article>`).join('') + '</div>'; }
+        x += `<div class="es-turma">${esc(fn)} <span>${lf.length}</span></div><div class="es-grid">` + lf.map(p => `<article class="es-card" style="--c:#2e7d32"><h3>${esc(p.nome)}</h3><div class="es-linha">${p.ativo === false ? '<span class="chip atrasado">inativo</span>' : ''}${(p.etapas || []).map(e => `<span class="chip">${esc(ETAPAS[e] ? ETAPAS[e][0] : e)}</span>`).join('')}</div>${(p.disciplinas || []).length ? `<p>📚 ${esc(p.disciplinas.join(', '))}</p>` : ''}${p.whatsapp ? `<p>📱 ${esc(p.whatsapp)}</p>` : ''}${gestor() ? `<div class="es-linha"><button class="b" data-edfu="${p.id}">✏️ Editar</button></div>` : ''}</article>`).join('') + '</div>'; }
     }
     return x + '</section>';
   }
@@ -256,9 +257,35 @@
     alert(n ? n + ' professor(es) trazido(s) do Horário de aula. Complete o WhatsApp de cada um.' : 'Nenhum professor novo encontrado no Horário de aula deste aparelho.'); await desenhar();
   }
 
+  /* ---------- ACESSOS (só com a nuvem ligada, só a Direção) ---------- */
+  let pararUs = null, usuarios = [];
+  const NOME_P = { direcao: 'Direção', secretaria: 'Secretaria', coordenacao: 'Coordenação', professor: 'Professor(a)', aee: 'AEE', financeiro: 'Financeiro', familia: 'Família' };
+  function telaAcessos() {
+    if (!pararUs) pararUs = D.nuvem.usuarios(l => { usuarios = l.sort((a, b) => (a.nome || a.email).localeCompare(b.nome || b.email)); if (aba === 'acessos' && !document.activeElement.closest('#es-fu')) telaAcessos(); });
+    const eq = usuarios.filter(u => u.perfil !== 'familia'), fam = usuarios.filter(u => u.perfil === 'familia');
+    const linha = u => `<li class="${u.ativo === false ? 'feito' : ''}"><b>${u.ativo === false ? '⛔' : '✅'} ${esc(u.nome || u.email)}<br><small>${esc(u.email)}</small></b><span class="chip">${NOME_P[u.perfil] || u.perfil}${u.perfil === 'familia' ? ' · ' + (u.alunos || []).length + ' aluno(s)' : ''}</span>${u.email === D.nuvem.usuario.email ? '<span class="chip ok">você</span>' : `<button class="b" data-usat="${esc(u.email)}">${u.ativo === false ? '✅ Liberar' : '⛔ Bloquear'}</button>`}</li>`;
+    $('#es').innerHTML = `<section class="es-sec"><h2>🔐 Quem pode entrar</h2><p class="es-dica">Só entra quem estiver liberado aqui. Bloquear tira o acesso na hora, em todos os aparelhos.</p>
+      <div class="es-acoes"><button class="b main" id="es-libeq">👩‍🏫 Liberar a equipe do cadastro</button><button class="b main" id="es-libpais">👨‍👩‍👧 Liberar os pais do cadastro</button></div>
+      <form class="es-form" id="es-fu"><h3>➕ Liberar um e-mail</h3><div class="es-g3"><label>E-mail<input name="email" type="email" required></label><label>Nome<input name="nome"></label><label>Perfil<select name="perfil">${Object.entries(NOME_P).filter(([k]) => k !== 'familia').map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label></div><div class="es-acoes"><button class="b main">✅ Liberar</button></div></form>
+      <h2 style="margin-top:18px">👥 Equipe <small>${eq.length}</small></h2><ul class="es-pend">${eq.map(linha).join('') || '<li>Ninguém ainda.</li>'}</ul>
+      <h2 style="margin-top:18px">👨‍👩‍👧 Famílias <small>${fam.length}</small></h2><ul class="es-pend">${fam.map(linha).join('') || '<li>Nenhuma família liberada. Marque “Acesso à área dos pais” no cadastro do aluno e toque em “Liberar os pais do cadastro”.</li>'}</ul></section>`;
+    $('#es-fu').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target); await D.nuvem.salvarUsuario({ email: f.get('email').trim(), nome: f.get('nome').trim(), perfil: f.get('perfil'), ativo: true }); e.target.reset(); };
+  }
+  async function liberarEquipe() { await carregar(); let n = 0; for (const p of pessoas.filter(p => p.email && p.ativo !== false && p.perfil !== 'apoio')) { await D.nuvem.salvarUsuario({ email: p.email, nome: p.nome, perfil: p.perfil, pessoaId: p.id, ativo: true }); n++; } alert(n ? n + ' pessoa(s) da equipe liberada(s).' : 'Nenhum funcionário com e-mail no cadastro.'); }
+  async function liberarPais() {
+    await carregar(); const m = {};
+    for (const a of alunos.filter(a => a.situacao !== 'Transferido' && a.situacao !== 'Desistente')) for (const r of a.responsaveis || []) if (r.email && r.acesso) { const k = r.email.toLowerCase(); m[k] = m[k] || { nome: r.nome, alunos: [] }; m[k].alunos.push(a.id); }
+    for (const [email, x] of Object.entries(m)) await D.nuvem.salvarUsuario({ email, nome: x.nome, perfil: 'familia', alunos: x.alunos, ativo: true });
+    let bl = 0; for (const u of usuarios.filter(u => u.perfil === 'familia' && !m[u.email] && u.ativo !== false)) { await D.nuvem.salvarUsuario({ email: u.email, ativo: false, alunos: [] }); bl++; }
+    alert(`${Object.keys(m).length} família(s) liberada(s)${bl ? ` e ${bl} bloqueada(s) (sem acesso no cadastro)` : ''}.`);
+  }
+
   /* ---------- desenho e eventos ---------- */
   async function desenhar() {
     emEntregas = null; await carregar(); montaVerComo(); $$('#abas button').forEach(b => b.classList.toggle('on', b.dataset.aba === aba));
+    const nv = D.nuvem && D.nuvem.usuario, dir = nv && nv.perfil === 'direcao'; $('[data-aba=acessos]').hidden = !dir; if (aba === 'acessos' && !dir) aba = 'hoje';
+    if (nv) $('#es-onde').innerHTML = `☁️ Conectado como <b>${esc(nv.nome)}</b> (${esc(nv.email)}). Tudo o que você salva aparece nos outros aparelhos da escola. <button class="b" id="es-sair">Sair</button>`;
+    if (aba === 'acessos') return telaAcessos();
     $('#es').innerHTML = aba === 'hoje' ? telaHoje() : aba === 'crono' ? telaCrono() : telaCad();
     const bu = $('#es-busca'); if (bu) bu.oninput = () => { busca = bu.value; const p = bu.selectionStart; desenhar().then(() => { const n = $('#es-busca'); n.focus(); n.setSelectionRange(p, p); }); };
     const an = $('#es-ano'); if (an) an.onchange = () => { ano = an.value; filtroG = ''; desenhar(); };
@@ -267,6 +294,9 @@
   $('#es').addEventListener('click', async e => {
     const b = e.target.closest('button,a'); if (!b) return; const d = b.dataset, item = id => crono.find(x => x.id === id);
     if (d.ir) { aba = d.ir; return desenhar(); }
+    if (b.id === 'es-libeq') return liberarEquipe();
+    if (b.id === 'es-libpais') return liberarPais();
+    if (d.usat) { const u = usuarios.find(x => x.email === d.usat); return D.nuvem.salvarUsuario({ email: u.email, ativo: u.ativo === false }); }
     if (b.id === 'es-gerar') return telaGerar();
     if (b.id === 'es-nova') return telaItem();
     if (b.id === 'es-pdf') return exportar('pdf');
@@ -292,6 +322,8 @@
   $('#es-exp').onclick = async () => { const l = await D.tudo(); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ sei: 'escola', em: new Date().toISOString(), itens: l })], { type: 'application/json' })); a.download = `SEI-gestao-${hoje()}.json`; document.body.append(a); a.click(); a.remove(); };
   $('#es-imp').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); if (j.sei !== 'escola') throw new Error('arquivo de outro tipo'); await D.importar(j.itens || []); alert('Cópia importada.'); await desenhar(); } catch (er) { alert('Não consegui importar: ' + er.message); } e.target.value = ''; };
   D.ouvir(() => { if (!document.querySelector('#es form') && !emEntregas) desenhar(); });
-  const h = location.hash.slice(1); if (['hoje', 'crono', 'cad'].includes(h)) aba = h;
+  document.addEventListener('sei-nuvem', () => desenhar());
+  document.addEventListener('click', e => { if (e.target.id === 'es-sair' && D.nuvem) D.nuvem.sair(); });
+  const h = location.hash.slice(1); if (['hoje', 'crono', 'cad', 'acessos'].includes(h)) aba = h;
   desenhar();
 })();

@@ -1,0 +1,49 @@
+rules_version = '2';
+// Regras de segurança da Biblioteca SEI (colar em Firebase → Firestore Database → Regras).
+// Troque EMAIL_DA_DIRECAO pelo e-mail dono do projeto, em letras minúsculas.
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function logado() { return request.auth != null && request.auth.token.email_verified == true; }
+    function email() { return request.auth.token.email.lower(); }
+    function dono() { return logado() && email() == 'EMAIL_DA_DIRECAO'; }
+    function temU() { return logado() && exists(/databases/$(db)/documents/usuarios/$(email())); }
+    function u() { return get(/databases/$(db)/documents/usuarios/$(email())).data; }
+    function ativo() { return dono() || (temU() && u().ativo == true); }
+    function perfil() { return dono() ? 'direcao' : u().perfil; }
+    function equipe() { return ativo() && perfil() in ['direcao', 'secretaria', 'coordenacao', 'professor', 'aee', 'financeiro']; }
+    function gestao() { return ativo() && perfil() in ['direcao', 'secretaria', 'coordenacao']; }
+    function direcao() { return ativo() && perfil() == 'direcao'; }
+    function familia() { return ativo() && perfil() == 'familia'; }
+    function soMudou(campos) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos); }
+
+    // contas e perfis: só a Direção libera; cada um lê a própria
+    match /usuarios/{e} {
+      allow read: if direcao() || (logado() && e == email());
+      allow write: if direcao();
+    }
+    // cronograma: equipe lê; gestão edita; professor só marca a própria entrega; famílias veem o que é para elas
+    match /cronograma/{id} {
+      allow read: if equipe() || (familia() && 'familias' in resource.data.quem);
+      allow create, delete: if gestao();
+      allow update: if gestao() || (equipe() && soMudou(['entregas', 'atualizado', 'por']));
+    }
+    match /pessoas/{id} {
+      allow read: if equipe();
+      allow write: if gestao();
+    }
+    match /alunos/{id} {
+      allow read: if equipe() || (familia() && id in u().alunos);
+      allow write: if gestao();
+    }
+    // diário: professores e gestão lançam notas e frequência
+    match /notas/{id} { allow read, write: if equipe(); }
+    match /frequencia/{id} { allow read, write: if equipe(); }
+    // boletim de cada aluno (o que a família vê)
+    match /boletins/{id} {
+      allow read: if equipe() || (familia() && id in u().alunos);
+      allow write: if equipe();
+    }
+    // o resto: só a Direção
+    match /{col}/{id} { allow read, write: if direcao(); }
+  }
+}

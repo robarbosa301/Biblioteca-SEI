@@ -12,7 +12,7 @@
 <meta name="description" content="Cronograma, prazos e cadastro do Sistema de Ensino Incentivo.">
 <link rel="icon" type="image/png" href="favicon.png?v=2"><link rel="apple-touch-icon" href="assets/portal/apple-touch-icon.png?v=2">
 </head>
-<body>
+<body data-nuvem="equipe">
 <header class="no-print">
   <a class="b" href="index.html">‹ Biblioteca</a>
   <h1>🧭 Gestão Escolar <small>Prazos, cronograma e cadastro</small></h1>
@@ -22,6 +22,7 @@
   <button data-aba="hoje">📌 Hoje</button>
   <button data-aba="crono">🗓️ Cronograma</button>
   <button data-aba="cad">👥 Cadastro</button>
+  <button data-aba="acessos" hidden>🔐 Acessos</button>
 </nav>
 <main id="es"></main>
 <footer class="no-print">
@@ -29,7 +30,7 @@
   <button class="b" id="es-exp">⬇ Exportar cópia (arquivo)</button>
   <label class="b">⬆ Importar cópia<input type="file" id="es-imp" accept=".json" hidden></label>
 </footer>
-<script src="escola-dados.js?v=1"></script>
+<script src="escola-dados.js?v=1"></script><script src="nuvem-config.js?v=1"></script><script src="nuvem.js?v=1"></script>
 <script src="baixar-doc.js?v=63"></script><script src="folha-doc.js?v=24"></script>
 <script src="escola.js?v=1"></script>
 <script src="offline.js?v=3"></script>
