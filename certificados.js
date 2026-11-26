@@ -4,9 +4,9 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const TIPOS = {
-    nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ffd600', cor2: '#ffb300', texto2: '#0b1a4a', claro: 'rgba(255,214,0,.35)', balao: 'Você é demais! 🌟',
+    nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ffd600', cor2: '#ffb300', texto2: '#0b1a4a', claro: 'rgba(255,214,0,.35)', painel: 'linear-gradient(180deg,#fff8a6 0,#ffe11a 45%,#ffb800 100%)', brilho: '#ffd600', balao: 'Você é demais! 🌟',
       texto: 'Você mandou muito bem no {BIMESTRE} bimestre de {ANO} e conquistou a nota máxima! 🎉 Sua dedicação inspira a gente. Continue brilhando: o SEI tem muito orgulho de você!' },
-    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#00d9ff', cor2: '#1e6bff', texto2: '#06183f', claro: 'rgba(0,217,255,.35)', balao: 'Orgulho de você! 💙',
+    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#5dff4a', cor2: '#00c853', texto2: '#06183f', claro: 'rgba(93,255,74,.32)', painel: 'linear-gradient(180deg,#d6ffb8 0,#6dff52 45%,#00c853 100%)', brilho: '#5dff4a', balao: 'Orgulho de você! 💙',
       texto: 'Cada conquista sua no {BIMESTRE} bimestre de {ANO} mostrou garra, esforço e coragem. 💙 Você é destaque e inspira toda a Família SEI. Siga em frente: a gente acredita em você!' }
   };
   const CHAVE = 'sei-certificados2';
@@ -27,17 +27,23 @@
       h += `<span style="position:absolute;left:${x + rnd() * cel * .5}mm;top:${y + rnd() * cel * .5}mm;font-size:${cel * (emo ? .3 : .24)}mm;transform:rotate(${(rnd() - .5) * 40}deg);opacity:${emo ? op * .7 : op};color:${cs[i % cs.length]};font-family:SeiRubik,Arial Black,sans-serif;white-space:nowrap">${t}</span>`; }
     return h; }
   // selo "Honra ao Mérito" desenhado em SVG
-  // medalha "Nº 1 em aprovação": um número 1 dourado com fitas (desenhado em SVG e convertido em PNG)
+  // medalha "Nº 1 em aprovação": a mão fazendo o número 1, com o lema ao redor (SVG convertido em PNG)
   const UM = (() => { const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320"><defs>
       <linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff8c4"/><stop offset=".35" stop-color="#ffd21f"/><stop offset=".7" stop-color="#e39a00"/><stop offset="1" stop-color="#ffe680"/></linearGradient>
-      <linearGradient id="b" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity=".75"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
-      <radialGradient id="l" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#7df9ff" stop-opacity=".55"/><stop offset="1" stop-color="#00d9ff" stop-opacity="0"/></radialGradient></defs>
-      <circle cx="120" cy="150" r="118" fill="url(#l)"/>
-      <path d="M96 214 L52 318 L78 304 L92 320 L128 226Z" fill="#00d9ff" stroke="#0b2a6b" stroke-width="3"/><path d="M144 214 L188 318 L162 304 L148 320 L112 226Z" fill="#1e6bff" stroke="#0b2a6b" stroke-width="3"/>
-      <path d="M72 78 L132 26 L172 26 L172 236 L204 236 L204 282 L58 282 L58 236 L110 236 L110 104 L84 122 Z" fill="url(#o)" stroke="#8a5a00" stroke-width="5" stroke-linejoin="round"/>
-      <path d="M86 80 L136 38 L160 38 L160 248 L192 248 L192 270 L70 270 L70 248 L122 248 L122 90 L90 112 Z" fill="none" stroke="#fff3a8" stroke-width="3" stroke-linejoin="round" opacity=".8"/>
-      <path d="M136 38 L160 38 L160 160 L136 175 Z" fill="url(#b)"/>
-      ${[[38, 60, 9], [206, 70, 7], [30, 170, 6], [212, 182, 8], [120, 8, 6]].map(([x, y, r]) => `<path d="M${x} ${y - r * 2} L${x + r * .5} ${y - r * .5} L${x + r * 2} ${y} L${x + r * .5} ${y + r * .5} L${x} ${y + r * 2} L${x - r * .5} ${y + r * .5} L${x - r * 2} ${y} L${x - r * .5} ${y - r * .5}Z" fill="#ffffff"/>`).join('')}</svg>`;
+      <radialGradient id="c" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#2f7bff"/><stop offset=".7" stop-color="#0b2a8a"/><stop offset="1" stop-color="#061650"/></radialGradient>
+      <path id="cima" d="M44 122 A76 76 0 0 1 196 122"/><path id="baixo" d="M36 122 A84 84 0 0 0 204 122"/></defs>
+      <path d="M92 196 L54 316 L80 300 L94 318 L130 206Z" fill="#00d9ff" stroke="#0b2a6b" stroke-width="3"/><path d="M148 196 L186 316 L160 300 L146 318 L110 206Z" fill="#1e6bff" stroke="#0b2a6b" stroke-width="3"/>
+      <polygon points="120.0,10.0 130.7,20.6 143.3,12.4 151.5,25.0 165.6,19.7 171.0,33.7 185.8,31.4 188.3,46.2 203.2,47.1 202.5,62.0 217.0,66.0 213.2,80.5 226.5,87.4 219.8,100.8 231.4,110.3 222.0,122.0 231.4,133.7 219.8,143.2 226.5,156.6 213.2,163.5 217.0,178.0 202.5,182.0 203.2,196.9 188.3,197.8 185.8,212.6 171.0,210.3 165.6,224.3 151.5,219.0 143.3,231.6 130.7,223.4 120.0,234.0 109.3,223.4 96.7,231.6 88.5,219.0 74.4,224.3 69.0,210.3 54.2,212.6 51.7,197.8 36.8,196.9 37.5,182.0 23.0,178.0 26.8,163.5 13.5,156.6 20.2,143.2 8.6,133.7 18.0,122.0 8.6,110.3 20.2,100.8 13.5,87.4 26.8,80.5 23.0,66.0 37.5,62.0 36.8,47.1 51.7,46.2 54.2,31.4 69.0,33.7 74.4,19.7 88.5,25.0 96.7,12.4 109.3,20.6" fill="url(#o)" stroke="#9a6a00" stroke-width="3"/>
+      <circle cx="120" cy="122" r="96" fill="url(#c)" stroke="#fff3a8" stroke-width="4"/>
+      <circle cx="120" cy="122" r="60" fill="none" stroke="#ffd21f" stroke-width="3" stroke-dasharray="2 5"/>
+      <text font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="17" fill="#ffe600" letter-spacing="1.5"><textPath href="#cima" startOffset="50%" text-anchor="middle">Nº 1 EM APROVAÇÃO</textPath></text>
+      <text font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="14" fill="#7df9ff" letter-spacing="1"><textPath href="#baixo" startOffset="50%" text-anchor="middle" dominant-baseline="hanging">★ HONRA AO MÉRITO ★</textPath></text>
+      <g transform="translate(120 122) scale(1.18) translate(-52 -50)" stroke="#0b2a6b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="41" y="2" width="20" height="56" rx="10" fill="#ffffff"/>
+        <rect x="26" y="44" width="54" height="50" rx="15" fill="#ffffff"/>
+        <path d="M61 56 Q80 54 80 64 M61 68 Q80 66 80 76 M61 80 Q78 79 78 88" fill="none"/>
+        <path d="M26 66 Q18 62 22 54 Q28 46 40 54 L56 64 Q62 70 54 74 L36 72" fill="#ffffff"/>
+        <path d="M44 10 L44 40" stroke="#cfe6ff" stroke-width="3"/></g></svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); })();
   let umPng = null;
   const prepararUm = () => umPng ? Promise.resolve(umPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 960; c.height = 1280; c.getContext('2d').drawImage(im, 0, 0, 960, 1280); umPng = c.toDataURL('image/png'); ok(umPng); }; im.onerror = () => ok(UM); im.src = UM; });
@@ -53,11 +59,11 @@
       <div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
       <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2});color:${T.texto2}">${T.emoji} ${T.rotulo} ${T.emoji}</div>
       <div class="ca-para"${some}>Este certificado vai para</div>
-      <div class="ca-nome"><span style="font-size:${tamNomeMm(nm)}mm${semTexto ? ';visibility:hidden' : ''}">${esc(nm)}</span></div>
+      <div class="ca-nome" style="background:${T.painel};box-shadow:0 0 5mm ${T.brilho},0 1.5mm 3mm rgba(0,0,0,.35),inset 0 -1mm 0 rgba(0,0,0,.12)"><span style="font-size:${tamNomeMm(nm)}mm${semTexto ? ';visibility:hidden' : ''}">${esc(nm)}</span></div>
       <p class="ca-msg"${some}>${esc(msg(tipo))}</p>
       <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(0,217,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao">${esc(T.balao)}</div></div>
       <div class="ca-data">São Miguel do Guamá – PA, ____ de ___________ de ${esc(st.ano)}.</div><div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
-      <div class="ca-um"><img src="${umPng || UM}" alt=""><span class="ca-fita">HONRA AO MÉRITO</span></div>`;
+      <div class="ca-um"><img src="${umPng || UM}" alt=""></div>`;
     return el;
   }
   // medalha redonda (desenhada a 60 mm e reduzida na folha)
@@ -125,7 +131,7 @@
       const sect = `<w:sectPr><w:headerReference w:type="default" r:id="rH${gi + 1}"/><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="${tw(Mm.para)}" w:right="${tw(Mm.lado)}" w:bottom="${tw(8)}" w:left="${tw(Mm.lado)}" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr>`;
       ns.forEach((n, i) => { const nm = bonito(n), fim = i === ns.length - 1, rp = (fonte, sz, cor, b) => `<w:rPr><w:rFonts w:ascii="${fonte}" w:hAnsi="${fonte}" w:cs="${fonte}"/>${b ? '<w:b/>' : ''}<w:color w:val="${cor}"/><w:sz w:val="${Math.round(sz * 2)}"/></w:rPr>`;
         corpo += `<w:p><w:pPr>${i ? '<w:pageBreakBefore/>' : ''}<w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lParaN)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial', 12.5, '7DF9FF', 1)}<w:t>Este certificado vai para</w:t></w:r></w:p>`;
-        corpo += `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lNome)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial Black', tamNomeMm(nm) * 2.835 * .9, 'FFFFFF', 1)}<w:t xml:space="preserve">${X(nm)}</w:t></w:r></w:p>`;
+        corpo += `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lNome)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial Black', tamNomeMm(nm) * 2.835 * .9, '0B1A4A', 1)}<w:t xml:space="preserve">${X(nm)}</w:t></w:r></w:p>`;
         corpo += `<w:p><w:pPr><w:spacing w:before="${tw(Mm.antesMsg)}" w:after="0" w:line="${tw(Mm.lMsg)}" w:lineRule="exact"/><w:ind w:left="${tw(Mm.msgRec)}" w:right="${tw(Mm.msgRec)}"/><w:jc w:val="center"/>${fim && gi < grupos.length - 1 ? sect : ''}</w:pPr><w:r>${rp('Arial', 14.5, 'EAF2FF', 0)}<w:t xml:space="preserve">${X(msg(t))}</w:t></w:r></w:p>`;
         if (fim && gi === grupos.length - 1) corpo += sect; });
     }
