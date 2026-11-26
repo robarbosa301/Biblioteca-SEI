@@ -4,9 +4,9 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const TIPOS = {
-    nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ff2bd6', cor2: '#ffd600', claro: '#ffe3f8', balao: 'Você é demais! 🌟',
+    nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ff2bd6', cor2: '#ffd600', claro: '#ffc9f1', balao: 'Você é demais! 🌟',
       texto: 'Você mandou muito bem no {BIMESTRE} bimestre de {ANO} e conquistou a nota máxima! 🎉 Sua dedicação inspira a gente. Continue brilhando: o SEI tem muito orgulho de você!' },
-    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#00b8d9', cor2: '#9d5cff', claro: '#dcf8ff', balao: 'Orgulho de você! 💙',
+    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#00b8d9', cor2: '#9d5cff', claro: '#b9f3ff', balao: 'Orgulho de você! 💙',
       texto: 'Cada conquista sua no {BIMESTRE} bimestre de {ANO} mostrou garra, esforço e coragem. 💙 Você é destaque e inspira toda a Família SEI. Siga em frente: a gente acredita em você!' }
   };
   const CHAVE = 'sei-certificados2';
@@ -32,20 +32,23 @@
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); })();
   let seloPng = null;
   const prepararSelo = () => seloPng ? Promise.resolve(seloPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 800; c.height = 1000; c.getContext('2d').drawImage(im, 0, 0, 800, 1000); seloPng = c.toDataURL('image/png'); ok(seloPng); }; im.onerror = () => ok(selo); im.src = selo; });
+  function confete() { let s = 3, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ff2bd6', '#ffd600', '#00d9ff', '#39e600', '#9d5cff', '#ff7b00'];
+    for (let i = 0; i < 46; i++) { const lado = i % 2, x = lado ? 196 + rnd() * 80 : 6 + rnd() * 80, y = 14 + rnd() * 46, w = 1.2 + rnd() * 1.6; h += `<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${w * 2.4}mm;background:${cs[i % cs.length]};transform:rotate(${rnd() * 180}deg)"></i>`; }
+    return h; }
   // folha do certificado (A4 deitada, em mm). semTexto: só a arte, para o fundo do Word
   function certificado(tipo, nome, semTexto) {
     const T = TIPOS[tipo], el = document.createElement('div'), nm = bonito(nome), some = semTexto ? ' style="visibility:hidden"' : ''; el.className = 'ct-art';
-    el.innerHTML = `<div class="ca-moldura" style="background:linear-gradient(120deg,${T.cor},#ffd600 35%,#39e600 55%,#00d9ff 75%,#9d5cff)"></div>
+    el.innerHTML = `<div class="ca-moldura" style="background:linear-gradient(135deg,${T.cor},#9d5cff 50%,${T.cor === '#ff2bd6' ? '#00d9ff' : '#ff2bd6'})"></div>
       <div class="ca-folha"><div class="ca-risc">${rabiscos(285, 198, .16)}</div>
         <div class="ca-topo"><img src="assets/docs/logo-sei.png" alt=""><div><b>Sistema de Ensino Incentivo</b><small>Aqui se faz educação com qualidade · @_sei01</small></div><span class="ca-chip" style="background:${T.cor}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</span></div>
-        <div class="ca-tit">CERTIFICADO</div>
+        <div class="ca-conf">${confete()}</div><div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
         <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2})">${T.emoji} ${T.rotulo} ${T.emoji}</div>
         <div class="ca-para"${some}>Este certificado vai para</div>
-        <div class="ca-nome"${some}><span style="font-size:${tamNomeMm(nm)}mm;background:linear-gradient(180deg,transparent 58%,${T.claro} 58%)">${esc(nm)}</span></div>
+        <div class="ca-nome"${some}><span style="font-size:${tamNomeMm(nm)}mm;background:linear-gradient(180deg,transparent 55%,${T.claro} 55%,${T.claro} 92%,transparent 92%)">${esc(nm)}</span></div>
         <p class="ca-msg"${some}>${esc(msg(tipo))}</p>
-        <div class="ca-palco"><div class="ca-podio"><span style="height:9mm">2º</span><span class="um" style="height:14mm">1º</span><span style="height:6mm">3º</span></div><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-balao" style="border-color:${T.cor}">${esc(T.balao)}</div></div>
-        <div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
-        <img class="ca-selo" src="${seloPng || selo}" alt="">
+        <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(255,255,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao" style="border-color:${T.cor}">${esc(T.balao)}</div></div>
+        <div class="ca-data">São Miguel do Guamá – PA, ____ de ___________ de ${esc(st.ano)}.</div><div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
+        <img class="ca-selo" src="assets/docs/selo-honra.png?v=1" alt="">
         <div class="ca-rod">São Miguel do Guamá – PA · Família SEI 💛 #OrgulhoSEI</div>
       </div>`;
     return el;
@@ -61,7 +64,6 @@
     return el;
   }
   async function render(el, dpi, transparente) {
-    if (!seloPng) { await prepararSelo(); const im = el.querySelector('.ca-selo'); if (im) im.src = seloPng; }
     const fora = document.createElement('div'); Object.assign(fora.style, { position: 'absolute', left: '0', top: '0', zIndex: '-5', pointerEvents: 'none' }); fora.append(el); document.body.append(fora);
     await Promise.all([...el.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))); if (document.fonts) { await document.fonts.load('10px SeiRubik'); await document.fonts.load('10px SeiPoppins'); }
     await carregar('html2canvas', 'assets/vendor/html2canvas-1.4.1.min.js');
@@ -122,7 +124,7 @@
     baixar(await docx(corpo, [], cabs), `Certificados-${st.bim}-Bimestre-${st.ano}.docx`);
   }
   // posições (mm) do texto no certificado — as mesmas do CSS (.ca-para, .ca-nome, .ca-msg)
-  const Mm = { para: 77, lParaN: 8, lNome: 22, antesMsg: 2, lMsg: 8.2, lado: 30, msgRec: 8 };
+  const Mm = { para: 77, lParaN: 8, lNome: 22, antesMsg: 2, lMsg: 8.2, lado: 30, msgRec: 0 };
   async function medalhasWord(aviso) {
     const l = lista(); if (!l.length) return alert('Coloque pelo menos um nome.'); aviso('⏳ Desenhando…'); const imgs = await medalhasImgs(), g = grade(), midias = [], rid = {};
     for (const t of Object.keys(imgs)) { rid[t] = 'rM' + t; midias.push({ arq: `medalha-${t}.png`, rid: rid[t], dados: await (await fetch(imgs[t])).arrayBuffer() }); }
