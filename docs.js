@@ -940,7 +940,7 @@ Prática e tira-dúvidas`;
   const TURMAS_MAT = ['Maternal', 'Pré I', 'Pré II', '1º ano', '2º ano', '3º ano', '4º ano', '5º ano'];
   const TEMA_MAT = { 'Maternal': ['#ef6c00', '#fff3e0'], 'Pré I': ['#2e7d32', '#e8f5e9'], 'Pré II': ['#1565c0', '#e3f2fd'], 'Pré III': ['#6a1b9a', '#f3e5f5'], '1º ano': ['#c62828', '#ffebee'], '2º ano': ['#00838f', '#e0f7fa'], '3º ano': ['#ad1457', '#fce4ec'], '4º ano': ['#283593', '#e8eaf6'], '5º ano': ['#00695c', '#e0f2f1'] };
   const MAT_MATERNAL = `01 - Pacote de palito de picolé
-02 - Livros de história
+01 - Livro de história
 01 - Brinquedo pedagógico (encaixe)
 01 - Caderno de desenho grande
 01 - Cola branca grande
@@ -955,7 +955,7 @@ Prática e tira-dúvidas`;
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT azul-escuro (grosso)
 06 - Papel crepom: 02 amarelo, 02 vermelho e 02 verde
-01 - Lã azul-escuro e vermelho
+02 - Lãs: 01 azul-escuro e 01 vermelho
 01 - Pacote de prendedor de madeira
 01 - Sabonete líquido
 01 - Creme dental
@@ -965,14 +965,15 @@ Prática e tira-dúvidas`;
 01 - Garrafinha para água ou copo
 03 - Pacotes de balões coloridos
 01 - Caixa de lápis de madeira
-02 - Cadernos brochura`;
+02 - Cadernos brochura
+01 - Bastão de cola quente fino`;
   const MAT_TURMAS = { 'Maternal': MAT_MATERNAL, 'Pré I': `01 - Caderno de desenho grande
 05 - Bastões de cola quente (grossa)
 02 - Colas de isopor grandes
 01 - Caixa de giz de cera grande (06 unid.)
 01 - Caixa de porosa grande (06 unid.)
 02 - Lápis
-02 - Borrachas de lápis
+02 - Borrachas
 01 - Pincel (nº 14)
 02 - Caixas de tinta guache
 01 - Avental
@@ -981,7 +982,7 @@ Prática e tira-dúvidas`;
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT preto grosso
 06 - Papel crepom: 02 verde, 02 azul, 02 vermelho
-01 - Lã vermelha
+02 - Lãs vermelhas
 01 - Sabonete líquido
 01 - Creme dental
 01 - Escova de dente
@@ -989,10 +990,10 @@ Prática e tira-dúvidas`;
 01 - Toalhinha para o lanche
 01 - Garrafinha para água ou copo
 03 - Pacotes de balão amarelo
-02 - Cadernos
-01 - Caixa de lápis de cor de madeira
-01 - Palito de picolé
-01 - Jogo pedagógico
+02 - Cadernos brochura grandes
+01 - Caixa de lápis de cor madeira
+01 - Palito de picolé (pacote)
+01 - Jogo pedagógico (encaixe)
 01 - Livro de história
 01 - Prendedor de madeira
 01 - Algodão`, 'Pré II': `01 - Estojo
@@ -1001,10 +1002,10 @@ Prática e tira-dúvidas`;
 02 - Colas de isopor grandes
 01 - Pacote de palito de picolé
 01 - Caixa de giz de cera grande (12 unid.)
-01 - Caixa de lápis de madeira
+01 - Caixa de lápis de cor de madeira
 02 - Caixas de porosa grande (12 unid.)
-03 - Lápis
-03 - Borrachas
+02 - Lápis
+02 - Borrachas
 01 - Pincel
 02 - Caixas de tinta guache
 01 - Avental
@@ -1013,7 +1014,7 @@ Prática e tira-dúvidas`;
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT branco grosso
 06 - Papel crepom: 02 amarelo, 02 laranja e 02 verde
-01 - Lã azul
+02 - Lãs: 01 azul e 01 verde
 01 - Sabonete líquido
 01 - Creme dental
 01 - Escova de dente
@@ -1023,101 +1024,101 @@ Prática e tira-dúvidas`;
 03 - Pacotes de balões azuis
 01 - Prendedor de madeira
 01 - Livro de história
-01 - Brinquedo pedagógico`, '1º ano': `02 - Cadernos brochura
+01 - Brinquedo pedagógico (encaixe)`, '1º ano': `02 - Cadernos brochura
 01 - Caderno de desenho grande
 01 - Caderno de caligrafia pequeno (somente com linhas)
 01 - Caderno pequeno (agenda)
-01 - Cola de isopor grande
+02 - Colas de isopor grandes
 01 - Apontador
-02 - Canetas pretas
-02 - Canetas azuis
-03 - Lápis
+01 - Caneta preta
+01 - Caneta azul
+02 - Lápis
 02 - Borrachas
 01 - Tesoura ponta redonda
 01 - Caixa de tinta guache
-01 - Caixa de hidrocor
-01 - Caixa de lápis de cor
+01 - Caixa de hidrocor (12 unid.)
+01 - Caixa de lápis de cor grande (madeira)
 03 - Metros de TNT branco
 01 - Pincel
 01 - Resma de papel A4 (500 fls)
 03 - Pacotes de balão colorido
-01 - Fita espuma adesiva`, '2º ano': `04 - Cadernos brochura grandes
+01 - Fita espuma adesiva
+01 - Toalhinha para o lanche
+01 - Garrafinha para água ou copo`, '2º ano': `04 - Cadernos brochura grandes
 01 - Caderno de caligrafia pequeno (só com linhas)
 01 - Caderno de desenho grande
 05 - Bastões de cola quente fino
-01 - Cola branca grande
-01 - Cola de isopor grande
+02 - Colas de isopor grandes
 01 - Caixa de porosa grande (12 unid.)
 01 - Caixa de lápis de cor grande (12 unid.)
-03 - Lápis
+02 - Lápis
 02 - Borrachas
 01 - Pincel (nº 14)
 01 - Caixa de tinta guache
 01 - Tesoura pequena
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT vermelho grosso
-03 - Papel crepom: 01 vermelho, 01 amarelo, 01 verde
-03 - Pacotes de balão azul
+06 - Papel crepom: 02 vermelho, 02 amarelo e 02 verde
 01 - Caixa para armazenar o material do aluno
 01 - Toalhinha para o lanche
 01 - Garrafinha para água ou copo
-03 - Pacotes de balão vermelho
+06 - Pacotes de balão: 03 vermelho e 03 azul
 01 - Fita espuma dupla face`, '3º ano': `01 - Caderno de desenho grande
 01 - Caderno de caligrafia pequeno (só com linhas)
 05 - Cadernos brochura
 05 - Bastões de cola quente fino
-01 - Cola de isopor grande
+02 - Colas de isopor grandes
 01 - Caixa de lápis de cor grande (12 unid.)
 01 - Caixa de porosa grande (12 unid.)
-05 - Lápis
-05 - Borrachas de lápis
+03 - Lápis
+02 - Borrachas
 01 - Pincel (nº 14)
 01 - Caixa de tinta guache
 01 - Tesoura pequena
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT verde
-04 - Papel crepom: 02 azul, 02 laranja
+06 - Papel crepom: 02 azul, 02 laranja e 02 vermelho
 03 - Pacotes de balão azul-escuro
 01 - Caixa para armazenar o material do aluno
 01 - Toalhinha para o lanche
 01 - Garrafinha para água ou copo
 01 - Apontador de lápis
-01 - Régua
-02 - Canetas azuis
-02 - Canetas pretas
+01 - Jogo de régua (pequeno)
+01 - Caneta azul
+01 - Caneta preta
 01 - Livro infantil
 01 - Fita adesiva banana`, '4º ano': `05 - Cadernos brochura grandes
 01 - Caderno de caligrafia pequeno (só com linhas)
 01 - Caderno de desenho grande
 05 - Bastões de cola quente fino
-01 - Cola de isopor grande
+02 - Colas de isopor grandes
 01 - Caixa de giz de cera grande (12 unid.)
 05 - Caixas de porosa grande (12 unid.)
-05 - Lápis
+03 - Lápis
 02 - Borrachas de lápis
-02 - Canetas azuis
-02 - Canetas pretas
+01 - Caneta azul
+01 - Caneta preta
 01 - Pincel (nº 14)
 01 - Caixa de tinta guache
 01 - Tesoura pequena
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT amarelo
-03 - Papel crepom: 01 branco, 01 azul, 01 vermelho
+06 - Papel crepom: 02 branco, 02 azul e 02 vermelho
 03 - Pacotes de balão branco
 01 - Caixa para armazenar os materiais
 01 - Toalhinha para o lanche
 01 - Garrafa para água ou copo
 01 - Kit de réguas (pequeno)
 01 - Material dourado (pequeno)
-01 - Fita espuma adesiva`, '5º ano': `04 - Cadernos brochura
+01 - Fita espuma adesiva`, '5º ano': `05 - Cadernos brochura
 01 - Caderno de desenho grande
-01 - Caderno de caligrafia grande (somente com linhas)
+01 - Caderno de caligrafia pequeno (somente com linhas)
 01 - Caderno pequeno (agenda)
-01 - Cola de isopor grande
+02 - Colas de isopor grandes
 01 - Apontador
-02 - Canetas pretas
-02 - Canetas azuis
-03 - Lápis
+01 - Caneta preta
+01 - Caneta azul
+02 - Lápis
 02 - Borrachas
 01 - Tesoura ponta redonda
 01 - Caixa de tinta guache

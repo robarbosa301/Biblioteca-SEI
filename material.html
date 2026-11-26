@@ -43,10 +43,10 @@
 <script>
 (function () {
   var L = [
-    ['Educação Infantil', '🧸', [['maternal', 'Maternal', '#ef6c00', 27], ['pre-i', 'Pré I', '#2e7d32', 30], ['pre-ii', 'Pré II', '#1565c0', 29]]],
-    ['Anos Iniciais', '✏️', [['1-ano', '1º ano', '#c62828', 19], ['2-ano', '2º ano', '#00838f', 22], ['3-ano', '3º ano', '#ad1457', 25], ['4-ano', '4º ano', '#283593', 24], ['5-ano', '5º ano', '#00695c', 22]]]
+    ['Educação Infantil', '🧸', [['maternal', 'Maternal', '#ef6c00', 28], ['pre-i', 'Pré I', '#2e7d32', 30], ['pre-ii', 'Pré II', '#1565c0', 29]]],
+    ['Anos Iniciais', '✏️', [['1-ano', '1º ano', '#c62828', 21], ['2-ano', '2º ano', '#00838f', 20], ['3-ano', '3º ano', '#ad1457', 25], ['4-ano', '4º ano', '#283593', 24], ['5-ano', '5º ano', '#00695c', 22]]]
   ];
-  var P = 'assets/material/2027/', V = '?v=2';
+  var P = 'assets/material/2027/', V = '?v=3';
   document.getElementById('listas').innerHTML = L.map(function (s) {
     return '<h2 class="mt-seg">' + s[1] + ' ' + s[0] + '</h2><div class="mt-grid">' + s[2].map(function (t) {
       var pdf = P + 'lista-material-2027-' + t[0] + '.pdf' + V;
