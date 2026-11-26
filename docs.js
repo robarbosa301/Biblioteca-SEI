@@ -963,10 +963,10 @@ Prática e tira-dúvidas`;
 01 - Caixa para armazenar o material do aluno
 01 - Toalhinha para o lanche
 01 - Garrafinha para água ou copo
-03 - Pacotes de balões coloridos
+03 - Pacotes de balão
 01 - Caixa de lápis de madeira
 02 - Cadernos brochura
-01 - Bastão de cola quente fino`;
+05 - Bastões de cola quente (fino)`;
   const MAT_TURMAS = { 'Maternal': MAT_MATERNAL, 'Pré I': `01 - Caderno de desenho grande
 05 - Bastões de cola quente (grossa)
 02 - Colas de isopor grandes
@@ -982,7 +982,7 @@ Prática e tira-dúvidas`;
 01 - Resma de papel A4 (500 fls)
 05 - Metros de TNT preto grosso
 06 - Papel crepom: 02 verde, 02 azul, 02 vermelho
-02 - Lãs vermelhas
+02 - Lãs: 01 vermelha e 01 amarela
 01 - Sabonete líquido
 01 - Creme dental
 01 - Escova de dente
