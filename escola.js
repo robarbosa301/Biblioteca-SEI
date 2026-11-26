@@ -30,12 +30,12 @@
   const falta = n => n === 0 ? 'termina hoje' : n === 1 ? 'falta 1 dia' : n > 0 ? `faltam ${n} dias` : n === -1 ? 'venceu ontem' : `venceu há ${-n} dias`;
 
   /* ---------- estado ---------- */
-  let emEntregas = null, aba = 'hoje', sub = 'alunos', pessoas = [], alunos = [], crono = [], filtroG = '', busca = '', editando = null;
+  let comunicados = [], emEntregas = null, aba = 'hoje', sub = 'alunos', pessoas = [], alunos = [], crono = [], filtroG = '', busca = '', editando = null;
   const anoAtual = () => { const d = new Date(); return String(d.getMonth() >= 9 ? d.getFullYear() + 1 : d.getFullYear()); };
   let ano = anoAtual();
   const eu = () => D.usuario();
   const gestor = () => ['direcao', 'secretaria', 'coordenacao'].includes(eu().perfil);
-  async function carregar() { [pessoas, alunos, crono, boletins, notasDocs, freqDocs] = await Promise.all(['pessoas', 'alunos', 'cronograma', 'boletins', 'notas', 'frequencia'].map(c => D.listar(c))); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
+  async function carregar() { [pessoas, alunos, crono, boletins, notasDocs, freqDocs, comunicados] = await Promise.all(['pessoas', 'alunos', 'cronograma', 'boletins', 'notas', 'frequencia', 'comunicados'].map(c => D.listar(c))); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
 
   /* ---------- regras do cronograma ---------- */
   const profsDe = it => pessoas.filter(p => p.ativo !== false && p.perfil === 'professor' && (!(it.etapas || []).length || !(p.etapas || []).length || p.etapas.some(e => it.etapas.includes(e))));
@@ -114,8 +114,20 @@
       x += `<div class="es-grid">${agora.map(it => cardHoje(it, u)).join('')}</div>`;
     }
     x += '</section>';
+    if (gestor()) { const cs = comunicados.slice().sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 6);
+      x += `<section class="es-sec"><h2>📢 Comunicados para as famílias</h2><div class="es-acoes"><button class="b main" id="es-novocom">➕ Novo comunicado</button></div>${cs.length ? `<div class="es-grid">${cs.map(c => `<article class="es-card" style="--c:#00838f"><div class="es-linha"><span class="chip">${fmtS(c.data)}</span><span class="chip">${(c.turmas || []).length ? esc(c.turmas.join(', ')) : 'Todas as turmas'}</span></div><h3>${esc(c.titulo)}</h3><p>${esc(c.texto).slice(0, 180)}${(c.texto || '').length > 180 ? '…' : ''}</p><div class="es-linha"><button class="b" data-edcom="${c.id}">✏️ Editar</button><button class="b" data-delcom="${c.id}">🗑️</button></div></article>`).join('')}</div>` : '<p class="es-dica">Os comunicados aparecem na Área das Famílias de cada aluno.</p>'}</section>`; }
     if (prox.length) x += `<section class="es-sec"><h2>🔭 Próximas semanas</h2><div class="es-grid">${prox.slice(0, 9).map(it => `<article class="es-card" style="--c:${COR[it.grupo] || '#1a73e8'}"><div class="es-linha"><span class="chip">${esc(it.grupo)}</span></div><h3>${ETAPA_AV[it.etapa] || '📌'} ${esc(it.titulo)}</h3><div class="es-data">🗓️ ${periodo(it)}</div></article>`).join('')}</div></section>`;
     return x;
+  }
+
+  function telaCom(c) {
+    c = c || { titulo: '', texto: '', turmas: [], data: hoje() };
+    $('#es').innerHTML = `<form class="es-form" id="es-fcom"><h3>📢 ${c.id ? 'Editar' : 'Novo'} comunicado para as famílias</h3>
+      <div class="es-g2"><label>Título<input name="titulo" required value="${esc(c.titulo)}" placeholder="Ex.: Reunião de pais — 1ª Avaliação"></label><label>Data<input type="date" name="data" value="${c.data}"></label></div>
+      <label>Mensagem<textarea name="texto" required style="min-height:140px">${esc(c.texto)}</textarea></label>
+      <div><b>Para quais turmas</b> <small>(nenhuma marcada = todas)</small><div class="es-marcas">${TURMAS.map(t => `<label><input type="checkbox" name="t" value="${t}" ${(c.turmas || []).includes(t) ? 'checked' : ''}> ${t}</label>`).join('')}</div></div>
+      <div class="es-acoes"><button class="b main">📢 Publicar para as famílias</button><button type="button" class="b" data-ir="hoje">Cancelar</button></div></form>`;
+    $('#es-fcom').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target); Object.assign(c, { titulo: f.get('titulo').trim(), texto: f.get('texto').trim(), data: f.get('data') || hoje(), turmas: f.getAll('t') }); await D.salvar('comunicados', c); aba = 'hoje'; desenhar(); };
   }
 
   /* ---------- CRONOGRAMA ---------- */
@@ -356,6 +368,9 @@
   $('#es').addEventListener('click', async e => {
     const b = e.target.closest('button,a'); if (!b) return; const d = b.dataset, item = id => crono.find(x => x.id === id);
     if (d.ir) { aba = d.ir; return desenhar(); }
+    if (b.id === 'es-novocom') return telaCom();
+    if (d.edcom) return telaCom(comunicados.find(c => c.id === d.edcom));
+    if (d.delcom) { if (confirm('Apagar este comunicado? Ele some da área das famílias.')) { await D.apagar('comunicados', d.delcom); await desenhar(); } return; }
     if (b.id === 'es-libeq') return liberarEquipe();
     if (b.id === 'es-libpais') return liberarPais();
     if (d.usat) { const u = usuarios.find(x => x.email === d.usat); return D.nuvem.salvarUsuario({ email: u.email, ativo: u.ativo === false }); }

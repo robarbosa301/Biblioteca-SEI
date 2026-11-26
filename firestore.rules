@@ -43,6 +43,11 @@ service cloud.firestore {
       allow read: if equipe() || (familia() && id in u().alunos);
       allow write: if equipe();
     }
+    // comunicados para as famílias: gestão escreve; equipe e famílias leem
+    match /comunicados/{id} {
+      allow read: if equipe() || familia();
+      allow write: if gestao();
+    }
     // o resto: só a Direção
     match /{col}/{id} { allow read, write: if direcao(); }
   }

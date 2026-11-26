@@ -7,7 +7,7 @@
   const V = 'assets/vendor/firebase/firebase-', VER = '-compat-10.14.1.js';
   const AREA = document.body.dataset.nuvem || 'equipe';
   const EQUIPE = ['direcao', 'secretaria', 'coordenacao', 'professor', 'aee', 'financeiro'], GESTAO = ['direcao', 'secretaria', 'coordenacao'];
-  const COLS = ['cronograma', 'pessoas', 'alunos', 'notas', 'frequencia', 'boletins'];
+  const COLS = ['cronograma', 'pessoas', 'alunos', 'notas', 'frequencia', 'boletins', 'comunicados'];
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const carregar = src => new Promise((ok, erro) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => erro(new Error('não carregou ' + src)); document.head.appendChild(s); });
 
@@ -66,6 +66,7 @@
     if (u.perfil === 'familia') {
       const ids = (u.alunos || []).slice(0, 30); if (ids.length) parar.push(db.collection('alunos').where(firebase.firestore.FieldPath.documentId(), 'in', ids).onSnapshot(s => aplicar('alunos', s), erro('alunos')));
       if (ids.length) parar.push(db.collection('boletins').where(firebase.firestore.FieldPath.documentId(), 'in', ids).onSnapshot(s => aplicar('boletins', s), erro('boletins')));
+      parar.push(db.collection('comunicados').onSnapshot(s => aplicar('comunicados', s), erro('comunicados')));
       parar.push(db.collection('cronograma').where('quem', 'array-contains', 'familias').onSnapshot(s => aplicar('cronograma', s), erro('cronograma')));
       return;
     }
