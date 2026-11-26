@@ -57,7 +57,7 @@
       <div class="md-risc">${rabiscos(56, 56, .22)}</div><img class="md-logo" src="assets/docs/logo-sei.png" alt="">
       <div class="md-grande" style="font-size:${tipo === 'nota10' ? 11 : 8.4}mm;color:${tipo === 'nota10' ? '#fff200' : '#7df9ff'};text-shadow:0 0 1.2mm ${T.cor},0 .6mm 0 ${T.cor}">${T.grande}</div>
       <div class="md-fita" style="background:${T.cor}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</div>
-      <img class="md-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="md-estrela">${tipo === 'nota10' ? '⭐' : '💙'}</div><div class="md-estrela b">✨</div></div></div>`;
+      <img class="md-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="md-estrela">${tipo === 'nota10' ? '⭐' : '💙'}</div></div></div>`;
     return el;
   }
   async function render(el, dpi, transparente) {
@@ -78,7 +78,7 @@
     doc.save(`Certificados-${st.bim}-Bimestre-${st.ano}.pdf`);
   }
   // grade das medalhas na folha A4 em pé, conforme o tamanho escolhido
-  const grade = () => { const d = +st.tamMed || 33, passo = d + 1.8, col = Math.floor((210 - 8) / passo), lin = Math.floor((297 - 10) / passo); return { d, passo, col, lin, x0: (210 - (col - 1) * passo - d) / 2, y0: (297 - (lin - 1) * passo - d) / 2 }; };
+  const grade = (dd) => { const d = dd || +st.tamMed || 33, passo = d + 1.2, col = Math.floor((210 - 6 + 1.2) / passo + 1e-6), lin = Math.floor((297 - 8 + 1.2) / passo + 1e-6); return { d, passo, col, lin, x0: (210 - (col - 1) * passo - d) / 2, y0: (297 - (lin - 1) * passo - d) / 2 }; };
   async function medalhasImgs() { const out = {}; for (const t of ['nota10', 'destaque']) if (nomes(t).length) out[t] = (await render(medalha(t), 300, true)).toDataURL('image/png'); return out; }
   async function medalhasPdf(aviso) {
     const l = lista(); if (!l.length) return alert('Coloque pelo menos um nome.'); aviso('⏳ Desenhando…'); const imgs = await medalhasImgs(), g = grade(), por = g.col * g.lin, doc = await novoPdf('p');
@@ -158,7 +158,7 @@
     const n1 = nomes('nota10'), n2 = nomes('destaque'), tot = n1.length + n2.length, g = grade();
     $('#ct').innerHTML = `<section class="es-sec"><h2>🏅 Certificados e medalhas</h2><p class="es-dica">Arte nova da escola, no estilo dos nossos posts. Escolha o bimestre, coloque os nomes e baixe os <b>certificados</b> (um por folha A4 deitada) e as <b>medalhas</b>, em PDF ou Word.</p>
       <form class="es-form" id="ct-f"><div class="es-g3"><label>Bimestre<select name="bim">${['1º', '2º', '3º', '4º'].map(b => `<option ${b === st.bim ? 'selected' : ''}>${b}</option>`).join('')}</select></label><label>Ano<input name="ano" inputmode="numeric" value="${esc(st.ano)}"></label>
-      <label>Tamanho da medalha<select name="tamMed">${[[33, '3,3 cm (48 por folha)'], [40, '4 cm (35 por folha)'], [50, '5 cm (20 por folha)']].map(([v, t]) => `<option value="${v}" ${+st.tamMed === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
+      <label>Tamanho da medalha<select name="tamMed">${[[33, '3,3 cm'], [40, '4 cm'], [50, '5 cm']].map(([v, t]) => [v, `${t} (${grade(v).col * grade(v).lin} por folha)`]).map(([v, t]) => `<option value="${v}" ${+st.tamMed === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
       <label>Mensagem do Aluno Nota 10 <small>({BIMESTRE} e {ANO} são trocados sozinhos)</small><textarea name="txt_nota10" style="min-height:70px">${esc(st.txt_nota10)}</textarea></label>
       <label>Mensagem do Aluno Destaque (AEE)<textarea name="txt_destaque" style="min-height:70px">${esc(st.txt_destaque)}</textarea></label><div class="es-acoes" style="margin:0"><button type="button" class="b" id="ct-padrao">↺ Mensagens padrão</button></div></form>
       <div class="es-g2" style="margin-top:14px">
