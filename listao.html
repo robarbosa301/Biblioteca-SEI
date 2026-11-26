@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Listão dos Aprovados · SEI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b2a5b">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="aulas.css?v=3-aval">
+<link rel="stylesheet" href="escola.css?v=2">
+<meta name="description" content="Monte o painel dos aprovados da escola em várias folhas A4.">
+<link rel="icon" type="image/png" href="favicon.png?v=2"><link rel="apple-touch-icon" href="assets/portal/apple-touch-icon.png?v=2">
+<style>
+@font-face{font-family:SeiRubik;src:url(assets/fonts/Rubik-ExtraBold.ttf)}@font-face{font-family:SeiPoppins;src:url(assets/fonts/Poppins-Bold.ttf)}
+.lt-turmas{display:flex;flex-direction:column;gap:12px}
+.lt-turma{background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(11,42,91,.10);border-left:6px solid var(--c,#1e4fb8);display:flex;flex-direction:column;gap:8px}
+.lt-turma .es-linha select,.lt-turma .es-linha input{font:inherit;padding:7px 10px;border:1px solid var(--bd);border-radius:9px}
+.lt-turma textarea{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:9px;min-height:130px;width:100%}
+.lt-prev{background:#0b2a5b;border-radius:14px;padding:12px;overflow:auto;text-align:center}
+.lt-prev canvas{max-width:100%;height:auto;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.lt-prev p{color:#dfeaff;margin:8px 0 0;font-size:14px}
+/* o cartaz (desenhado em milímetros) */
+.cz{position:relative;overflow:hidden;font-family:SeiPoppins,Arial,sans-serif;color:#0b2a5b;box-sizing:border-box;display:flex;flex-direction:column}
+.cz.festa{background:radial-gradient(circle at 50% 18%,#2a6cf0 0,#0f3fbf 40%,#0a2a95 75%,#071d70 100%);color:#fff}
+.cz.leve{background:#fff}
+.cz-conf{position:absolute;inset:0;pointer-events:none}
+.cz-cab{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.cz.leve .cz-cab{background:linear-gradient(135deg,#0a2f86,#071c55);color:#fff;border-bottom:solid #e6b422}
+.cz-cab img.m{flex:0 0 auto}
+.cz-tit{text-align:center;line-height:1}
+.cz-tit b{display:block;font-family:SeiRubik,Arial Black,sans-serif;color:#ffd34d;text-shadow:0 .06em 0 rgba(0,0,0,.25);letter-spacing:.01em}
+.cz-tit span{display:block;color:#fff}
+.cz-tit i{display:inline-block;font-style:normal;background:#ffd34d;color:#0b2a5b;border-radius:99em;font-family:SeiRubik,Arial Black,sans-serif}
+.cz-corpo{position:relative;flex:1 1 auto;overflow:hidden}
+.cz-bloco{break-inside:avoid;background:#fff;color:#10213f;border-radius:.6em;box-shadow:0 .15em .5em rgba(0,0,0,.25);overflow:hidden}
+.cz.leve .cz-bloco{border:.12em solid #c9d6ea;box-shadow:none}
+.cz-bloco h3{margin:0;color:#fff;font-family:SeiRubik,Arial Black,sans-serif;font-weight:800;text-align:center;line-height:1.15}
+.cz-bloco ol{margin:0;list-style:none;line-height:1.28}
+.cz-bloco li{white-space:nowrap;overflow:hidden}
+.cz-bloco li::before{content:"★ ";color:#e6b422}
+.cz-rod{flex:0 0 auto;display:flex;align-items:center;justify-content:center;text-align:center}
+.cz.festa .cz-rod{color:#cfe2ff}.cz.leve .cz-rod{color:#0b2a5b}
+</style>
+</head>
+<body>
+<header class="no-print">
+  <a class="b" href="index.html">‹ Biblioteca</a>
+  <h1>🏆 Listão dos Aprovados <small>Painel em várias folhas A4</small></h1>
+</header>
+<main id="lt"></main>
+<footer class="no-print"><p>O rascunho fica guardado <b>neste aparelho</b>. Imprima sempre em <b>tamanho real (100%)</b>, depois corte nas marcas e monte o painel seguindo o número de cada folha.</p></footer>
+<script src="escola-dados.js?v=2"></script>
+<script src="listao.js?v=1"></script>
+<script src="offline.js?v=3"></script>
+</body>
+</html>
