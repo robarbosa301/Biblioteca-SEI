@@ -27,30 +27,37 @@
       h += `<span style="position:absolute;left:${x + rnd() * cel * .5}mm;top:${y + rnd() * cel * .5}mm;font-size:${cel * (emo ? .3 : .24)}mm;transform:rotate(${(rnd() - .5) * 40}deg);opacity:${emo ? op * .7 : op};color:${cs[i % cs.length]};font-family:SeiRubik,Arial Black,sans-serif;white-space:nowrap">${t}</span>`; }
     return h; }
   // selo "Honra ao Mérito" desenhado em SVG
-  const selo = (() => { const pts = []; for (let i = 0; i < 48; i++) { const a = i * Math.PI / 24, r = i % 2 ? 84 : 96; pts.push((100 + r * Math.sin(a)).toFixed(1) + ',' + (98 - r * Math.cos(a)).toFixed(1)); }
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 250"><defs><linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff7b0"/><stop offset=".45" stop-color="#ffd21f"/><stop offset="1" stop-color="#d18f00"/></linearGradient></defs><path d="M62 150 L40 246 L72 226 L96 248 L104 160Z" fill="#ff2bd6"/><path d="M138 150 L160 246 L128 226 L104 248 L96 160Z" fill="#00b8d9"/><polygon points="${pts.join(' ')}" fill="url(#o)" stroke="#b37800" stroke-width="2"/><circle cx="100" cy="98" r="70" fill="none" stroke="#fffbd6" stroke-width="4" stroke-dasharray="3 6"/><text x="100" y="80" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="15" text-anchor="middle" fill="#7a4d00">★ ★ ★</text><text x="100" y="106" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="27" text-anchor="middle" fill="#0b1a4a">HONRA</text><text x="100" y="130" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="17" text-anchor="middle" fill="#0b1a4a">AO MÉRITO</text></svg>`;
+  // medalha "Nº 1 em aprovação": um número 1 dourado com fitas (desenhado em SVG e convertido em PNG)
+  const UM = (() => { const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320"><defs>
+      <linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff8c4"/><stop offset=".35" stop-color="#ffd21f"/><stop offset=".7" stop-color="#e39a00"/><stop offset="1" stop-color="#ffe680"/></linearGradient>
+      <linearGradient id="b" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity=".75"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+      <radialGradient id="l" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#7df9ff" stop-opacity=".55"/><stop offset="1" stop-color="#00d9ff" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="120" cy="150" r="118" fill="url(#l)"/>
+      <path d="M96 214 L52 318 L78 304 L92 320 L128 226Z" fill="#00d9ff" stroke="#0b2a6b" stroke-width="3"/><path d="M144 214 L188 318 L162 304 L148 320 L112 226Z" fill="#1e6bff" stroke="#0b2a6b" stroke-width="3"/>
+      <path d="M72 78 L132 26 L172 26 L172 236 L204 236 L204 282 L58 282 L58 236 L110 236 L110 104 L84 122 Z" fill="url(#o)" stroke="#8a5a00" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M86 80 L136 38 L160 38 L160 248 L192 248 L192 270 L70 270 L70 248 L122 248 L122 90 L90 112 Z" fill="none" stroke="#fff3a8" stroke-width="3" stroke-linejoin="round" opacity=".8"/>
+      <path d="M136 38 L160 38 L160 160 L136 175 Z" fill="url(#b)"/>
+      ${[[38, 60, 9], [206, 70, 7], [30, 170, 6], [212, 182, 8], [120, 8, 6]].map(([x, y, r]) => `<path d="M${x} ${y - r * 2} L${x + r * .5} ${y - r * .5} L${x + r * 2} ${y} L${x + r * .5} ${y + r * .5} L${x} ${y + r * 2} L${x - r * .5} ${y + r * .5} L${x - r * 2} ${y} L${x - r * .5} ${y - r * .5}Z" fill="#ffffff"/>`).join('')}</svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); })();
-  let seloPng = null;
-  const prepararSelo = () => seloPng ? Promise.resolve(seloPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 800; c.height = 1000; c.getContext('2d').drawImage(im, 0, 0, 800, 1000); seloPng = c.toDataURL('image/png'); ok(seloPng); }; im.onerror = () => ok(selo); im.src = selo; });
+  let umPng = null;
+  const prepararUm = () => umPng ? Promise.resolve(umPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 960; c.height = 1280; c.getContext('2d').drawImage(im, 0, 0, 960, 1280); umPng = c.toDataURL('image/png'); ok(umPng); }; im.onerror = () => ok(UM); im.src = UM; });
   function confete() { let s = 3, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ffd600', '#00d9ff', '#ffffff', '#4f8bff', '#7df9ff', '#ffe600'];
     for (let i = 0; i < 46; i++) { const lado = i % 2, x = lado ? 196 + rnd() * 80 : 6 + rnd() * 80, y = 14 + rnd() * 46, w = 1.2 + rnd() * 1.6; h += `<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${w * 2.4}mm;background:${cs[i % cs.length]};transform:rotate(${rnd() * 180}deg)"></i>`; }
     return h; }
   // folha do certificado (A4 deitada, em mm). semTexto: só a arte, para o fundo do Word
   function certificado(tipo, nome, semTexto) {
     const T = TIPOS[tipo], el = document.createElement('div'), nm = bonito(nome), some = semTexto ? ' style="visibility:hidden"' : ''; el.className = 'ct-art';
-    el.innerHTML = `<div class="ca-moldura" style="background:linear-gradient(135deg,#ffd600,#00d9ff 50%,#1e6bff)"></div>
-      <div class="ca-folha"><div class="ca-risc">${rabiscos(285, 198, .2)}</div>
-        <div class="ca-topo"><img src="assets/docs/logo-sei.png" alt=""><div><b>Sistema de Ensino Incentivo</b><small>Aqui se faz educação com qualidade · @_sei01</small></div><span class="ca-chip" style="background:${T.cor};color:${T.texto2}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</span></div>
-        <div class="ca-conf">${confete()}</div><div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
-        <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2});color:${T.texto2}">${T.emoji} ${T.rotulo} ${T.emoji}</div>
-        <div class="ca-para"${some}>Este certificado vai para</div>
-        <div class="ca-nome"><span style="font-size:${tamNomeMm(nm)}mm${semTexto ? ';visibility:hidden' : ''}">${esc(nm)}</span></div>
-        <p class="ca-msg"${some}>${esc(msg(tipo))}</p>
-        <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(0,217,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao" style="border-color:${T.cor}">${esc(T.balao)}</div></div>
-        <div class="ca-data">São Miguel do Guamá – PA, ____ de ___________ de ${esc(st.ano)}.</div><div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
-        <img class="ca-selo" src="assets/docs/selo-honra.png?v=1" alt="">
-        <div class="ca-rod">São Miguel do Guamá – PA · Família SEI 💛 #OrgulhoSEI</div>
-      </div>`;
+    el.innerHTML = `<div class="ca-bg"></div><div class="ca-vinheta"></div><div class="ca-conf">${confete()}</div><div class="ca-linha"></div>
+      <img class="ca-logo" src="assets/docs/logo-sei.png" alt="">
+      <span class="ca-chip" style="background:${T.cor};color:${T.texto2}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</span><span class="ca-insta">@_sei01</span>
+      <div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
+      <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2});color:${T.texto2}">${T.emoji} ${T.rotulo} ${T.emoji}</div>
+      <div class="ca-para"${some}>Este certificado vai para</div>
+      <div class="ca-nome"><span style="font-size:${tamNomeMm(nm)}mm${semTexto ? ';visibility:hidden' : ''}">${esc(nm)}</span></div>
+      <p class="ca-msg"${some}>${esc(msg(tipo))}</p>
+      <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(0,217,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao">${esc(T.balao)}</div></div>
+      <div class="ca-data">São Miguel do Guamá – PA, ____ de ___________ de ${esc(st.ano)}.</div><div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
+      <div class="ca-um"><img src="${umPng || UM}" alt=""><span class="ca-fita">HONRA AO MÉRITO</span></div>`;
     return el;
   }
   // medalha redonda (desenhada a 60 mm e reduzida na folha)
@@ -64,6 +71,7 @@
     return el;
   }
   async function render(el, dpi, transparente) {
+    if (!umPng) { await prepararUm(); const im = el.querySelector('.ca-um img'); if (im) im.src = umPng; }
     const fora = document.createElement('div'); Object.assign(fora.style, { position: 'absolute', left: '0', top: '0', zIndex: '-5', pointerEvents: 'none' }); fora.append(el); document.body.append(fora);
     await Promise.all([...el.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))); if (document.fonts) { await document.fonts.load('10px SeiRubik'); await document.fonts.load('10px SeiPoppins'); }
     await carregar('html2canvas', 'assets/vendor/html2canvas-1.4.1.min.js');
@@ -124,7 +132,7 @@
     baixar(await docx(corpo, [], cabs), `Certificados-${st.bim}-Bimestre-${st.ano}.docx`);
   }
   // posições (mm) do texto no certificado — as mesmas do CSS (.ca-para, .ca-nome, .ca-msg)
-  const Mm = { para: 77, lParaN: 8, lNome: 22, antesMsg: 2, lMsg: 8.2, lado: 30, msgRec: 0 };
+  const Mm = { para: 86, lParaN: 8, lNome: 22, antesMsg: 3, lMsg: 8.2, lado: 30, msgRec: 0 };
   async function medalhasWord(aviso) {
     const l = lista(); if (!l.length) return alert('Coloque pelo menos um nome.'); aviso('⏳ Desenhando…'); const imgs = await medalhasImgs(), g = grade(), midias = [], rid = {};
     for (const t of Object.keys(imgs)) { rid[t] = 'rM' + t; midias.push({ arq: `medalha-${t}.png`, rid: rid[t], dados: await (await fetch(imgs[t])).arrayBuffer() }); }
