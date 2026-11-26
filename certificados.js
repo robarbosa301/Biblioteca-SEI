@@ -30,22 +30,43 @@
   // medalha "Nº 1 em aprovação": a mão fazendo o número 1, com o lema ao redor (SVG convertido em PNG)
   const UM = (() => { const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320"><defs>
       <linearGradient id="o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff8c4"/><stop offset=".35" stop-color="#ffd21f"/><stop offset=".7" stop-color="#e39a00"/><stop offset="1" stop-color="#ffe680"/></linearGradient>
-      <radialGradient id="c" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#2f7bff"/><stop offset=".7" stop-color="#0b2a8a"/><stop offset="1" stop-color="#061650"/></radialGradient>
+      <linearGradient id="pele" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f3f7ff"/><stop offset="1" stop-color="#c9d8f5"/></linearGradient><radialGradient id="c" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#2f7bff"/><stop offset=".7" stop-color="#0b2a8a"/><stop offset="1" stop-color="#061650"/></radialGradient>
       <path id="cima" d="M44 122 A76 76 0 0 1 196 122"/><path id="baixo" d="M36 122 A84 84 0 0 0 204 122"/></defs>
       <path d="M92 196 L54 316 L80 300 L94 318 L130 206Z" fill="#00d9ff" stroke="#0b2a6b" stroke-width="3"/><path d="M148 196 L186 316 L160 300 L146 318 L110 206Z" fill="#1e6bff" stroke="#0b2a6b" stroke-width="3"/>
       <polygon points="120.0,10.0 130.7,20.6 143.3,12.4 151.5,25.0 165.6,19.7 171.0,33.7 185.8,31.4 188.3,46.2 203.2,47.1 202.5,62.0 217.0,66.0 213.2,80.5 226.5,87.4 219.8,100.8 231.4,110.3 222.0,122.0 231.4,133.7 219.8,143.2 226.5,156.6 213.2,163.5 217.0,178.0 202.5,182.0 203.2,196.9 188.3,197.8 185.8,212.6 171.0,210.3 165.6,224.3 151.5,219.0 143.3,231.6 130.7,223.4 120.0,234.0 109.3,223.4 96.7,231.6 88.5,219.0 74.4,224.3 69.0,210.3 54.2,212.6 51.7,197.8 36.8,196.9 37.5,182.0 23.0,178.0 26.8,163.5 13.5,156.6 20.2,143.2 8.6,133.7 18.0,122.0 8.6,110.3 20.2,100.8 13.5,87.4 26.8,80.5 23.0,66.0 37.5,62.0 36.8,47.1 51.7,46.2 54.2,31.4 69.0,33.7 74.4,19.7 88.5,25.0 96.7,12.4 109.3,20.6" fill="url(#o)" stroke="#9a6a00" stroke-width="3"/>
       <circle cx="120" cy="122" r="96" fill="url(#c)" stroke="#fff3a8" stroke-width="4"/>
       <circle cx="120" cy="122" r="60" fill="none" stroke="#ffd21f" stroke-width="3" stroke-dasharray="2 5"/>
-      <text font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="17" fill="#ffe600" letter-spacing="1.5"><textPath href="#cima" startOffset="50%" text-anchor="middle">Nº 1 EM APROVAÇÃO</textPath></text>
-      <text font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="14" fill="#7df9ff" letter-spacing="1"><textPath href="#baixo" startOffset="50%" text-anchor="middle" dominant-baseline="hanging">★ HONRA AO MÉRITO ★</textPath></text>
-      <g transform="translate(121 125) scale(1.12) translate(-46 -49)" fill="#ffffff" stroke="#0b1a4a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+      <g transform="translate(121 124) scale(1.16) translate(-46 -49)">
+        <g transform="translate(1.8 2.6)" fill="#061650" opacity=".45"><path d="M28.5 47 C27 34 26.5 20 28.5 13.5 C30.5 8 40 8 42 13.5 C44 20 44.5 34 42.5 46 L73 70 C69 82 59 87 46 87.5 C32 88 20.5 81.5 17 70 C14 60 17 48 27.5 45.5Z"/><ellipse cx="73.5" cy="60" rx="7" ry="8.5"/><ellipse cx="65" cy="52.5" rx="7.8" ry="10.5"/><ellipse cx="53.5" cy="47" rx="9" ry="14"/></g>
+        <g fill="url(#pele)" stroke="#0b1a4a" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round">
         <path d="M28.5 47 C27 34 26.5 20 28.5 13.5 C30.5 8 40 8 42 13.5 C44 20 44.5 34 42.5 46"/>
         <path d="M27.5 45.5 C17 48 14 60 17 70 C20.5 81.5 32 88 46 87.5 C59 87 69 82 73 70 L50 56 Z"/>
         <ellipse cx="73.5" cy="60" rx="7" ry="8.5" transform="rotate(-20 73.5 60)"/><ellipse cx="65" cy="52.5" rx="7.8" ry="10.5" transform="rotate(-12 65 52.5)"/><ellipse cx="53.5" cy="47" rx="9" ry="14" transform="rotate(-6 53.5 47)"/>
-        <path d="M17.5 66 C15 55 20 47 30 45.5 C38 44.5 45 47 45.5 52 C46 57 40 60 35.5 61.5 C40 63 44 68 44.5 76"/><path d="M35.5 61.5 C39.5 63 43.5 68 44.5 76" fill="none"/></g></svg>`;
+        <path d="M17.5 66 C15 55 20 47 30 45.5 C38 44.5 45 47 45.5 52 C46 57 40 60 35.5 61.5 C40 63 44 68 44.5 76"/><path d="M35.5 61.5 C39.5 63 43.5 68 44.5 76" fill="none"/></g>
+        <g fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity=".95"><path d="M31.5 16 C30.8 24 30.8 32 31.5 38"/><path d="M48.5 38 C47.8 42 48 46 48.8 49"/><path d="M21.5 58 C20.5 63 21 68 23 72"/></g>
+        <g fill="none" stroke="#8fa8d8" stroke-width="1.4" stroke-linecap="round"><path d="M31 41 C34 42.5 38 42.5 41 41"/><path d="M60.5 46 C62 48 62 50 61 52"/><path d="M70 55 C71 56.5 71 58 70 59.5"/></g></g></svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); })();
   let umPng = null;
-  const prepararUm = () => umPng ? Promise.resolve(umPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 960; c.height = 1280; c.getContext('2d').drawImage(im, 0, 0, 960, 1280); umPng = c.toDataURL('image/png'); ok(umPng); }; im.onerror = () => ok(UM); im.src = UM; });
+  const prepararUm = () => umPng ? Promise.resolve(umPng) : new Promise(ok => { const im = new Image(); im.onload = async () => {
+    try { if (document.fonts) await document.fonts.load('60px SeiRubik'); } catch (e) {}
+    const K = 4, c = document.createElement('canvas'); c.width = 240 * K; c.height = 320 * K; const g = c.getContext('2d'); g.drawImage(im, 0, 0, c.width, c.height);
+    const ouro = (y0, y1) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, '#fffbe0'); gr.addColorStop(.45, '#ffd84a'); gr.addColorStop(.75, '#e8a300'); gr.addColorStop(1, '#fff0a0'); return gr; };
+    const letra = (ch, x, y, ang, px, fill) => { g.save(); g.translate(x, y); g.rotate(ang); g.font = `${px}px SeiRubik, "Arial Black", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+      g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = px * .18; g.shadowOffsetY = px * .06; g.lineWidth = px * .2; g.strokeStyle = '#061650'; g.strokeText(ch, 0, 0); g.shadowColor = 'transparent'; g.fillStyle = fill(px); g.fillText(ch, 0, 0); g.restore(); };
+    const arco = (txt, cx, cy, r, px, cima, fill, esp = 1.06) => { g.font = `${px}px SeiRubik, "Arial Black", sans-serif`; const ws = [...txt].map(ch => g.measureText(ch).width * esp), tot = ws.reduce((a, b) => a + b, 0); let a = -tot / r / 2;
+      [...txt].forEach((ch, k) => { const m = a + ws[k] / 2 / r; if (cima) letra(ch, cx + r * Math.sin(m), cy - r * Math.cos(m), m, px, fill); else letra(ch, cx + r * Math.sin(m), cy + r * Math.cos(m), -m, px, fill); a += ws[k] / r; }); };
+    // "Nº 1 EM APROVAÇÃO" contornando o círculo
+    arco('Nº 1 EM APROVAÇÃO', 120 * K, 122 * K, 79 * K, 17 * K, true, px => ouro(-px / 2, px / 2));
+    // faixa "HONRA AO MÉRITO" cruzando a medalha
+    const fy = 196 * K, R = 520 * K, fcy = fy - R, larg = 196 * K, alt = 26 * K;
+    const curva = (dy) => { g.beginPath(); for (let t = -1; t <= 1.0001; t += .05) { const x = 120 * K + t * larg / 2, y = fcy + Math.sqrt(R * R - (x - 120 * K) ** 2) + dy; t === -1 ? g.moveTo(x, y) : g.lineTo(x, y); } };
+    for (const lado of [-1, 1]) { const x0 = 120 * K + lado * (larg / 2 - 4 * K), yb = fcy + Math.sqrt(R * R - (larg / 2) ** 2) + 5 * K, a2 = alt / 2;
+      g.beginPath(); g.moveTo(x0, yb - a2); g.lineTo(x0 + lado * 24 * K, yb - a2); g.lineTo(x0 + lado * 15 * K, yb); g.lineTo(x0 + lado * 24 * K, yb + a2); g.lineTo(x0, yb + a2); g.closePath();
+      const gt = g.createLinearGradient(0, yb - a2, 0, yb + a2); gt.addColorStop(0, '#1e4fb8'); gt.addColorStop(1, '#061650'); g.fillStyle = gt; g.fill(); g.lineWidth = 1.3 * K; g.strokeStyle = '#ffd21f'; g.stroke(); }
+    g.save(); curva(-alt / 2); for (let t = 1; t >= -1.0001; t -= .05) { const x = 120 * K + t * larg / 2, y = fcy + Math.sqrt(R * R - (x - 120 * K) ** 2) + alt / 2; g.lineTo(x, y); } g.closePath();
+    const fb = g.createLinearGradient(0, fy - alt, 0, fy + alt); fb.addColorStop(0, '#2f7bff'); fb.addColorStop(.5, '#1240b8'); fb.addColorStop(1, '#0b2a8a'); g.fillStyle = fb; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 6 * K; g.shadowOffsetY = 2 * K; g.fill(); g.shadowColor = 'transparent'; g.lineWidth = 2.6 * K / 2; g.strokeStyle = '#ffd21f'; g.stroke(); g.restore();
+    arco('HONRA AO MÉRITO', 120 * K, fcy, R - 1.2 * K, 14.5 * K, false, px => ouro(-px / 2, px / 2), 1.04);
+    umPng = c.toDataURL('image/png'); ok(umPng); }; im.onerror = () => ok(UM); im.src = UM; });
   function confete() { let s = 3, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ffd600', '#00d9ff', '#ffffff', '#4f8bff', '#7df9ff', '#ffe600'];
     for (let i = 0; i < 46; i++) { const lado = i % 2, x = lado ? 196 + rnd() * 80 : 6 + rnd() * 80, y = 14 + rnd() * 46, w = 1.2 + rnd() * 1.6; h += `<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${w * 2.4}mm;background:${cs[i % cs.length]};transform:rotate(${rnd() * 180}deg)"></i>`; }
     return h; }
