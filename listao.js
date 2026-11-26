@@ -11,10 +11,13 @@
   const M = 7; // margem de corte em cada folha (mm)
   const CHAVE = 'sei-listao';
   const anoPad = () => { const d = new Date(); return String(d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1); };
-  let st = { ano: anoPad(), titulo: 'APROVADOS', sub: 'Parabéns pela conquista!', modo: 'geral', tam: 2, ori: 'p', fundo: 'festa', turmas: [] };
+  let st = { ano: anoPad(), titulo: 'APROVADOS', chamada: 'É OFICIAL: VOCÊS PASSARAM! 🎉', sub: 'Cada nome aqui é uma conquista. Orgulho do SEI! 💙', balao: 'Eu sabia que vocês conseguiam! 😄', modo: 'geral', tam: 2, ori: 'p', fundo: 'festa', turmas: [] };
   try { const s = JSON.parse(localStorage.getItem(CHAVE) || 'null'); if (s) st = Object.assign(st, s); } catch (e) {}
+  if (st.sub === 'Parabéns pela conquista!') st.sub = 'Cada nome aqui é uma conquista. Orgulho do SEI! 💙';
   const guardar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(st)); } catch (e) {} };
   const nomesDe = t => (t.nomes || '').split(/\r?\n/).map(s => s.replace(/^\s*\d+[\s.)-]*/, '').trim()).filter(Boolean);
+  const MARCA = /\s*(\*+|\(10\)|⭐\s*10|⭐|nota\s*10)\s*$/i;
+  const itensDe = t => nomesDe(t).map(x => ({ n: x.replace(MARCA, '').trim(), dez: MARCA.test(x) })).filter(x => x.n);
 
   /* ---------- medidas ---------- */
   function medidas() {
@@ -27,31 +30,38 @@
   /* ---------- o cartaz ---------- */
   function confete(W, H, n) { let s = 7, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280; const cs = ['#ffd34d', '#ff7aa8', '#7ff0ff', '#9cff8a', '#ffffff', '#ffb74d'];
     for (let i = 0; i < n; i++) { const x = rnd() * W, y = rnd() * H * .3, w = Math.min(W, H) * (.006 + rnd() * .01); h += `<i style="position:absolute;left:${x}mm;top:${y}mm;width:${w}mm;height:${w * 2.2}mm;background:${cs[i % cs.length]};transform:rotate(${rnd() * 180}deg);border-radius:${w * .3}mm;opacity:.85"></i>`; } return h; }
+  const NEON = [['#fff35c', '#ffd600'], ['#ff9be8', '#ff2bd6'], ['#8ff8ff', '#00d9ff'], ['#b8ff7a', '#39e600'], ['#ffc46b', '#ff7b00'], ['#d7b8ff', '#9d5cff']];
+  const GRITOS = ['Arrasaram! 🚀', 'Turma nota mil! ✨', 'Missão cumprida! ✅', 'Que orgulho! 💙', 'Bora pro próximo! 🔥', 'Vocês brilharam! 🌟', 'Show de turma! 🎉', 'Mandaram bem! 👏'];
+  const neonDe = t => NEON[Math.max(0, TURMAS.indexOf(t)) % NEON.length];
   function montar(lista, W, H) {
-    const deitado = W > H, s = Math.min(W, H * .78), p = s * .035;
-    const hdr = deitado ? Math.min(H * .25, W * .16) : Math.min(H * .2, W * .3), rod = Math.max(H * .04, 9);
-    const el = document.createElement('div'); el.className = 'cz ' + (st.fundo === 'leve' ? 'leve' : 'festa') + (lista.length === 1 && st.modo === 'turma' ? ' cz-uma' : '');
+    const deitado = W > H, s = Math.min(W, H * .78), p = s * .035, festa = st.fundo !== 'leve';
+    const hdr = deitado ? Math.min(H * .27, W * .17) : Math.min(H * .22, W * .32), rod = Math.max(H * .045, 9);
+    const el = document.createElement('div'); el.className = 'cz ' + (festa ? 'festa' : 'leve') + (lista.length === 1 && st.modo === 'turma' ? ' cz-uma' : '');
     Object.assign(el.style, { width: W + 'mm', height: H + 'mm', padding: `${p * .6}mm ${p}mm ${p * .3}mm` });
-    const hm = hdr * .86, hl = hdr * .5, livre = W - 2 * p - hm * 560 / 495 - hl * 533 / 383 - hdr * .06 - 2 * p;
-    const tit = Math.min(hdr * .42, livre / (Math.max(5, (st.titulo || 'APROVADOS').length) * .7)), lin = Math.min(hdr * .13, livre / 16), uma = st.modo === 'turma' && lista.length === 1;
-    el.innerHTML = (st.fundo === 'leve' ? '' : `<div class="cz-conf">${confete(W, H, Math.round(40 + W * H / 4000))}</div>`) +
-      `<div class="cz-cab" style="height:${hdr}mm;gap:${p}mm;${st.fundo === 'leve' ? `margin:-${p * .6}mm -${p}mm ${p * .5}mm;padding:${hdr * .06}mm ${p}mm;box-sizing:content-box;border-bottom-width:${hdr * .04}mm` : `margin-bottom:${p * .4}mm`}">
-        <img class="m" src="assets/docs/mascote-sei.png?v=14" alt="" style="height:${hm}mm">
-        <div class="cz-tit"><span style="font-size:${lin}mm;margin-bottom:${hdr * .03}mm">Sistema de Ensino Incentivo</span><b style="font-size:${tit}mm">${esc(st.titulo || 'APROVADOS')}</b>
-          <span style="font-size:${lin}mm;margin-top:${hdr * .04}mm">${uma ? `<i style="font-size:${lin}mm;padding:.1em .7em;margin-right:.4em">${esc(lista[0].turma)}</i>` : ''}<i style="font-size:${lin}mm;padding:.1em .7em">${esc(st.ano)}</i></span>
-          ${st.sub ? `<span style="font-size:${Math.min(hdr * .12, livre / (st.sub.length * .52 + 2))}mm;margin-top:${hdr * .05}mm">🎉 ${esc(st.sub)}</span>` : ''}</div>
+    const hm = hdr * .74, hl = hdr * .36, livre = W - 2 * p - hm * 560 / 495 - hl * 533 / 383 - 2 * p * .8 - hl * .1, uma = st.modo === 'turma' && lista.length === 1;
+    const tit = Math.min(hdr * .31, livre / (Math.max(5, (st.titulo || 'APROVADOS').length) * .7)), lin = Math.min(hdr * .085, livre / 26);
+    const tot = lista.reduce((a, t) => a + t.nomes.length, 0), dez = lista.reduce((a, t) => a + t.nomes.filter(x => x.dez).length, 0);
+    const conta = `<span class="cz-conta" style="font-size:${lin * .9}mm;margin-top:${hdr * .05}mm">🎓 <strong>${tot}</strong> aprovado${tot === 1 ? '' : 's'}${dez ? ` &nbsp;·&nbsp; <em>⭐10</em> <strong>${dez}</strong> tiraram nota 10` : ''}</span>`;
+    el.innerHTML = `<div class="cz-luz"></div>${festa ? `<div class="cz-conf">${confete(W, H, Math.round(40 + W * H / 4000))}</div>` : ''}
+      <div class="cz-cab" style="height:${hdr}mm;gap:${p * .8}mm;${festa ? `margin-bottom:${p * .5}mm` : `margin:-${p * .6}mm -${p}mm ${p * .6}mm;padding:${hdr * .06}mm ${p}mm;box-sizing:content-box;border-bottom-width:${hdr * .035}mm`}">
+        <div class="cz-masc" style="height:${hm}mm;width:${hm * 560 / 495}mm"><img src="assets/docs/mascote-sei.png?v=14" alt="" style="height:${hm}mm">
+          ${st.balao ? `<div class="cz-balao" style="font-size:${Math.min(lin * .8, hdr * .07)}mm;width:${hm * .62}mm;padding:.4em .55em;border-width:${hdr * .012}mm;left:${hm * .62}mm;top:-${hdr * .02}mm">${esc(st.balao)}</div>` : ''}</div>
+        <div class="cz-tit">${st.chamada ? `<span class="cz-chama" style="font-size:${lin}mm;padding:.2em .9em;margin-bottom:${hdr * .04}mm;border-width:${hdr * .01}mm">${esc(st.chamada)}</span>` : ''}
+          <b class="cz-grande" style="font-size:${tit}mm">${esc(st.titulo || 'APROVADOS')}</b>
+          <span style="margin-top:${hdr * .03}mm">${uma ? `<i class="cz-pill t" style="font-size:${lin * 1.15}mm">${esc(lista[0].turma)}</i> ` : ''}<i class="cz-pill" style="font-size:${lin * 1.15}mm">${esc(st.ano)}</i></span>
+          ${st.sub ? `<span class="cz-sub" style="font-size:${Math.min(lin * 1.05, livre / (st.sub.length * .5 + 2))}mm;margin-top:${hdr * .04}mm">${esc(st.sub)}</span>` : ''}${conta}</div>
         <img class="m" src="assets/docs/logo-sei.png" alt="" style="height:${hl}mm;background:#fff;border-radius:${hdr * .08}mm;padding:${hdr * .03}mm">
       </div>
       <div class="cz-corpo"><div class="cz-cols"></div></div>
-      <div class="cz-rod" style="height:${rod}mm;font-size:${rod * .32}mm">Sistema de Ensino Incentivo · Aqui se faz educação com qualidade · São Miguel do Guamá – PA</div>`;
+      <div class="cz-rod" style="height:${rod}mm;font-size:${Math.min(rod * .3, (W - 2 * p) / ((dez ? 118 : 95) * .5))}mm">${dez ? '<em>⭐10</em>&nbsp;= tirou nota 10! &nbsp;·&nbsp; ' : ''}Família SEI 💛 Aqui se faz educação com qualidade &nbsp;·&nbsp; Nos vemos em ${(+st.ano || new Date().getFullYear()) + 1}! 🚀</div>`;
     return { el, p };
   }
   // acha o maior tamanho de letra (e o número de colunas) que faz todos os nomes caberem
   function ajustar(el, p, lista) {
     const cols = el.querySelector('.cz-cols'), corpo = el.querySelector('.cz-corpo'), uma = el.classList.contains('cz-uma'), mb = p * .45;
-    cols.style.cssText = `display:flex;gap:${p * .6}mm;align-items:flex-start;height:100%`;
-    const bloco = (t, k, f) => { const n = t.nomes, q = Math.ceil(n.length / k), partes = Array.from({ length: k }, (_, i) => n.slice(i * q, i * q + q));
-      return `<div class="cz-bloco" style="font-size:${f}mm;margin-bottom:${mb}mm"><h3 style="background:${corDe(t.turma)};font-size:${f * 1.25}mm;padding:.3em .4em">${esc(t.turma)} <small style="opacity:.85;font-size:.6em">· ${n.length}</small></h3><div style="display:flex;gap:1.2em;padding:.45em .7em .55em">${partes.map(ps => `<ol style="flex:1 1 0;min-width:0;padding:0">${ps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`).join('')}</div></div>`; };
+    cols.style.cssText = `display:flex;gap:${p * .6}mm;align-items:${uma ? 'center' : 'flex-start'};height:100%`;
+    const bloco = (t, k, f) => { const n = t.nomes, q = Math.ceil(n.length / k), partes = Array.from({ length: k }, (_, i) => n.slice(i * q, i * q + q)), [cl, cf] = neonDe(t.turma), ix = Math.max(0, TURMAS.indexOf(t.turma)), d = n.filter(x => x.dez).length;
+      return `<div class="cz-bloco" style="font-size:${f}mm;margin-bottom:${mb}mm;background:${cl}" data-rot="${[-1.1, .8, -.5, 1.2, -.8, .5][ix % 6]}"><i class="cz-fita"></i><h3 style="font-size:${f * 1.3}mm;padding:.55em .5em .1em">${esc(t.turma)}</h3><p class="cz-grito" style="font-size:${f * .78}mm;color:${cf === '#fff35c' ? '#8a6d00' : '#0b1a4a'}">${GRITOS[ix % GRITOS.length]} · ${n.length} 🎓${d ? ` · ${d} ⭐10` : ''}</p><div style="display:flex;gap:1.2em;padding:.25em .8em .65em;border-top:.12em dashed rgba(11,26,74,.25);margin:0 .5em">${partes.map(ps => `<ol style="flex:1 1 0;min-width:0;padding:0">${ps.map(x => `<li>${esc(x.n)}${x.dez ? '<b class="dez">⭐10</b>' : ''}</li>`).join('')}</ol>`).join('')}</div></div>`; };
     const monta = (f, k) => {
       cols.innerHTML = ''; const nova = () => { const c = document.createElement('div'); c.style.cssText = 'flex:1 1 0;min-width:0'; cols.append(c); return c; };
       if (uma) { nova().innerHTML = bloco(lista[0], k, f); return; }
@@ -61,16 +71,17 @@
       parte(hi).forEach((g, ci) => g.forEach(i => (cs[ci] || cs[k - 1]).append(bs[i])));
     };
     const cabe = () => { const lim = corpo.clientHeight + 1; return [...cols.children].every(c => c.offsetHeight <= lim) && cols.scrollWidth <= cols.clientWidth + 1 && [...el.querySelectorAll('.cz-bloco li')].every(li => li.scrollWidth <= li.clientWidth + 1); };
-    let melhor = null; const max = Math.min(el.offsetWidth / 96 * 25.4 * .05, 40);
+    let melhor = null; const res = []; const max = Math.min(el.offsetWidth / 96 * 25.4 * .05, 40);
     for (let k = 1; k <= 8; k++) {
       let lo = 1.2, hi = max; monta(lo, k); if (!cabe()) continue;
       for (let i = 0; i < 12; i++) { const m = (lo + hi) / 2; monta(m, k); if (cabe()) lo = m; else hi = m; }
-      if (!melhor || lo > melhor[0] * 1.03 || (uma && lo >= melhor[0] * .9)) melhor = [lo, k];
+      res.push([lo, k]);
     }
-    if (!melhor) melhor = [1.2, 8]; monta(melhor[0], melhor[1]);
+    const fmax = Math.max(0, ...res.map(r => r[0])); melhor = res.filter(r => r[0] >= fmax * (uma ? .9 : .97)).pop() || [1.2, 8]; monta(melhor[0], melhor[1]);
     // sobrou espaço embaixo: abre as linhas para o painel ficar cheio
     const lim = corpo.clientHeight, alto = Math.max(...[...cols.children].map(c => c.offsetHeight));
     if (alto < lim * .97) { let lh = 1.28 * Math.min(1.9, lim / alto); const ols = [...el.querySelectorAll('.cz-bloco ol')]; for (let i = 0; i < 8; i++) { ols.forEach(o => { o.style.lineHeight = lh; }); if ([...cols.children].every(c => c.offsetHeight <= lim)) break; lh = 1.28 + (lh - 1.28) * .8; } if (![...cols.children].every(c => c.offsetHeight <= lim)) ols.forEach(o => { o.style.lineHeight = 1.28; }); }
+    el.querySelectorAll('.cz-bloco').forEach(b => { b.style.transform = `rotate(${(+b.dataset.rot || 0) * (uma ? .3 : 1)}deg)`; });
     return melhor;
   }
   const carregar = (g, src) => window[g] ? Promise.resolve() : new Promise((ok, er) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = er; document.head.append(s); });
@@ -84,7 +95,7 @@
     const r = el.getBoundingClientRect(); const canvas = await html2canvas(el, { ignoreElements: n => n.parentElement === document.body && !n.contains(el), scale: sc, useCORS: true, backgroundColor: '#ffffff', logging: false, x: r.left + scrollX, y: r.top + scrollY, width: r.width, height: r.height, windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(r.width)), windowHeight: Math.max(innerHeight, Math.ceil(r.height)), scrollX: 0, scrollY: 0 });
     fora.remove(); return { canvas, fit, W, H };
   }
-  const paineis = () => { const t = st.turmas.map(x => ({ turma: x.turma, nomes: nomesDe(x) })).filter(x => x.turma && x.nomes.length); return st.modo === 'turma' ? t.map(x => [x]) : t.length ? [t] : []; };
+  const paineis = () => { const t = st.turmas.map(x => ({ turma: x.turma, nomes: itensDe(x) })).filter(x => x.turma && x.nomes.length); return st.modo === 'turma' ? t.map(x => [x]) : t.length ? [t] : []; };
 
   /* ---------- PDF em folhas A4 ---------- */
   async function gerarPdf() {
@@ -134,24 +145,26 @@
       const rec = Object.values(ns).some(d => d['Recuperação'] !== undefined || d['Recuperação Final'] !== undefined);
       const baixa = Object.values(ns).some(d => { const v = ['1ª Avaliação', '2ª Avaliação', '3ª Avaliação', '4ª Avaliação'].map(k => d[k]).filter(x => x !== undefined); return v.length && v.reduce((s, x) => s + x, 0) / v.length < 6; });
       if (rec || baixa) { fora++; return false; } return true; });
-    return { nomes: ok.map(a => a.nome), fora, semNota, total: lista.length };
+    const dez = a => { const ns = ((((bol.find(x => x.id === a.id) || {}).anos || {})[st.ano]) || {}).notas || {}; return Object.values(ns).some(d => Object.values(d).some(v => +v === 10)); };
+    return { nomes: ok.map(a => a.nome + (dez(a) ? ' *' : '')), fora, semNota, total: lista.length };
   }
 
   /* ---------- tela ---------- */
   function desenhar() {
     const md = medidas();
     $('#lt').innerHTML = `<section class="es-sec"><h2>🏆 Listão dos Aprovados</h2><p class="es-dica">Monte o painel com os alunos <b>aprovados sem recuperação</b>. O site ajusta o tamanho das letras para caber todo mundo e divide o painel em <b>folhas A4</b> numeradas, prontas para imprimir, cortar e montar.</p>
-      <form class="es-form" id="lt-f"><div class="es-g3"><label>Título<input name="titulo" value="${esc(st.titulo)}"></label><label>Ano<input name="ano" value="${esc(st.ano)}" inputmode="numeric"></label><label>Frase<input name="sub" value="${esc(st.sub)}"></label></div>
+      <form class="es-form" id="lt-f"><div class="es-g3"><label>Chamada (em cima)<input name="chamada" value="${esc(st.chamada)}"></label><label>Título<input name="titulo" value="${esc(st.titulo)}"></label><label>Ano<input name="ano" value="${esc(st.ano)}" inputmode="numeric"></label></div>
+      <div class="es-g2"><label>Frase<input name="sub" value="${esc(st.sub)}"></label><label>Balão do mascote<input name="balao" value="${esc(st.balao)}"></label></div>
       <div class="es-g3"><label>Painel<select name="modo"><option value="geral" ${st.modo === 'geral' ? 'selected' : ''}>Um painel com todas as turmas</option><option value="turma" ${st.modo === 'turma' ? 'selected' : ''}>Um painel para cada turma</option></select></label>
       <label>Tamanho<select name="tam">${TAM.map((t, i) => `<option value="${i}" ${i === +st.tam ? 'selected' : ''}>${t[0]}</option>`).join('')}</select></label>
       <label>Posição<select name="ori"><option value="p" ${st.ori === 'p' ? 'selected' : ''}>Em pé</option><option value="l" ${st.ori === 'l' ? 'selected' : ''}>Deitado</option></select></label>
       <label>Fundo<select name="fundo"><option value="festa" ${st.fundo === 'festa' ? 'selected' : ''}>Azul festivo</option><option value="leve" ${st.fundo === 'leve' ? 'selected' : ''}>Branco (gasta menos tinta)</option></select></label></div>
       <p class="es-dica" style="margin:0">📐 Cada painel: <b>${md.c * md.r} folha(s) A4</b> (${md.c} × ${md.r}) · tamanho final <b>${Math.round(md.W / 10)} × ${Math.round(md.H / 10)} cm</b>${st.modo === 'turma' ? ` · ${paineis().length} painel(is)` : ''}.</p></form>
-      <h2 style="margin-top:16px">🎓 Turmas e nomes</h2><div class="es-acoes"><button class="b main" id="lt-todas">↧ Puxar todas as turmas do cadastro</button><select id="lt-add" class="es-busca" style="flex:0 1 220px"><option value="">➕ Adicionar turma…</option>${TURMAS.filter(t => !st.turmas.some(x => x.turma === t)).map(t => `<option>${t}</option>`).join('')}</select></div>
-      <div class="lt-turmas">${st.turmas.map((t, i) => `<div class="lt-turma" style="--c:${corDe(t.turma)}"><div class="es-linha"><b style="color:${corDe(t.turma)};font-size:17px;flex:1">${esc(t.turma)}</b><span class="chip">${nomesDe(t).length} nome(s)</span><button class="b" data-puxa="${i}">↧ Puxar do cadastro</button><button class="b" data-tira="${i}" title="Tirar a turma">🗑️</button></div><textarea data-nomes="${i}" placeholder="Um nome por linha">${esc(t.nomes)}</textarea></div>`).join('') || '<div class="es-vazio"><b>Nenhuma turma ainda.</b>Adicione as turmas e digite (ou cole) um nome por linha — ou puxe do cadastro da Gestão Escolar.</div>'}</div>
+      <h2 style="margin-top:16px">🎓 Turmas e nomes</h2><p class="es-dica">Um nome por linha. Quem tirou <b>nota 10</b>: coloque um <b>*</b> no fim do nome (ex.: <i>Ana Clara Souza *</i>) e ele ganha o selo <b>⭐10</b> no painel. Ao puxar do cadastro, o site marca sozinho quem tem nota 10 no diário.</p><div class="es-acoes"><button class="b main" id="lt-todas">↧ Puxar todas as turmas do cadastro</button><select id="lt-add" class="es-busca" style="flex:0 1 220px"><option value="">➕ Adicionar turma…</option>${TURMAS.filter(t => !st.turmas.some(x => x.turma === t)).map(t => `<option>${t}</option>`).join('')}</select></div>
+      <div class="lt-turmas">${st.turmas.map((t, i) => `<div class="lt-turma" style="--c:${corDe(t.turma)}"><div class="es-linha"><b style="color:${corDe(t.turma)};font-size:17px;flex:1">${esc(t.turma)}</b><span class="chip">${nomesDe(t).length} nome(s)${itensDe(t).some(x => x.dez) ? ' · ⭐10 ' + itensDe(t).filter(x => x.dez).length : ''}</span><button class="b" data-puxa="${i}">↧ Puxar do cadastro</button><button class="b" data-tira="${i}" title="Tirar a turma">🗑️</button></div><textarea data-nomes="${i}" placeholder="Um nome por linha. Nota 10: * no fim">${esc(t.nomes)}</textarea></div>`).join('') || '<div class="es-vazio"><b>Nenhuma turma ainda.</b>Adicione as turmas e digite (ou cole) um nome por linha — ou puxe do cadastro da Gestão Escolar.</div>'}</div>
       <div class="es-acoes" style="margin-top:14px"><button class="b" id="lt-ver">👀 Ver prévia</button><button class="b main" id="lt-pdf">📄 Gerar PDF para imprimir</button></div><div id="lt-prev"></div></section>`;
-    $('#lt-f').oninput = $('#lt-f').onchange = e => { const f = new FormData($('#lt-f')); const antes = st.modo + st.tam + st.ori; Object.assign(st, { titulo: f.get('titulo'), ano: f.get('ano').trim(), sub: f.get('sub'), modo: f.get('modo'), tam: +f.get('tam'), ori: f.get('ori'), fundo: f.get('fundo') }); guardar(); if (e.type === 'change' && antes !== st.modo + st.tam + st.ori) desenhar(); };
-    $$('[data-nomes]').forEach(t => { t.oninput = () => { st.turmas[+t.dataset.nomes].nomes = t.value; guardar(); t.closest('.lt-turma').querySelector('.chip').textContent = nomesDe(st.turmas[+t.dataset.nomes]).length + ' nome(s)'; }; });
+    $('#lt-f').oninput = $('#lt-f').onchange = e => { const f = new FormData($('#lt-f')); const antes = st.modo + st.tam + st.ori; Object.assign(st, { titulo: f.get('titulo'), chamada: f.get('chamada'), balao: f.get('balao'), ano: f.get('ano').trim(), sub: f.get('sub'), modo: f.get('modo'), tam: +f.get('tam'), ori: f.get('ori'), fundo: f.get('fundo') }); guardar(); if (e.type === 'change' && antes !== st.modo + st.tam + st.ori) desenhar(); };
+    $$('[data-nomes]').forEach(t => { t.oninput = () => { st.turmas[+t.dataset.nomes].nomes = t.value; guardar(); const tt = st.turmas[+t.dataset.nomes], dz = itensDe(tt).filter(x => x.dez).length; t.closest('.lt-turma').querySelector('.chip').textContent = nomesDe(tt).length + ' nome(s)' + (dz ? ' · ⭐10 ' + dz : ''); }; });
     $('#lt-add').onchange = e => { if (!e.target.value) return; st.turmas.push({ turma: e.target.value, nomes: '' }); st.turmas.sort((a, b) => TURMAS.indexOf(a.turma) - TURMAS.indexOf(b.turma)); guardar(); desenhar(); };
   }
   document.addEventListener('click', async e => {

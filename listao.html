@@ -20,27 +20,36 @@
 .lt-prev{background:#0b2a5b;border-radius:14px;padding:12px;overflow:auto;text-align:center}
 .lt-prev canvas{max-width:100%;height:auto;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 .lt-prev p{color:#dfeaff;margin:8px 0 0;font-size:14px}
-/* o cartaz (desenhado em milímetros) */
-.cz{position:relative;overflow:hidden;font-family:SeiPoppins,Arial,sans-serif;color:#0b2a5b;box-sizing:border-box;display:flex;flex-direction:column}
-.cz.festa{background:radial-gradient(circle at 50% 18%,#2a6cf0 0,#0f3fbf 40%,#0a2a95 75%,#071d70 100%);color:#fff}
+/* o cartaz (desenhado em milímetros) — estilo post, cores neon */
+.cz{position:relative;overflow:hidden;font-family:SeiPoppins,Arial,sans-serif;color:#0b1a4a;box-sizing:border-box;display:flex;flex-direction:column}
+.cz.festa{background:radial-gradient(circle at 15% 12%,rgba(255,43,214,.45) 0,rgba(255,43,214,0) 28%),radial-gradient(circle at 88% 20%,rgba(0,229,255,.4) 0,rgba(0,229,255,0) 30%),radial-gradient(circle at 50% 80%,rgba(157,92,255,.35) 0,rgba(157,92,255,0) 45%),linear-gradient(180deg,#140a52 0,#0b0638 55%,#06031f 100%)}
 .cz.leve{background:#fff}
+.cz.leve .cz-luz{position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,43,214,.05) 0 2%,rgba(0,217,255,.05) 2% 4%)}
 .cz-conf{position:absolute;inset:0;pointer-events:none}
-.cz-cab{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.cz.leve .cz-cab{background:linear-gradient(135deg,#0a2f86,#071c55);color:#fff;border-bottom:solid #e6b422}
+.cz-cab{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#fff}
+.cz.leve .cz-cab{background:radial-gradient(circle at 15% 20%,rgba(255,43,214,.45) 0,rgba(255,43,214,0) 35%),radial-gradient(circle at 90% 30%,rgba(0,229,255,.4) 0,rgba(0,229,255,0) 35%),linear-gradient(135deg,#140a52,#06031f);border-bottom:solid #ff2bd6}
 .cz-cab img.m{flex:0 0 auto}
-.cz-tit{text-align:center;line-height:1}
-.cz-tit b{display:block;font-family:SeiRubik,Arial Black,sans-serif;color:#ffd34d;text-shadow:0 .06em 0 rgba(0,0,0,.25);letter-spacing:.01em}
-.cz-tit span{display:block;color:#fff}
-.cz-tit i{display:inline-block;font-style:normal;background:#ffd34d;color:#0b2a5b;border-radius:99em;font-family:SeiRubik,Arial Black,sans-serif}
-.cz-corpo{position:relative;flex:1 1 auto;overflow:hidden}
-.cz-bloco{break-inside:avoid;background:#fff;color:#10213f;border-radius:.6em;box-shadow:0 .15em .5em rgba(0,0,0,.25);overflow:hidden}
-.cz.leve .cz-bloco{border:.12em solid #c9d6ea;box-shadow:none}
-.cz-bloco h3{margin:0;color:#fff;font-family:SeiRubik,Arial Black,sans-serif;font-weight:800;text-align:center;line-height:1.15}
+.cz-masc{position:relative;flex:0 0 auto}.cz-masc img{position:absolute;left:0;bottom:0}
+.cz-balao{position:absolute;background:#fff;color:#0b1a4a;border:solid #ff2bd6;border-radius:1em 1em 1em .2em;font-family:SeiPoppins,Arial,sans-serif;line-height:1.2;text-align:center;box-shadow:0 0 .6em rgba(255,43,214,.8)}
+.cz-tit{text-align:center;line-height:1;display:flex;flex-direction:column;align-items:center}
+.cz-tit .cz-grande{display:block;font-family:SeiRubik,Arial Black,sans-serif;color:#fff200;text-shadow:0 0 .06em #fff200,0 0 .18em #ff2bd6,0 .06em 0 #ff2bd6;letter-spacing:.01em}
+.cz-chama{display:inline-block;color:#7df9ff;border:solid #00e5ff;border-radius:99em;font-family:SeiRubik,Arial Black,sans-serif;text-shadow:0 0 .3em #00e5ff;box-shadow:0 0 .5em rgba(0,229,255,.7)}
+.cz-pill{display:inline-block;font-style:normal;background:#ff2bd6;color:#fff;border-radius:99em;font-family:SeiRubik,Arial Black,sans-serif;padding:.08em .7em;box-shadow:0 0 .5em #ff2bd6}
+.cz-pill.t{background:#00d9ff;color:#06031f;box-shadow:0 0 .5em #00d9ff}
+.cz-sub{display:block;color:#fff}
+.cz-conta{display:block;color:#b8ff7a}.cz-conta em,.cz-rod em{font-style:normal;background:#ff2bd6;color:#fff;border-radius:99em;padding:0 .45em}
+.cz-corpo{position:relative;flex:1 1 auto;overflow:hidden;padding:0 .6%}
+.cz-bloco{position:relative;color:#0b1a4a;border-radius:.25em;box-shadow:0 .35em .9em rgba(0,0,0,.45)}
+.cz.leve .cz-bloco{box-shadow:0 .25em .6em rgba(11,26,74,.25)}
+.cz-fita{position:absolute;left:50%;top:-.45em;width:4.5em;height:1.1em;margin-left:-2.25em;background:rgba(255,255,255,.6);transform:rotate(-3deg);box-shadow:0 .05em .2em rgba(0,0,0,.15)}
+.cz-bloco h3{margin:0;font-family:SeiRubik,Arial Black,sans-serif;font-weight:800;text-align:center;line-height:1.1;color:#0b1a4a}
+.cz-grito{margin:0 0 .3em;text-align:center;font-weight:700;opacity:.85;white-space:nowrap;overflow:hidden}
 .cz-bloco ol{margin:0;list-style:none;line-height:1.28}
 .cz-bloco li{white-space:nowrap;overflow:hidden}
-.cz-bloco li::before{content:"★ ";color:#e6b422}
-.cz-rod{flex:0 0 auto;display:flex;align-items:center;justify-content:center;text-align:center}
-.cz.festa .cz-rod{color:#cfe2ff}.cz.leve .cz-rod{color:#0b2a5b}
+.cz-bloco li::before{content:"✦ ";color:#ff2bd6}
+.cz-bloco .dez{display:inline-block;margin-left:.35em;background:#ff2bd6;color:#fff;font-size:.68em;border-radius:99em;padding:.02em .45em;vertical-align:.12em;font-family:SeiRubik,Arial Black,sans-serif}
+.cz-rod{position:relative;flex:0 0 auto;display:flex;align-items:center;justify-content:center;text-align:center}
+.cz.festa .cz-rod{color:#d9e6ff}.cz.leve .cz-rod{color:#140a52}
 </style>
 </head>
 <body>
@@ -51,7 +60,7 @@
 <main id="lt"></main>
 <footer class="no-print"><p>O rascunho fica guardado <b>neste aparelho</b>. Imprima sempre em <b>tamanho real (100%)</b>, depois corte nas marcas e monte o painel seguindo o número de cada folha.</p></footer>
 <script src="escola-dados.js?v=2"></script>
-<script src="listao.js?v=1"></script>
+<script src="listao.js?v=2"></script>
 <script src="offline.js?v=3"></script>
 </body>
 </html>
