@@ -11,14 +11,47 @@
 <link rel="stylesheet" href="escola.css?v=2">
 <link rel="icon" type="image/png" href="favicon.png?v=2"><link rel="apple-touch-icon" href="assets/portal/apple-touch-icon.png?v=2">
 <style>
-@font-face{font-family:SeiRubik;src:url(assets/fonts/Rubik-ExtraBold.ttf)}
+@font-face{font-family:SeiRubik;src:url(assets/fonts/Rubik-ExtraBold.ttf)}@font-face{font-family:SeiPoppins;src:url(assets/fonts/Poppins-Bold.ttf)}
 .lt-turma{background:#fff;border-radius:14px;padding:12px;box-shadow:0 2px 10px rgba(11,42,91,.10);border-left:6px solid var(--c,#1e4fb8);display:flex;flex-direction:column;gap:8px}
-.lt-turma textarea{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:9px;min-height:170px;width:100%;text-transform:uppercase}
+.lt-turma textarea{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:9px;min-height:170px;width:100%}
 .ct-prev{display:flex;flex-direction:column;gap:14px}
-.ct-folha{position:relative;width:100%;max-width:760px;aspect-ratio:297/210;background:#fff center/100% 100% no-repeat;box-shadow:0 6px 20px rgba(0,0,0,.25);border-radius:4px}
-.ct-folha p{position:absolute;left:2.38%;width:119.5%;transform:scaleX(.8);transform-origin:0 0;top:45.6%;margin:0;font:700 1em/1.415 "Times New Roman",Tinos,"Liberation Serif",serif;text-align:justify;color:#000}
-.ct-folha p i{font-style:italic}
+.ct-cv{width:100%;max-width:760px;height:auto;box-shadow:0 6px 20px rgba(0,0,0,.25);border-radius:4px}
 .ct-meds{display:flex;gap:12px;flex-wrap:wrap}
+/* certificado (A4 deitada, em mm) */
+.ct-art{position:relative;width:297mm;height:210mm;font-family:SeiPoppins,Arial,sans-serif;color:#0b1a4a;overflow:hidden}
+.ct-art *{box-sizing:border-box}
+.ca-moldura{position:absolute;inset:0}
+.ca-folha{position:absolute;left:6mm;top:6mm;width:285mm;height:198mm;background:linear-gradient(180deg,#fffefe,#f2f8ff);border-radius:6mm;overflow:hidden}
+.ca-risc{position:absolute;inset:0}
+.ca-topo{position:absolute;left:10mm;right:10mm;top:7mm;display:flex;align-items:center;gap:3mm;color:#0b2a6b}
+.ca-topo img{height:19mm}.ca-topo div{flex:1;display:flex;flex-direction:column;line-height:1.25}.ca-topo b{font-size:5mm}.ca-topo small{font-size:3.4mm;color:#55627e}
+.ca-chip{color:#fff;font-family:SeiRubik,Arial Black,sans-serif;font-size:4.6mm;padding:1.6mm 4.5mm;border-radius:99mm;white-space:nowrap}
+.ca-tit{position:absolute;left:0;right:0;top:25mm;text-align:center;font-family:SeiRubik,Arial Black,sans-serif;font-size:21mm;line-height:1;color:#140a52;letter-spacing:1.2mm;text-shadow:0 1.2mm 0 #ff2bd6,0 0 4mm rgba(0,217,255,.55)}
+.ca-tipo{position:absolute;left:50%;transform:translateX(-50%);top:51mm;color:#fff;font-family:SeiRubik,Arial Black,sans-serif;font-size:7mm;padding:2mm 7mm;border-radius:99mm;white-space:nowrap;box-shadow:0 1.2mm 3mm rgba(0,0,0,.2)}
+.ca-para{position:absolute;left:0;right:0;top:71mm;height:8mm;line-height:8mm;text-align:center;font-size:4.4mm;font-weight:700;color:#0b2a6b}
+.ca-nome{position:absolute;left:24mm;right:24mm;top:79mm;height:22mm;display:flex;align-items:center;justify-content:center;font-family:SeiRubik,Arial Black,sans-serif;color:#0b1a4a;white-space:nowrap;line-height:1}
+.ca-nome span{padding:0 2mm}
+.ca-msg{position:absolute;left:32mm;right:32mm;top:103mm;margin:0;text-align:center;font-size:5.2mm;line-height:8.2mm;color:#24324f}
+.ca-palco{position:absolute;left:6mm;bottom:8mm;width:72mm;height:66mm}
+.ca-podio{position:absolute;left:4mm;right:4mm;bottom:0;display:flex;align-items:flex-end;gap:1mm}
+.ca-podio span{flex:1;display:flex;justify-content:center;padding-top:1mm;border-radius:1.5mm 1.5mm 0 0;font-family:SeiRubik,Arial Black,sans-serif;font-size:4mm;color:#fff;background:linear-gradient(180deg,#8ff8ff,#00a7c4)}
+.ca-podio span.um{background:linear-gradient(180deg,#fff35c,#ffb400);color:#4a3200}.ca-podio span:last-child{background:linear-gradient(180deg,#ff9be8,#d61fb0)}
+.ca-masc{position:absolute;left:50%;transform:translateX(-50%);bottom:13.6mm;height:50mm}
+.ca-balao{position:absolute;left:54mm;top:-4mm;width:38mm;background:#fff;border:.8mm solid;border-radius:5mm 5mm 5mm 1mm;font-size:3.8mm;line-height:1.25;padding:2mm;text-align:center;font-weight:700;color:#0b1a4a;box-shadow:0 1mm 3mm rgba(0,0,0,.15)}
+.ca-ass{position:absolute;left:100mm;right:84mm;bottom:22mm;display:flex;gap:12mm}
+.ca-ass div{flex:1;text-align:center;font-size:4.4mm;font-weight:700;color:#0b2a6b}.ca-ass i{display:block;border-top:.5mm solid #0b2a6b;margin-bottom:1.5mm}
+.ca-selo{position:absolute;right:10mm;bottom:10mm;height:62mm}
+.ca-rod{position:absolute;left:0;right:0;bottom:3mm;text-align:center;font-size:3.3mm;color:#55627e}
+/* medalha (60 mm) */
+.md-art{width:60mm;height:60mm;font-family:SeiPoppins,Arial,sans-serif}
+.md-anel{width:60mm;height:60mm;border-radius:50%;padding:2.2mm;box-sizing:border-box}
+.md-disco{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 30%,#2a1a8a 0,#140a52 60%,#06031f 100%)}
+.md-risc{position:absolute;inset:0}
+.md-logo{position:absolute;left:50%;top:3.5mm;transform:translateX(-50%);height:10mm;background:#fff;border-radius:1.5mm;padding:.6mm}
+.md-grande{position:absolute;left:0;right:0;top:16mm;text-align:center;font-family:SeiRubik,Arial Black,sans-serif;line-height:1.1}
+.md-fita{position:absolute;left:6mm;right:6mm;top:29.5mm;text-align:center;color:#fff;font-family:SeiRubik,Arial Black,sans-serif;font-size:3.4mm;padding:1mm 0;border-radius:99mm}
+.md-masc{position:absolute;left:50%;bottom:-1mm;transform:translateX(-45%);height:20mm}
+.md-estrela{position:absolute;left:8mm;bottom:9mm;font-size:6.5mm}.md-estrela.b{left:auto;right:8mm;bottom:12mm;font-size:5.5mm}
 .pr-nav{display:flex;gap:6px;max-width:1100px;margin:14px auto 0;padding:0 16px;flex-wrap:wrap}
 .pr-nav a{font:700 15px system-ui,Arial;border-radius:12px 12px 0 0;padding:10px 16px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none}
 .pr-nav a.on{background:#fff;color:#0b2a5b}
@@ -33,7 +66,7 @@
 <main id="ct"></main>
 <footer class="no-print"><p>Os nomes ficam guardados <b>neste aparelho</b>. Imprima sempre em <b>tamanho real (100%)</b>.</p></footer>
 <script src="escola-dados.js?v=2"></script>
-<script src="certificados.js?v=1"></script>
+<script src="certificados.js?v=2"></script>
 <script src="offline.js?v=3"></script>
 </body>
 </html>
