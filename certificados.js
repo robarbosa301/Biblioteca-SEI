@@ -38,12 +38,11 @@
       <circle cx="120" cy="122" r="60" fill="none" stroke="#ffd21f" stroke-width="3" stroke-dasharray="2 5"/>
       <text font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="17" fill="#ffe600" letter-spacing="1.5"><textPath href="#cima" startOffset="50%" text-anchor="middle">Nº 1 EM APROVAÇÃO</textPath></text>
       <text font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="14" fill="#7df9ff" letter-spacing="1"><textPath href="#baixo" startOffset="50%" text-anchor="middle" dominant-baseline="hanging">★ HONRA AO MÉRITO ★</textPath></text>
-      <g transform="translate(120 122) scale(1.18) translate(-52 -50)" stroke="#0b2a6b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-        <rect x="41" y="2" width="20" height="56" rx="10" fill="#ffffff"/>
-        <rect x="26" y="44" width="54" height="50" rx="15" fill="#ffffff"/>
-        <path d="M61 56 Q80 54 80 64 M61 68 Q80 66 80 76 M61 80 Q78 79 78 88" fill="none"/>
-        <path d="M26 66 Q18 62 22 54 Q28 46 40 54 L56 64 Q62 70 54 74 L36 72" fill="#ffffff"/>
-        <path d="M44 10 L44 40" stroke="#cfe6ff" stroke-width="3"/></g></svg>`;
+      <g transform="translate(121 125) scale(1.12) translate(-46 -49)" fill="#ffffff" stroke="#0b1a4a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M28.5 47 C27 34 26.5 20 28.5 13.5 C30.5 8 40 8 42 13.5 C44 20 44.5 34 42.5 46"/>
+        <path d="M27.5 45.5 C17 48 14 60 17 70 C20.5 81.5 32 88 46 87.5 C59 87 69 82 73 70 L50 56 Z"/>
+        <ellipse cx="73.5" cy="60" rx="7" ry="8.5" transform="rotate(-20 73.5 60)"/><ellipse cx="65" cy="52.5" rx="7.8" ry="10.5" transform="rotate(-12 65 52.5)"/><ellipse cx="53.5" cy="47" rx="9" ry="14" transform="rotate(-6 53.5 47)"/>
+        <path d="M17.5 66 C15 55 20 47 30 45.5 C38 44.5 45 47 45.5 52 C46 57 40 60 35.5 61.5 C40 63 44 68 44.5 76"/><path d="M35.5 61.5 C39.5 63 43.5 68 44.5 76" fill="none"/></g></svg>`;
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); })();
   let umPng = null;
   const prepararUm = () => umPng ? Promise.resolve(umPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 960; c.height = 1280; c.getContext('2d').drawImage(im, 0, 0, 960, 1280); umPng = c.toDataURL('image/png'); ok(umPng); }; im.onerror = () => ok(UM); im.src = UM; });
