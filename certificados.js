@@ -7,10 +7,13 @@
     nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ffd600', cor2: '#ffb300', texto2: '#0b1a4a', claro: 'rgba(255,214,0,.35)', painel: 'linear-gradient(180deg,#fff8a6 0,#ffe11a 45%,#ffb800 100%)', brilho: '#ffd600', balao: 'Você é demais! 🌟',
       texto: 'Você mandou muito bem no {BIMESTRE} bimestre de {ANO} e conquistou a nota máxima! 🎉 Sua dedicação inspira a gente. Continue brilhando: o SEI tem muito orgulho de você!' },
     destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#5dff4a', cor2: '#00c853', texto2: '#06183f', claro: 'rgba(93,255,74,.32)', painel: 'linear-gradient(180deg,#d6ffb8 0,#6dff52 45%,#00c853 100%)', brilho: '#5dff4a', balao: 'Orgulho de você! 💙',
-      texto: 'Cada conquista sua no {BIMESTRE} bimestre de {ANO} mostrou garra, esforço e coragem. 💙 Você é destaque e inspira toda a Família SEI. Siga em frente: a gente acredita em você!' }
+      texto: 'Cada conquista sua no {BIMESTRE} bimestre de {ANO} mostrou garra, esforço e coragem. 💙 Você é destaque e inspira toda a Família SEI. Siga em frente: a gente acredita em você!' },
+    aprovado: { rotulo: 'ALUNO APROVADO', emoji: '🎓', grande: 'APROVADO', cor: '#ff9a1f', cor2: '#ff6a00', texto2: '#0b1a4a', claro: 'rgba(255,154,31,.32)', painel: 'linear-gradient(180deg,#ffe0b0 0,#ffb347 45%,#ff7a00 100%)', brilho: '#ff9a1f', balao: 'Partiu próxima série! 🚀', anual: true,
+      texto: 'Parabéns, você foi aprovado(a) no ano letivo de {ANO}! 🎓 Foi um ano de esforço e conquistas. Agora é comemorar e seguir em frente: a Família SEI tem orgulho de você!' }
   };
+  const TIPOS_L = ['nota10', 'destaque', 'aprovado'];
   const CHAVE = 'sei-certificados2';
-  let st = { bim: '3º', ano: String(new Date().getFullYear()), nota10: '', destaque: '', txt_nota10: TIPOS.nota10.texto, txt_destaque: TIPOS.destaque.texto, tamMed: 33 };
+  let st = { bim: '3º', ano: String(new Date().getFullYear()), nota10: '', destaque: '', aprovado: '', txt_nota10: TIPOS.nota10.texto, txt_destaque: TIPOS.destaque.texto, txt_aprovado: TIPOS.aprovado.texto, tamMed: 33 };
   try { Object.assign(st, JSON.parse(localStorage.getItem(CHAVE) || '{}')); } catch (e) {}
   const guardar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(st)); } catch (e) {} };
   const nomes = tipo => (st[tipo] || '').split(/\r?\n/).map(s => s.replace(/^\s*\d+[\s.)-]*/, '').trim()).filter(Boolean);
@@ -75,7 +78,7 @@
     const T = TIPOS[tipo], el = document.createElement('div'), nm = bonito(nome), some = semTexto ? ' style="visibility:hidden"' : ''; el.className = 'ct-art';
     el.innerHTML = `<div class="ca-bg"></div><div class="ca-vinheta"></div><div class="ca-conf">${confete()}</div><div class="ca-linha"></div>
       <img class="ca-logo" src="assets/docs/logo-sei.png" alt="">
-      <span class="ca-chip" style="background:${T.cor};color:${T.texto2}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</span><span class="ca-insta">@_sei01</span>
+      <span class="ca-chip" style="background:${T.cor};color:${T.texto2}">${T.anual ? 'ANO LETIVO' : esc(st.bim) + ' BIMESTRE'} · ${esc(st.ano)}</span><span class="ca-insta">@_sei01</span>
       <div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
       <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2});color:${T.texto2}">${T.emoji} ${T.rotulo} ${T.emoji}</div>
       <div class="ca-para"${some}>Este certificado vai para</div>
@@ -91,9 +94,9 @@
     const T = TIPOS[tipo], el = document.createElement('div'); el.className = 'md-art';
     el.innerHTML = `<div class="md-anel" style="background:linear-gradient(135deg,#ffd600,#00d9ff 55%,#1e6bff)"><div class="md-disco">
       <div class="md-risc">${rabiscos(56, 56, .22)}</div><img class="md-logo" src="assets/docs/logo-sei.png" alt="">
-      <div class="md-grande" style="font-size:${tipo === 'nota10' ? 11 : 8.4}mm;color:${tipo === 'nota10' ? '#fff200' : '#7df9ff'};text-shadow:0 0 1.4mm ${T.cor},0 .6mm 0 #0b2a6b">${T.grande}</div>
-      <div class="md-fita" style="background:${T.cor};color:${T.texto2}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</div>
-      <img class="md-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="md-estrela">${tipo === 'nota10' ? '⭐' : '💙'}</div></div></div>`;
+      <div class="md-grande" style="font-size:${tipo === 'nota10' ? 11 : 8.4}mm;color:${tipo === 'nota10' ? '#fff200' : tipo === 'aprovado' ? '#ffc46b' : '#7df9ff'};text-shadow:0 0 1.4mm ${T.cor},0 .6mm 0 #0b2a6b">${T.grande}</div>
+      <div class="md-fita" style="background:${T.cor};color:${T.texto2}">${T.anual ? 'ANO LETIVO' : esc(st.bim) + ' BIMESTRE'} · ${esc(st.ano)}</div>
+      <img class="md-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="md-estrela">${T.emoji}</div></div></div>`;
     return el;
   }
   async function render(el, dpi, transparente) {
@@ -107,7 +110,7 @@
 
   /* ---------- PDF ---------- */
   const novoPdf = async o => { await carregar('html2pdf', 'assets/vendor/html2pdf.bundle.min.js'); return html2pdf().set({ jsPDF: { unit: 'mm', format: 'a4', orientation: o } }).from('<div></div>').toPdf().get('pdf'); };
-  const lista = () => ['nota10', 'destaque'].flatMap(t => nomes(t).map(n => [t, n]));
+  const lista = () => TIPOS_L.flatMap(t => nomes(t).map(n => [t, n]));
   async function certificadosPdf(aviso) {
     const l = lista(); if (!l.length) return alert('Coloque pelo menos um nome.'); const doc = await novoPdf('l');
     for (const [i, [t, n]] of l.entries()) { aviso(`⏳ ${i + 1} de ${l.length}…`); const cv = await render(certificado(t, n), 170); if (i) doc.addPage('a4', 'l'); doc.addImage(cv.toDataURL('image/jpeg', .9), 'JPEG', 0, 0, 297, 210, undefined, 'FAST'); }
@@ -115,7 +118,7 @@
   }
   // grade das medalhas na folha A4 em pé, conforme o tamanho escolhido
   const grade = (dd) => { const d = dd || +st.tamMed || 33, passo = d + 1.2, col = Math.floor((210 - 6 + 1.2) / passo + 1e-6), lin = Math.floor((297 - 8 + 1.2) / passo + 1e-6); return { d, passo, col, lin, x0: (210 - (col - 1) * passo - d) / 2, y0: (297 - (lin - 1) * passo - d) / 2 }; };
-  async function medalhasImgs() { const out = {}; for (const t of ['nota10', 'destaque']) if (nomes(t).length) out[t] = (await render(medalha(t), 300, true)).toDataURL('image/png'); return out; }
+  async function medalhasImgs() { const out = {}; for (const t of TIPOS_L) if (nomes(t).length) out[t] = (await render(medalha(t), 300, true)).toDataURL('image/png'); return out; }
   async function medalhasPdf(aviso) {
     const l = lista(); if (!l.length) return alert('Coloque pelo menos um nome.'); aviso('⏳ Desenhando…'); const imgs = await medalhasImgs(), g = grade(), por = g.col * g.lin, doc = await novoPdf('p');
     l.forEach(([t], i) => { if (i && i % por === 0) doc.addPage('a4', 'p'); const j = i % por; doc.addImage(imgs[t], 'PNG', g.x0 + (j % g.col) * g.passo, g.y0 + Math.floor(j / g.col) * g.passo, g.d, g.d, 'm-' + t, 'FAST'); });
@@ -143,7 +146,7 @@
   const baixar = (blob, nome) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); };
   const tw = mm => Math.round(mm * 56.7);
   async function certificadosWord(aviso) {
-    const grupos = ['nota10', 'destaque'].map(t => [t, nomes(t)]).filter(g => g[1].length); if (!grupos.length) return alert('Coloque pelo menos um nome.');
+    const grupos = TIPOS_L.map(t => [t, nomes(t)]).filter(g => g[1].length); if (!grupos.length) return alert('Coloque pelo menos um nome.');
     const cabs = []; let corpo = '';
     for (const [gi, [t, ns]] of grupos.entries()) {
       aviso('⏳ Desenhando a arte…'); const cv = await render(certificado(t, 'x', true), 170);
@@ -175,6 +178,10 @@
     const l = al.filter(a => { const ns = ((((bol.find(b => b.id === a.id) || {}).anos || {})[st.ano]) || {}).notas || {}; return Object.values(ns).some(d => +d[av] === 10); }).map(a => a.nome).sort();
     if (!l.length) return alert(`Nenhum aluno com nota 10 na ${av} de ${st.ano} no diário deste aparelho. Digite os nomes.`); st.nota10 = l.join('\n'); guardar(); desenhar(); alert(l.length + ' aluno(s) com nota 10 na ' + av + '.');
   }
+  function puxarListao() {
+    let l = []; try { const x = JSON.parse(localStorage.getItem('sei-listao') || 'null'); l = ((x && x.turmas) || []).flatMap(t => (t.nomes || '').split(/\r?\n/).map(n => n.replace(/^\s*\d+[\s.)-]*/, '').replace(/\s*\*+\s*$/, '').trim()).filter(Boolean)); } catch (e) {}
+    if (!l.length) return alert('O listão dos aprovados deste aparelho está vazio. Monte o listão primeiro ou digite os nomes.'); st.aprovado = l.join('\n'); guardar(); desenhar(); alert(l.length + ' aluno(s) aprovados trazidos do listão.');
+  }
   async function puxarAee() {
     const D = window.seiDados, l = new Set(); if (D) (await D.listar('alunos')).filter(a => a.aee && (a.situacao || 'Ativo') === 'Ativo').forEach(a => l.add(a.nome));
     await new Promise(ok => { try { const r = indexedDB.open('sei-aee'); r.onsuccess = () => { const db = r.result; if (!db.objectStoreNames.contains('alunos')) return ok(); const q = db.transaction('alunos').objectStore('alunos').getAll(); q.onsuccess = () => { (q.result || []).forEach(a => a.nome && l.add(a.nome)); ok(); }; q.onerror = ok; }; r.onerror = ok; } catch (e) { ok(); } });
@@ -185,33 +192,35 @@
   let prevVez = 0;
   async function previa() {
     const vez = ++prevVez, box = $('#ct-prev'); if (!box) return; const n1 = nomes('nota10'), n2 = nomes('destaque');
-    const itens = [['nota10', n1[0] || 'Nome do Aluno'], ...(n2.length ? [['destaque', n2[0]]] : [])], cvs = [], meds = [];
+    const n3 = nomes('aprovado'), itens = [['nota10', n1[0] || 'Nome do Aluno'], ...(n2.length ? [['destaque', n2[0]]] : []), ...(n3.length ? [['aprovado', n3[0]]] : [])], cvs = [], meds = [];
     for (const [t, n] of itens) cvs.push(await render(certificado(t, n), 60));
-    for (const t of ['nota10', 'destaque']) meds.push(await render(medalha(t), 110, true));
+    for (const t of TIPOS_L) meds.push(await render(medalha(t), 110, true));
     if (vez !== prevVez) return; box.innerHTML = ''; cvs.forEach(c => { c.className = 'ct-cv'; box.append(c); }); const m = document.createElement('div'); m.className = 'ct-meds'; meds.forEach(c => { c.style.width = '120px'; c.style.height = 'auto'; m.append(c); }); box.append(m);
   }
   function desenhar() {
-    const n1 = nomes('nota10'), n2 = nomes('destaque'), tot = n1.length + n2.length, g = grade();
-    $('#ct').innerHTML = `<section class="es-sec"><h2>🏅 Certificados e medalhas</h2><p class="es-dica">Arte nova da escola, no estilo dos nossos posts. Escolha o bimestre, coloque os nomes e baixe os <b>certificados</b> (um por folha A4 deitada) e as <b>medalhas</b>, em PDF ou Word.</p>
+    const n1 = nomes('nota10'), n2 = nomes('destaque'), n3 = nomes('aprovado'), tot = n1.length + n2.length + n3.length, g = grade();
+    $('#ct').innerHTML = `<section class="es-sec"><h2>🏅 Certificados e medalhas</h2><p class="es-dica">Arte nova da escola, no estilo dos nossos posts. Escolha o bimestre (o certificado de aprovado é do ano letivo), coloque os nomes e baixe os <b>certificados</b> (um por folha A4 deitada) e as <b>medalhas</b>, em PDF ou Word.</p>
       <form class="es-form" id="ct-f"><div class="es-g3"><label>Bimestre<select name="bim">${['1º', '2º', '3º', '4º'].map(b => `<option ${b === st.bim ? 'selected' : ''}>${b}</option>`).join('')}</select></label><label>Ano<input name="ano" inputmode="numeric" value="${esc(st.ano)}"></label>
       <label>Tamanho da medalha<select name="tamMed">${[[33, '3,3 cm'], [40, '4 cm'], [50, '5 cm']].map(([v, t]) => [v, `${t} (${grade(v).col * grade(v).lin} por folha)`]).map(([v, t]) => `<option value="${v}" ${+st.tamMed === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
       <label>Mensagem do Aluno Nota 10 <small>({BIMESTRE} e {ANO} são trocados sozinhos)</small><textarea name="txt_nota10" style="min-height:70px">${esc(st.txt_nota10)}</textarea></label>
-      <label>Mensagem do Aluno Destaque (AEE)<textarea name="txt_destaque" style="min-height:70px">${esc(st.txt_destaque)}</textarea></label><div class="es-acoes" style="margin:0"><button type="button" class="b" id="ct-padrao">↺ Mensagens padrão</button></div></form>
+      <label>Mensagem do Aluno Destaque (AEE)<textarea name="txt_destaque" style="min-height:70px">${esc(st.txt_destaque)}</textarea></label><label>Mensagem do Aluno Aprovado<textarea name="txt_aprovado" style="min-height:70px">${esc(st.txt_aprovado)}</textarea></label><div class="es-acoes" style="margin:0"><button type="button" class="b" id="ct-padrao">↺ Mensagens padrão</button></div></form>
       <div class="es-g2" style="margin-top:14px">
         <div class="lt-turma" style="--c:#ff2bd6"><div class="es-linha"><b style="flex:1;font-size:17px">⭐ Aluno Nota 10</b><span class="chip">${n1.length}</span><button class="b" id="ct-p10">↧ Puxar do diário</button></div><textarea data-l="nota10" placeholder="Um nome por linha">${esc(st.nota10)}</textarea></div>
-        <div class="lt-turma" style="--c:#00b8d9"><div class="es-linha"><b style="flex:1;font-size:17px">💙 Aluno Destaque (AEE)</b><span class="chip">${n2.length}</span><button class="b" id="ct-paee">↧ Puxar do AEE</button></div><textarea data-l="destaque" placeholder="Um nome por linha">${esc(st.destaque)}</textarea></div></div>
+        <div class="lt-turma" style="--c:#00b8d9"><div class="es-linha"><b style="flex:1;font-size:17px">💙 Aluno Destaque (AEE)</b><span class="chip">${n2.length}</span><button class="b" id="ct-paee">↧ Puxar do AEE</button></div><textarea data-l="destaque" placeholder="Um nome por linha">${esc(st.destaque)}</textarea></div>
+        <div class="lt-turma" style="--c:#ff9a1f"><div class="es-linha"><b style="flex:1;font-size:17px">🎓 Aluno Aprovado</b><span class="chip">${n3.length}</span><button class="b" id="ct-plist">↧ Puxar do listão</button></div><textarea data-l="aprovado" placeholder="Um nome por linha">${esc(st.aprovado)}</textarea></div></div>
       <div class="es-acoes" style="margin-top:14px"><button class="b main" id="ct-cpdf">📄 Certificados (PDF)</button><button class="b" id="ct-cdoc">⬇ Certificados (Word)</button><button class="b main" id="ct-mpdf">🏅 Medalhas (PDF)</button><button class="b" id="ct-mdoc">⬇ Medalhas (Word)</button></div>
       <p class="es-dica">${tot ? `Vai gerar <b>${tot} certificado(s)</b> e <b>${tot} medalha(s)</b> em ${Math.ceil(tot / (g.col * g.lin))} folha(s). Imprima em tamanho real (100%).` : 'Coloque os nomes para gerar.'}</p>
       <h2 style="margin-top:10px">👀 Prévia</h2><div class="ct-prev" id="ct-prev"><p class="es-dica">⏳ Desenhando…</p></div></section>`;
-    let t = null; const f = $('#ct-f'); f.oninput = f.onchange = e => { const d = new FormData(f); Object.assign(st, { bim: d.get('bim'), ano: d.get('ano').trim(), tamMed: +d.get('tamMed'), txt_nota10: d.get('txt_nota10'), txt_destaque: d.get('txt_destaque') }); guardar(); if (e.type === 'change' && e.target.tagName === 'SELECT') return desenhar(); clearTimeout(t); t = setTimeout(previa, 700); };
+    let t = null; const f = $('#ct-f'); f.oninput = f.onchange = e => { const d = new FormData(f); Object.assign(st, { bim: d.get('bim'), ano: d.get('ano').trim(), tamMed: +d.get('tamMed'), txt_nota10: d.get('txt_nota10'), txt_destaque: d.get('txt_destaque'), txt_aprovado: d.get('txt_aprovado') }); guardar(); if (e.type === 'change' && e.target.tagName === 'SELECT') return desenhar(); clearTimeout(t); t = setTimeout(previa, 700); };
     document.querySelectorAll('[data-l]').forEach(x => { x.oninput = () => { st[x.dataset.l] = x.value; guardar(); }; x.onchange = desenhar; });
     previa();
   }
   document.addEventListener('click', async e => {
     const b = e.target.closest('button'); if (!b || !b.id.startsWith('ct-')) return;
-    if (b.id === 'ct-padrao') { st.txt_nota10 = TIPOS.nota10.texto; st.txt_destaque = TIPOS.destaque.texto; guardar(); return desenhar(); }
+    if (b.id === 'ct-padrao') { st.txt_nota10 = TIPOS.nota10.texto; st.txt_destaque = TIPOS.destaque.texto; st.txt_aprovado = TIPOS.aprovado.texto; guardar(); return desenhar(); }
     if (b.id === 'ct-p10') return puxarNota10();
     if (b.id === 'ct-paee') return puxarAee();
+    if (b.id === 'ct-plist') return puxarListao();
     const fn = { 'ct-cpdf': certificadosPdf, 'ct-cdoc': certificadosWord, 'ct-mpdf': medalhasPdf, 'ct-mdoc': medalhasWord }[b.id]; if (!fn) return;
     const t0 = b.textContent; b.disabled = true; b.textContent = '⏳ Gerando…'; try { await fn(m => { b.textContent = m; }); } catch (er) { alert('Não consegui gerar: ' + (er && er.message || er)); } b.disabled = false; b.textContent = t0;
   });
