@@ -36,7 +36,7 @@
   <a class="b" href="aulas.html">📁 Minhas aulas</a>
 </header>
 <main class="mt-wrap">
-  <p class="mt-intro"><b>Listas de material de 2027.</b> Escolha a turma para abrir ou baixar o PDF. Cada folha traz <b>duas listas iguais</b>: imprima em <b>tamanho real (100%)</b> e corte ao meio. Entrega na escola até <b>15/01/2027</b>.</p>
+  <p class="mt-intro"><b>Listas de material de 2027.</b> Escolha a turma para abrir ou baixar a lista. É <b>uma lista por aluno</b>. Entrega na escola até <b>15/01/2027</b>, com todo o material marcado com o nome do aluno.</p>
   <div id="listas"></div>
   <p class="mt-dica">Para mudar itens, prazo ou criar a lista de outra turma, use o modelo <b>“Lista de material”</b> na <a href="secretaria.html">Secretaria</a> ou na <a href="coordenacao.html">Coordenação</a>.</p>
 </main>
@@ -46,13 +46,13 @@
     ['Educação Infantil', '🧸', [['maternal', 'Maternal', '#ef6c00', 28], ['pre-i', 'Pré I', '#2e7d32', 30], ['pre-ii', 'Pré II', '#1565c0', 29]]],
     ['Anos Iniciais', '✏️', [['1-ano', '1º ano', '#c62828', 21], ['2-ano', '2º ano', '#00838f', 20], ['3-ano', '3º ano', '#ad1457', 25], ['4-ano', '4º ano', '#283593', 24], ['5-ano', '5º ano', '#00695c', 22]]]
   ];
-  var P = 'assets/material/2027/', V = '?v=3';
+  var P = 'assets/material/2027/', V = '?v=4';
   document.getElementById('listas').innerHTML = L.map(function (s) {
     return '<h2 class="mt-seg">' + s[1] + ' ' + s[0] + '</h2><div class="mt-grid">' + s[2].map(function (t) {
       var pdf = P + 'lista-material-2027-' + t[0] + '.pdf' + V;
       return '<article class="mt-card"><div class="mt-top" style="background:' + t[2] + '"><b>' + t[1] + '</b><span>' + t[3] + ' itens</span></div>' +
         '<a class="mt-prev" href="' + pdf + '" target="_blank" rel="noopener" aria-label="Abrir a lista do ' + t[1] + '"><img src="' + P + 'previa-' + t[0] + '.jpg' + V + '" alt="Prévia da lista de material do ' + t[1] + '" width="330" height="467"></a>' +
-        '<p class="mt-info">1 folha = 2 listas · entrega até 15/01/2027</p>' +
+        '<p class="mt-info">Entrega até 15/01/2027</p>' +
         '<div class="mt-acoes"><a class="mt-abrir" href="' + pdf + '" target="_blank" rel="noopener">📄 Abrir PDF</a><a class="mt-baixar" href="' + pdf + '" download="Lista-de-Material-2027-' + t[1].replace(/[º ]/g, function (c) { return c === ' ' ? '-' : ''; }) + '.pdf">⬇ Baixar</a></div></article>';
     }).join('') + '</div>';
   }).join('');
