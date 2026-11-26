@@ -4,9 +4,9 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const TIPOS = {
-    nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ff2bd6', cor2: '#ffd600', claro: '#ffc9f1', balao: 'Você é demais! 🌟',
+    nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ffd600', cor2: '#ffb300', texto2: '#0b1a4a', claro: 'rgba(255,214,0,.35)', balao: 'Você é demais! 🌟',
       texto: 'Você mandou muito bem no {BIMESTRE} bimestre de {ANO} e conquistou a nota máxima! 🎉 Sua dedicação inspira a gente. Continue brilhando: o SEI tem muito orgulho de você!' },
-    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#00b8d9', cor2: '#9d5cff', claro: '#b9f3ff', balao: 'Orgulho de você! 💙',
+    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#00d9ff', cor2: '#1e6bff', texto2: '#06183f', claro: 'rgba(0,217,255,.35)', balao: 'Orgulho de você! 💙',
       texto: 'Cada conquista sua no {BIMESTRE} bimestre de {ANO} mostrou garra, esforço e coragem. 💙 Você é destaque e inspira toda a Família SEI. Siga em frente: a gente acredita em você!' }
   };
   const CHAVE = 'sei-certificados2';
@@ -22,7 +22,7 @@
 
   /* ---------- artes ---------- */
   const DISC = ['π', '📐', '∑', 'x²', 'Aa', '📖', '✍️', '🧬', '🔬', '🌱', '⚛️', 'E=mc²', '🧪', 'H₂O', '🏛️', '📜', '🌎', '🧭', 'Hello!', 'ABC', '🎨', '🎭', '⚽', '🏅', '💭', '🌳', '🦜', '🎵', '💡', '🔭', 'Δ', '🧮'];
-  function rabiscos(W, H, op) { let s = 5, h = '', i = 0; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cel = Math.min(W, H) * .13, cs = ['#00a7c4', '#d61fb0', '#c9a800', '#2fa800', '#7a3dff'];
+  function rabiscos(W, H, op) { let s = 5, h = '', i = 0; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cel = Math.min(W, H) * .13, cs = ['#7df9ff', '#ffe600', '#8fb8ff', '#7df9ff', '#ffffff'];
     for (let y = -cel * .2; y < H; y += cel) for (let x = -cel * .2; x < W; x += cel) { const t = DISC[i++ % DISC.length], emo = /\p{Extended_Pictographic}/u.test(t);
       h += `<span style="position:absolute;left:${x + rnd() * cel * .5}mm;top:${y + rnd() * cel * .5}mm;font-size:${cel * (emo ? .3 : .24)}mm;transform:rotate(${(rnd() - .5) * 40}deg);opacity:${emo ? op * .7 : op};color:${cs[i % cs.length]};font-family:SeiRubik,Arial Black,sans-serif;white-space:nowrap">${t}</span>`; }
     return h; }
@@ -32,21 +32,21 @@
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); })();
   let seloPng = null;
   const prepararSelo = () => seloPng ? Promise.resolve(seloPng) : new Promise(ok => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 800; c.height = 1000; c.getContext('2d').drawImage(im, 0, 0, 800, 1000); seloPng = c.toDataURL('image/png'); ok(seloPng); }; im.onerror = () => ok(selo); im.src = selo; });
-  function confete() { let s = 3, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ff2bd6', '#ffd600', '#00d9ff', '#39e600', '#9d5cff', '#ff7b00'];
+  function confete() { let s = 3, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ffd600', '#00d9ff', '#ffffff', '#4f8bff', '#7df9ff', '#ffe600'];
     for (let i = 0; i < 46; i++) { const lado = i % 2, x = lado ? 196 + rnd() * 80 : 6 + rnd() * 80, y = 14 + rnd() * 46, w = 1.2 + rnd() * 1.6; h += `<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${w * 2.4}mm;background:${cs[i % cs.length]};transform:rotate(${rnd() * 180}deg)"></i>`; }
     return h; }
   // folha do certificado (A4 deitada, em mm). semTexto: só a arte, para o fundo do Word
   function certificado(tipo, nome, semTexto) {
     const T = TIPOS[tipo], el = document.createElement('div'), nm = bonito(nome), some = semTexto ? ' style="visibility:hidden"' : ''; el.className = 'ct-art';
-    el.innerHTML = `<div class="ca-moldura" style="background:linear-gradient(135deg,${T.cor},#9d5cff 50%,${T.cor === '#ff2bd6' ? '#00d9ff' : '#ff2bd6'})"></div>
-      <div class="ca-folha"><div class="ca-risc">${rabiscos(285, 198, .16)}</div>
-        <div class="ca-topo"><img src="assets/docs/logo-sei.png" alt=""><div><b>Sistema de Ensino Incentivo</b><small>Aqui se faz educação com qualidade · @_sei01</small></div><span class="ca-chip" style="background:${T.cor}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</span></div>
+    el.innerHTML = `<div class="ca-moldura" style="background:linear-gradient(135deg,#ffd600,#00d9ff 50%,#1e6bff)"></div>
+      <div class="ca-folha"><div class="ca-risc">${rabiscos(285, 198, .2)}</div>
+        <div class="ca-topo"><img src="assets/docs/logo-sei.png" alt=""><div><b>Sistema de Ensino Incentivo</b><small>Aqui se faz educação com qualidade · @_sei01</small></div><span class="ca-chip" style="background:${T.cor};color:${T.texto2}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</span></div>
         <div class="ca-conf">${confete()}</div><div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
-        <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2})">${T.emoji} ${T.rotulo} ${T.emoji}</div>
+        <div class="ca-tipo" style="background:linear-gradient(90deg,${T.cor},${T.cor2});color:${T.texto2}">${T.emoji} ${T.rotulo} ${T.emoji}</div>
         <div class="ca-para"${some}>Este certificado vai para</div>
-        <div class="ca-nome"${some}><span style="font-size:${tamNomeMm(nm)}mm;background:linear-gradient(180deg,transparent 55%,${T.claro} 55%,${T.claro} 92%,transparent 92%)">${esc(nm)}</span></div>
+        <div class="ca-nome"><span style="font-size:${tamNomeMm(nm)}mm${semTexto ? ';visibility:hidden' : ''}">${esc(nm)}</span></div>
         <p class="ca-msg"${some}>${esc(msg(tipo))}</p>
-        <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(255,255,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao" style="border-color:${T.cor}">${esc(T.balao)}</div></div>
+        <div class="ca-palco"><span class="ca-luz" style="background:radial-gradient(circle,${T.claro} 0,rgba(0,217,255,0) 70%)"></span><img class="ca-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="ca-podio"><span class="d">2º</span><span class="um">🏆 1º</span><span class="t">3º</span></div><div class="ca-balao" style="border-color:${T.cor}">${esc(T.balao)}</div></div>
         <div class="ca-data">São Miguel do Guamá – PA, ____ de ___________ de ${esc(st.ano)}.</div><div class="ca-ass"><div><i></i>Direção</div><div><i></i>Coordenação pedagógica</div></div>
         <img class="ca-selo" src="assets/docs/selo-honra.png?v=1" alt="">
         <div class="ca-rod">São Miguel do Guamá – PA · Família SEI 💛 #OrgulhoSEI</div>
@@ -56,10 +56,10 @@
   // medalha redonda (desenhada a 60 mm e reduzida na folha)
   function medalha(tipo) {
     const T = TIPOS[tipo], el = document.createElement('div'); el.className = 'md-art';
-    el.innerHTML = `<div class="md-anel" style="background:linear-gradient(135deg,${T.cor},#ffd600 40%,#00d9ff 70%,${T.cor2})"><div class="md-disco">
+    el.innerHTML = `<div class="md-anel" style="background:linear-gradient(135deg,#ffd600,#00d9ff 55%,#1e6bff)"><div class="md-disco">
       <div class="md-risc">${rabiscos(56, 56, .22)}</div><img class="md-logo" src="assets/docs/logo-sei.png" alt="">
-      <div class="md-grande" style="font-size:${tipo === 'nota10' ? 11 : 8.4}mm;color:${tipo === 'nota10' ? '#fff200' : '#7df9ff'};text-shadow:0 0 1.2mm ${T.cor},0 .6mm 0 ${T.cor}">${T.grande}</div>
-      <div class="md-fita" style="background:${T.cor}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</div>
+      <div class="md-grande" style="font-size:${tipo === 'nota10' ? 11 : 8.4}mm;color:${tipo === 'nota10' ? '#fff200' : '#7df9ff'};text-shadow:0 0 1.4mm ${T.cor},0 .6mm 0 #0b2a6b">${T.grande}</div>
+      <div class="md-fita" style="background:${T.cor};color:${T.texto2}">${esc(st.bim)} BIMESTRE · ${esc(st.ano)}</div>
       <img class="md-masc" src="assets/docs/mascote-sei.png?v=14" alt=""><div class="md-estrela">${tipo === 'nota10' ? '⭐' : '💙'}</div></div></div>`;
     return el;
   }
@@ -116,9 +116,9 @@
       cabs.push({ rid: 'rF' + gi, arq: `fundo-${t}.jpeg`, dados: await (await fetch(cv.toDataURL('image/jpeg', .9))).arrayBuffer(), xml: desenho('rF' + gi, 900 + gi, 297 * 36000, 210 * 36000, true) });
       const sect = `<w:sectPr><w:headerReference w:type="default" r:id="rH${gi + 1}"/><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="${tw(Mm.para)}" w:right="${tw(Mm.lado)}" w:bottom="${tw(8)}" w:left="${tw(Mm.lado)}" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr>`;
       ns.forEach((n, i) => { const nm = bonito(n), fim = i === ns.length - 1, rp = (fonte, sz, cor, b) => `<w:rPr><w:rFonts w:ascii="${fonte}" w:hAnsi="${fonte}" w:cs="${fonte}"/>${b ? '<w:b/>' : ''}<w:color w:val="${cor}"/><w:sz w:val="${Math.round(sz * 2)}"/></w:rPr>`;
-        corpo += `<w:p><w:pPr>${i ? '<w:pageBreakBefore/>' : ''}<w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lParaN)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial', 12.5, '0B2A6B', 1)}<w:t>Este certificado vai para</w:t></w:r></w:p>`;
-        corpo += `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lNome)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial Black', tamNomeMm(nm) * 2.835 * .9, '0B1A4A', 1)}<w:t xml:space="preserve">${X(nm)}</w:t></w:r></w:p>`;
-        corpo += `<w:p><w:pPr><w:spacing w:before="${tw(Mm.antesMsg)}" w:after="0" w:line="${tw(Mm.lMsg)}" w:lineRule="exact"/><w:ind w:left="${tw(Mm.msgRec)}" w:right="${tw(Mm.msgRec)}"/><w:jc w:val="center"/>${fim && gi < grupos.length - 1 ? sect : ''}</w:pPr><w:r>${rp('Arial', 14.5, '24324F', 0)}<w:t xml:space="preserve">${X(msg(t))}</w:t></w:r></w:p>`;
+        corpo += `<w:p><w:pPr>${i ? '<w:pageBreakBefore/>' : ''}<w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lParaN)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial', 12.5, '7DF9FF', 1)}<w:t>Este certificado vai para</w:t></w:r></w:p>`;
+        corpo += `<w:p><w:pPr><w:spacing w:before="0" w:after="0" w:line="${tw(Mm.lNome)}" w:lineRule="exact"/><w:jc w:val="center"/></w:pPr><w:r>${rp('Arial Black', tamNomeMm(nm) * 2.835 * .9, 'FFFFFF', 1)}<w:t xml:space="preserve">${X(nm)}</w:t></w:r></w:p>`;
+        corpo += `<w:p><w:pPr><w:spacing w:before="${tw(Mm.antesMsg)}" w:after="0" w:line="${tw(Mm.lMsg)}" w:lineRule="exact"/><w:ind w:left="${tw(Mm.msgRec)}" w:right="${tw(Mm.msgRec)}"/><w:jc w:val="center"/>${fim && gi < grupos.length - 1 ? sect : ''}</w:pPr><w:r>${rp('Arial', 14.5, 'EAF2FF', 0)}<w:t xml:space="preserve">${X(msg(t))}</w:t></w:r></w:p>`;
         if (fim && gi === grupos.length - 1) corpo += sect; });
     }
     baixar(await docx(corpo, [], cabs), `Certificados-${st.bim}-Bimestre-${st.ano}.docx`);
