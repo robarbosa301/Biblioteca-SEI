@@ -218,7 +218,7 @@
       if (!alunos.length) x += '<div class="es-vazio"><b>Nenhum aluno cadastrado.</b>Cadastre um por um ou use <b>📋 Colar lista de nomes</b> para lançar a turma inteira de uma vez.</div>';
       for (const t of TURMAS.concat([''])) { const lt = l.filter(a => (a.turma || '') === t); if (!lt.length) continue;
         x += `<div class="es-turma">${t ? esc(t) : 'Sem turma'} <span>${lt.length} aluno${lt.length > 1 ? 's' : ''}</span></div><div class="es-grid">` + lt.map(a => { const r = a.responsaveis || [];
-          return `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(a.nome)}</h3><div class="es-linha">${a.aee ? '<span class="chip">🤝 AEE</span>' : ''}${a.situacao && a.situacao !== 'Ativo' ? `<span class="chip ${a.situacao === 'Retido' ? 'breve' : 'atrasado'}">${esc(a.situacao)}</span>` : ''}${a.saida ? `<a class="chip ok" href="secretaria.html" style="text-decoration:none">📄 documentos de saída prontos</a>` : ''}${r.some(x => x.acesso && x.email) ? '<span class="chip ok">👨‍👩‍👧 acesso dos pais</span>' : ''}</div>${r.filter(x => x.nome).map(x => `<p>👤 ${esc(x.nome)}${x.parentesco ? ` (${esc(x.parentesco)})` : ''}${x.whatsapp ? ` · 📱 ${esc(x.whatsapp)}` : ''}</p>`).join('')}${gestor() ? `<div class="es-linha"><button class="b" data-edal="${a.id}">✏️ Editar</button>${a.saida ? `<button class="b" data-docsaida="${a.id}">↻ Refazer documentos</button>` : ''}</div>` : ''}</article>`; }).join('') + '</div>'; }
+          return `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(a.nome)}</h3><div class="es-linha">${a.aee ? '<span class="chip">🤝 AEE</span>' : ''}${a.situacao && a.situacao !== 'Ativo' ? `<span class="chip ${a.situacao === 'Retido' ? 'breve' : 'atrasado'}">${esc(a.situacao)}</span>` : ''}${a.saida ? (a.saida.liberado === false ? `<span class="chip atrasado">🔒 pendência financeira: ${a.saida.bloqueio.qtd} mensalidade(s) — documentos bloqueados</span>` : `<a class="chip ok" href="secretaria.html" style="text-decoration:none">📄 documentos de saída prontos</a>`) : ''}${r.some(x => x.acesso && x.email) ? '<span class="chip ok">👨‍👩‍👧 acesso dos pais</span>' : ''}</div>${r.filter(x => x.nome).map(x => `<p>👤 ${esc(x.nome)}${x.parentesco ? ` (${esc(x.parentesco)})` : ''}${x.whatsapp ? ` · 📱 ${esc(x.whatsapp)}` : ''}</p>`).join('')}${gestor() ? `<div class="es-linha"><button class="b" data-edal="${a.id}">✏️ Editar</button>${a.saida ? (a.saida.liberado === false ? `<button class="b main" data-libsaida="${a.id}">🔓 Verificar e liberar</button>${eu().perfil === 'direcao' ? `<button class="b" data-forcasaida="${a.id}">Liberar mesmo assim</button>` : ''}` : `<button class="b" data-docsaida="${a.id}">↻ Refazer documentos</button>`) : ''}</div>` : ''}</article>`; }).join('') + '</div>'; }
     } else {
       const l = pessoas.filter(p => !q || p.nome.toLowerCase().includes(q));
       if (!pessoas.length) x += '<div class="es-vazio"><b>Nenhum funcionário cadastrado.</b>Cadastre a equipe com a função e o WhatsApp: é com ele que a secretaria cobra os prazos em um toque. Se os professores já estão no Horário de aula, use <b>↧ Trazer professores do Horário</b>.</div>';
@@ -281,6 +281,22 @@
     return ok;
   }
 
+  // confere o Financeiro antes de gerar os documentos de saída
+  const fichasFin = () => new Promise(ok => { try { const r = indexedDB.open('sei-docs', 1); r.onupgradeneeded = () => r.result.createObjectStore('docs', { keyPath: 'id' }); r.onsuccess = () => { const t = r.result.transaction('docs').objectStore('docs').getAll(); t.onsuccess = () => ok(t.result || []); t.onerror = () => ok([]); }; r.onerror = () => ok([]); } catch (e) { ok([]); } });
+  const normN = n => String(n || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  async function pendenciaFin(a) {
+    const docs = (await fichasFin()).filter(d => d.tipo === 'mensalidades' && normN(d.aluno) === normN(a.nome)), lim = (a.saida && a.saida.data) || hoje(), l = [];
+    for (const d of docs) { const y = +d.ano || new Date().getFullYear(), pg = d.pagos || {}; for (let i = 0; i < 12; i++) { const vk = `${y}-${String(i + 1).padStart(2, '0')}-${String(d.venc || '05').padStart(2, '0')}`; if (!(pg[i] || {}).d && vk < lim) l.push(`${MESES[i].slice(0, 3)}/${y}`); } }
+    return { qtd: l.length, meses: l.join(', '), fichas: docs.length };
+  }
+  async function liberarSaida(a, forcar) {
+    const pd = await pendenciaFin(a);
+    if (pd.qtd && !forcar) { a.saida = Object.assign(a.saida || {}, { bloqueio: { qtd: pd.qtd, meses: pd.meses, em: hoje() }, liberado: false }); await D.salvar('alunos', a);
+      alert(`🔒 ${a.nome} saiu da escola, mas tem ${pd.qtd} mensalidade(s) em atraso no Financeiro (${pd.meses}).\n\nOs documentos de saída (transferência, ressalva e histórico) ficam BLOQUEADOS até regularizar. Depois que o Financeiro registrar o pagamento, toque em "🔓 Verificar e liberar" no cartão do aluno.`); return false; }
+    a.saida = Object.assign(a.saida || {}, { liberado: true, bloqueio: null, forcado: !!(pd.qtd && forcar), liberadoEm: hoje() }); await D.salvar('alunos', a); const n = await docsDeSaida(a);
+    alert(`${a.nome}: ${n} documento(s) prontos na Secretaria (Declaração de transferência, Ressalva e Histórico escolar com as notas do diário).` + (pd.fichas ? (pd.qtd ? '\n⚠️ Liberado pela Direção mesmo com pendência.' : '\n✅ Sem pendência no Financeiro.') : '\nℹ️ Não encontrei ficha de mensalidades deste aluno neste aparelho: confira com o Financeiro antes de entregar.'));
+    return true;
+  }
   function telaAluno(a) {
     a = a || { nome: '', turma: '', situacao: 'Ativo', responsaveis: [{}, {}] }; const r = (a.responsaveis || []).concat([{}, {}]).slice(0, 2);
     $('#es').innerHTML = `<form class="es-form" id="es-fa"><h3>${a.id ? '✏️ Editar aluno' : '➕ Novo aluno'}</h3>
@@ -294,7 +310,7 @@
       Object.assign(a, { nome: f.get('nome').trim(), turma: f.get('turma'), nasc: f.get('nasc'), situacao: f.get('situacao'), aee: !!f.get('aee'), obs: f.get('obs').trim(),
         responsaveis: [0, 1].map(i => ({ nome: f.get('rn' + i).trim(), parentesco: f.get('rp' + i).trim(), whatsapp: f.get('rw' + i).trim(), email: f.get('re' + i).trim().toLowerCase(), acesso: !!f.get('ra' + i) })).filter(x => x.nome || x.email || x.whatsapp) });
       a.etapa = etapaDe(a.turma); const saiu = SAIU.includes(a.situacao) && !SAIU.includes(antes); if (saiu) a.saida = { data: hoje(), turma: a.turma, ano: anoDoAluno(a), situacao: a.situacao }; if (!SAIU.includes(a.situacao)) delete a.saida;
-      await D.salvar('alunos', a); if (saiu) { await carregar(); const n = await docsDeSaida(a); alert(`${a.nome} saiu da escola. ${n} documento(s) já estão prontos na Secretaria: Declaração de transferência, Ressalva e Histórico escolar (com as notas do diário). É só conferir e imprimir.`); } aba = 'cad'; sub = 'alunos'; await desenhar(); };
+      await D.salvar('alunos', a); if (saiu) { await carregar(); await liberarSaida(a, false); } aba = 'cad'; sub = 'alunos'; await desenhar(); };
   }
   function telaColar() {
     $('#es').innerHTML = `<form class="es-form" id="es-fc"><h3>📋 Colar lista de nomes</h3><p class="es-dica">Um nome por linha. Nomes que já estão cadastrados na mesma turma são ignorados.</p>
@@ -535,7 +551,9 @@
     if (b.id === 'es-novoal') return telaAluno();
     if (b.id === 'es-virada') return telaVirada();
     if (b.id === 'es-virar') { if (confirm('Confirmar a passagem de série de todos os alunos listados?')) await virar(d.novo); return; }
-    if (d.docsaida) { const al = alunos.find(x => x.id === d.docsaida); const n = await docsDeSaida(al); alert(n + ' documento(s) prontos na Secretaria.'); return; }
+    if (d.docsaida) { const al = alunos.find(x => x.id === d.docsaida); await liberarSaida(al, false); return desenhar(); }
+    if (d.libsaida) { await liberarSaida(alunos.find(x => x.id === d.libsaida), false); return desenhar(); }
+    if (d.forcasaida) { if (confirm('Liberar os documentos mesmo com mensalidades em atraso? Fica registrado que foi liberado pela Direção.')) await liberarSaida(alunos.find(x => x.id === d.forcasaida), true); return desenhar(); }
     if (b.id === 'es-colar') return telaColar();
     if (b.id === 'es-novofu') return telaFunc();
     if (b.id === 'es-trazer') return trazerHorario();

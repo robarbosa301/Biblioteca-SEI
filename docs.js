@@ -1243,6 +1243,15 @@ Prática e tira-dúvidas`;
     return `${num} (${ext})`;
   }
   const doc2 = (rg, cpf) => [rg && 'RG nº ' + rg, cpf && 'CPF nº ' + cpf].filter(Boolean).join(' e ');
+  // mensalidades em atraso de um aluno (fichas do Controle de mensalidades)
+  const normNome = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  function pendenciaDe(nome, docs, ate) {
+    const n = normNome(nome), lim = ate || hoje(), l = []; if (!n) return { qtd: 0, meses: '', fichas: 0 };
+    const fichas = docs.filter(d => d.tipo === 'mensalidades' && normNome(d.aluno) === n);
+    for (const d of fichas) { const y = +d.ano || new Date().getFullYear(), pg = d.pagos || {}; for (let i = 0; i < 12; i++) { const vk = `${y}-${String(i + 1).padStart(2, '0')}-${String(d.venc || '05').padStart(2, '0')}`; if (!(pg[i] || {}).d && vk < lim) l.push(`${MESES[i].slice(0, 3)}/${y}`); } }
+    return { qtd: l.length, meses: l.join(', '), fichas: fichas.length };
+  }
+  window.seiPendencia = async (nome, ate) => pendenciaDe(nome, await todos(), ate);
   function textoDec(o) {
     const L = '______________________________';
     if (o.modelo === 'pagamento') return `Declaramos, para os devidos fins, que o(a) Sr.(a) *${(o.resp || L).toUpperCase()}*${doc2(o.rg, o.cpf) ? ', portador(a) do ' + doc2(o.rg, o.cpf) : ''}, efetuou pagamento na secretaria do Sistema de Ensino Incentivo no valor de *${reais(o.valor) || 'R$ ________'}*, referente às mensalidades de estudos do(a) aluno(a) *${(o.aluno || L).toUpperCase()}*.\n\nAluno(a) devidamente matriculado(a) neste Sistema de Ensino, onde cursou o(a) ${serieNome(o.turma)} no ano de ${o.anoRef || '____'}.`;
@@ -1822,6 +1831,9 @@ Prática e tira-dúvidas`;
     $('#pvAbre').onclick = () => { $('#formPv').classList.add('pv-on'); escalaPv(); atualizaPv(); }; $('#pvFecha').onclick = () => $('#formPv').classList.remove('pv-on');
     atualizaPv();
     const salvar = async () => {
+      // documentos de saída do aluno: avisa se há mensalidade em atraso no Financeiro
+      if (['historico', 'ressalva'].includes(edit.tipo) || (edit.tipo === 'declaracao' && v('modelo') === 'transferencia')) { const nome = v(edit.tipo === 'declaracao' ? 'alunoM' : 'aluno'); const pd = pendenciaDe(nome, await todos());
+        if (pd.qtd && !confirm(`⚠️ PENDÊNCIA FINANCEIRA\n\n${nome} tem ${pd.qtd} mensalidade(s) em atraso (${pd.meses}).\nA documentação só deve ser entregue depois de regularizar no Financeiro.\n\nSalvar mesmo assim?`)) throw new Error('cancelado'); }
       if (edit.tipo === 'horario') { const n = document.querySelectorAll('#grade td.conflito').length; if (n && !confirm(`Este horário tem ${n} conflito(s) marcado(s) em vermelho. Salvar mesmo assim?`)) throw new Error('cancelado'); }
       Object.assign(edit, ler(t.campos)); if (t.extra) t.extra(edit); if (!edit.id) { edit.id = novoId(); edit.criado = Date.now(); } await gravar(edit); const d = edit; aviso('Documento salvo.'); edit = null; await carregar(); return d; };
     $('#fDoc').onsubmit = async e => { e.preventDefault(); try { await salvar(); } catch (x) { if (x.message !== 'cancelado') throw x; } };
