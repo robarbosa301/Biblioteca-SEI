@@ -11,8 +11,8 @@
   const etapaDe = t => Object.keys(ETAPAS).find(k => ETAPAS[k][1].includes(t)) || '';
   const PERFIS = { direcao: '⭐ Direção', secretaria: '🗂️ Secretaria', coordenacao: '🧩 Coordenação', professor: '👩‍🏫 Professores', aee: '🤝 AEE', financeiro: '💰 Financeiro', familias: '👨‍👩‍👧 Famílias' };
   const FUNCOES = [['Direção', 'direcao'], ['Secretaria', 'secretaria'], ['Coordenação pedagógica', 'coordenacao'], ['Professor(a)', 'professor'], ['AEE', 'aee'], ['Financeiro', 'financeiro'], ['Apoio / serviços gerais', 'apoio']];
-  const GRUPOS = ['1ª Avaliação', '2ª Avaliação', '3ª Avaliação', '4ª Avaliação', 'Recuperação', 'Planejamento', 'Reunião', 'Conselho de Classe', 'Matrícula', 'Evento', 'Outra'];
-  const COR = { '1ª Avaliação': '#1e4fb8', '2ª Avaliação': '#2e7d32', '3ª Avaliação': '#ef6c00', '4ª Avaliação': '#6a1b9a', 'Recuperação': '#c62828', 'Planejamento': '#6d4c41', 'Reunião': '#00838f', 'Conselho de Classe': '#ad1457', 'Matrícula': '#0b2a6b', 'Evento': '#00acc1', 'Outra': '#5a6f8e' };
+  const GRUPOS = ['1ª Avaliação', '2ª Avaliação', '3ª Avaliação', '4ª Avaliação', 'Recuperação', 'Planejamento', 'Reunião', 'Conselho de Classe', 'Matrícula', 'Evento', 'Meta do PPP', 'Outra'];
+  const COR = { '1ª Avaliação': '#1e4fb8', '2ª Avaliação': '#2e7d32', '3ª Avaliação': '#ef6c00', '4ª Avaliação': '#6a1b9a', 'Recuperação': '#c62828', 'Planejamento': '#6d4c41', 'Reunião': '#00838f', 'Conselho de Classe': '#ad1457', 'Matrícula': '#0b2a6b', 'Evento': '#00acc1', 'Meta do PPP': '#b8860b', 'Outra': '#5a6f8e' };
   const ETAPA_AV = { questoes: '📝', prontas: '🖨️', provas: '✏️', notas: '📊' };
 
   /* ---------- datas ---------- */
@@ -35,7 +35,7 @@
   let ano = anoAtual();
   const eu = () => D.usuario();
   const gestor = () => ['direcao', 'secretaria', 'coordenacao'].includes(eu().perfil);
-  async function carregar() { [pessoas, alunos, crono, boletins, notasDocs, freqDocs, comunicados] = await Promise.all(['pessoas', 'alunos', 'cronograma', 'boletins', 'notas', 'frequencia', 'comunicados'].map(c => D.listar(c))); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
+  async function carregar() { [pessoas, alunos, crono, boletins, notasDocs, freqDocs, comunicados, metasDocs] = await Promise.all(['pessoas', 'alunos', 'cronograma', 'boletins', 'notas', 'frequencia', 'comunicados', 'metas'].map(c => D.listar(c))); pessoas.sort((a, b) => a.nome.localeCompare(b.nome)); alunos.sort((a, b) => a.nome.localeCompare(b.nome)); }
 
   /* ---------- regras do cronograma ---------- */
   const profsDe = it => pessoas.filter(p => p.ativo !== false && p.perfil === 'professor' && (!(it.etapas || []).length || !(p.etapas || []).length || p.etapas.some(e => it.etapas.includes(e))));
@@ -352,11 +352,96 @@
   }
 
   /* ---------- desenho e eventos ---------- */
+  /* ---------- METAS DO PPP 2027–2031 (ligadas ao cronograma) ---------- */
+  const ANOS_PPP = ['2027', '2028', '2029', '2030', '2031'];
+  let anoMeta = ANOS_PPP.includes(hoje().slice(0, 4)) ? hoje().slice(0, 4) : '2027', metasDocs = [];
+  const A = (a, md) => `${a}-${md}`;
+  const ac = (meta, titulo, de, ate, extra) => Object.assign({ meta, titulo, de, ate, grupo: 'Meta do PPP', quem: ['coordenacao'], cobra: ['direcao'], etapas: ['ei'] }, extra || {});
+  const METAS = [
+    { id: 'familias', e: '👨‍👩‍👧', t: 'Famílias presentes', ind: 'Pelo menos 80% das famílias em reuniões e eventos', pz: 'Todo semestre', resp: 'Gestão e coordenação', alvo: 80, un: '%', pede: 'Presença média das famílias (%)',
+      acoes: a => [ac('familias', 'Reunião de pais da Educação Infantil — 1º semestre (entrega dos relatórios)', A(a, '07-03'), A(a, '07-03'), { quem: ['coordenacao', 'professor', 'familias'] }), ac('familias', 'Reunião de pais da Educação Infantil — 2º semestre (entrega dos relatórios)', A(a, '12-11'), A(a, '12-11'), { quem: ['coordenacao', 'professor', 'familias'] }), ac('familias', 'Dia da Família na Escola', A(a, '05-15'), A(a, '05-15'), { grupo: 'Evento', quem: ['coordenacao', 'professor', 'familias'] })] },
+    { id: 'escuta', e: '🗳️', t: 'Escuta das Famílias', ind: 'Realizada todos os anos', pz: 'Novembro', resp: 'Gestão',
+      acoes: a => [ac('escuta', 'Escuta das Famílias — questionário para construir o PPP', A(a, '11-03'), A(a, '11-20'), { quem: ['coordenacao', 'secretaria', 'familias'] })] },
+    { id: 'formacao', e: '🎓', t: 'Professores em formação', ind: '4 formações por ano, específicas da Educação Infantil', pz: 'Bimestral', resp: 'Coordenação',
+      acoes: a => [['02-05', 'Semana pedagógica: BNCC e planejamento'], ['04-24', 'Brincar e aprender'], ['07-31', 'Registros e documentação pedagógica'], ['10-23', 'Inclusão e saúde emocional do professor']].map(([d, t], i) => ac('formacao', `Formação ${i + 1}/4 da Educação Infantil — ${t}`, A(a, d), A(a, d), { quem: ['coordenacao', 'professor'] })) },
+    { id: 'acompanha', e: '📋', t: 'Toda criança acompanhada', ind: '100% das crianças com relatório semestral e portfólio', pz: 'Semestral', resp: 'Professores e coordenação', auto: 'relatorios',
+      acoes: a => [ac('acompanha', 'Entrega dos relatórios descritivos — 1º semestre', A(a, '06-08'), A(a, '06-26'), { quem: ['professor'], cobra: ['coordenacao', 'secretaria'], controle: true }), ac('acompanha', 'Entrega dos relatórios descritivos — 2º semestre', A(a, '11-23'), A(a, '12-04'), { quem: ['professor'], cobra: ['coordenacao', 'secretaria'], controle: true })] },
+    { id: 'aee', e: '🤝', t: 'AEE para quem precisa', ind: '100% das crianças do AEE com PDI, REA e RDA em dia', pz: 'Anual', resp: 'AEE e coordenação',
+      acoes: a => [ac('aee', 'PDI de todas as crianças do AEE', A(a, '02-16'), A(a, '03-31'), { quem: ['aee'] }), ac('aee', 'RDA do 1º semestre (AEE)', A(a, '06-15'), A(a, '06-30'), { quem: ['aee'] }), ac('aee', 'RDA do 2º semestre (AEE)', A(a, '11-23'), A(a, '12-04'), { quem: ['aee'] })] },
+    { id: 'transicao', e: '🎒', t: 'Transição para o 1º ano', ind: 'Projeto de transição com todas as crianças do Pré II', pz: '2º semestre', resp: 'Coordenação e professores',
+      acoes: a => [ac('transicao', 'Projeto de transição Pré II → 1º ano (visitas e conversa com as famílias)', A(a, '09-14'), A(a, '11-27'), { quem: ['coordenacao', 'professor', 'familias'] })] },
+    { id: 'turmas', e: '🐣', t: 'Três turmas sempre', ind: 'Maternal, Pré I e Pré II oferecidos todos os anos', pz: 'Até 2028', resp: 'Gestão', auto: 'turmas',
+      acoes: a => [ac('turmas', `Campanha de matrícula ${+a + 1} — Maternal, Pré I e Pré II`, A(a, '10-05'), A(a, '12-18'), { quem: ['secretaria', 'direcao'], etapas: [] })] },
+    { id: 'brincar', e: '🧸', t: 'Brincar e ler', ind: 'Brinquedoteca e cantinho de leitura em todas as salas', pz: 'Até 2028', resp: 'Gestão',
+      acoes: a => +a <= 2028 ? [ac('brincar', +a === 2027 ? 'Montagem da brinquedoteca e dos cantinhos de leitura' : 'Conclusão da brinquedoteca e dos cantinhos de leitura', A(a, '02-01'), A(a, '06-30'), { quem: ['direcao', 'coordenacao'] })] : [ac('brincar', 'Manutenção da brinquedoteca e renovação do acervo', A(a, '07-20'), A(a, '07-31'), { quem: ['coordenacao'] })] },
+    { id: 'acessib', e: '♿', t: 'Acessibilidade plena', ind: 'Adequações físicas e de comunicação revistas todo ano', pz: 'Até 2028', resp: 'Gestão',
+      acoes: a => [ac('acessib', 'Revisão anual de acessibilidade (espaços, materiais e comunicação)', A(a, '01-19'), A(a, '01-30'), { quem: ['direcao', 'aee'], etapas: [] })] },
+    { id: 'coberto', e: '☂️', t: 'Espaço coberto', ind: 'Área coberta ou quadra para brincar e para a Educação Física', pz: 'Até 2030', resp: 'Gestão e mantenedora',
+      acoes: a => ({ 2027: ['Projeto e orçamento do espaço coberto', '08-03', '09-30'], 2028: ['Captação de recursos e aprovação do espaço coberto', '03-02', '06-30'], 2029: ['Obra do espaço coberto', '07-01', '12-18'], 2030: ['Inauguração do espaço coberto', '03-02', '03-31'] }[a] ? [(x => ac('coberto', x[0], A(a, x[1]), A(a, x[2]), { quem: ['direcao'], cobra: ['direcao'], etapas: [] }))({ 2027: ['Projeto e orçamento do espaço coberto', '08-03', '09-30'], 2028: ['Captação de recursos e aprovação do espaço coberto', '03-02', '06-30'], 2029: ['Obra do espaço coberto', '07-01', '12-18'], 2030: ['Inauguração do espaço coberto', '03-02', '03-31'] }[a])] : []) },
+    { id: 'paz', e: '🕊️', t: 'Cultura de paz', ind: 'Projeto anual de convivência e combate ao bullying', pz: 'Anual', resp: 'Coordenação',
+      acoes: a => [ac('paz', 'Projeto de convivência e cultura de paz', A(a, '04-06'), A(a, '04-30'), { quem: ['coordenacao', 'professor'] })] },
+    { id: 'ciclo', e: '🔄', t: 'PPP vivo e novo ciclo', ind: 'Revisão anual do PPP e, em 2031, avaliação final e novo PPP', pz: 'Novembro', resp: 'Toda a comunidade',
+      acoes: a => [ac('ciclo', 'Apresentação do PPP às famílias (início do ano)', A(a, '02-20'), A(a, '02-20'), { quem: ['coordenacao', 'familias'] }), ac('ciclo', a === '2031' ? 'Avaliação final do PPP 2027–2031 e aprovação do novo PPP' : `Revisão anual do PPP ${a} (com o Conselho de Classe)`, A(a, '11-23'), A(a, '12-04'), { quem: ['direcao', 'coordenacao', 'professor'] })] }
+  ];
+  const acoesDe = (m, a) => crono.filter(it => it.meta === m.id && it.ano === a);
+  const docMeta = (m, a) => metasDocs.find(x => x.id === m.id + '|' + a) || {};
+  function autoMeta(m, a) {
+    if (m.auto === 'relatorios') { const ei = alunos.filter(x => ['Maternal', 'Pré I', 'Pré II'].includes(x.turma) && (x.situacao || 'Ativo') === 'Ativo'); if (!ei.length) return null;
+      const com = ei.filter(x => { const r = ((((boletins.find(b => b.id === x.id) || {}).anos || {})[a]) || {}).relatorios || {}; return Object.values(r).some(s => Object.values(s).some(t => (t || '').trim())); }).length;
+      return { v: Math.round(com * 100 / ei.length), txt: `${com} de ${ei.length} crianças com relatório no diário` }; }
+    if (m.auto === 'turmas') { const ts = ['Maternal', 'Pré I', 'Pré II'].filter(t => alunos.some(x => x.turma === t && (x.situacao || 'Ativo') === 'Ativo')); return alunos.length ? { v: Math.round(ts.length * 100 / 3), txt: `Turmas com alunos: ${ts.join(', ') || 'nenhuma'}` } : null; }
+    return null;
+  }
+  function andamento(m, a) {
+    const l = acoesDe(m, a), d = docMeta(m, a); if (d.status === 'feito') return { p: 100, cl: 'ok', t: '✅ meta cumprida' }; if (d.status === 'nao') return { p: 0, cl: 'atrasado', t: '🔴 não cumprida' };
+    if (!l.length) return { p: 0, cl: 'futuro', t: m.acoes(a).length ? '⚪ ações ainda não estão no cronograma' : '— sem ação neste ano' };
+    const ok = l.filter(it => estado(it)[0] === 'ok').length, atr = l.filter(it => ['atrasado', 'encerrado'].includes(estado(it)[0])).length;
+    const p = Math.round(ok * 100 / l.length); return { p, cl: p === 100 ? 'ok' : atr ? 'atrasado' : ok ? 'aberto' : 'futuro', t: p === 100 ? '✅ ações concluídas' : atr ? `🔴 ${atr} ação(ões) com prazo vencido` : ok ? `🟢 ${ok} de ${l.length} ações concluídas` : `⏳ ${l.length} ação(ões) programadas` };
+  }
+  function telaMetas() {
+    const a = anoMeta, ger = gestor(), todas = METAS.map(m => andamento(m, a)), media = Math.round(todas.reduce((s, x) => s + x.p, 0) / METAS.length), faltam = METAS.filter(m => m.acoes(a).length && !acoesDe(m, a).length).length;
+    const anos = ANOS_PPP.map(x => { const ps = METAS.map(m => andamento(m, x).p); return [x, Math.round(ps.reduce((s, v) => s + v, 0) / ps.length)]; });
+    return `<section class="es-sec"><h2>🎯 Metas do PPP 2027–2031 <small>Educação Infantil</small></h2>
+      <p class="es-dica">Cada meta do PPP tem ações com data no cronograma: elas aparecem no painel <b>📌 Hoje</b> de quem faz e de quem cobra. Aqui você acompanha o andamento ano a ano.</p>
+      <div class="es-sub">${anos.map(([x, p]) => `<button data-anometa="${x}" class="${x === a ? 'on' : ''}">${x} · ${p}%</button>`).join('')}</div>
+      <div class="es-num"><div style="--c:#2e7d32"><b>${media}%</b><span>andamento de ${a}</span></div><div style="--c:#1e4fb8"><b>${METAS.filter((m, i) => todas[i].p === 100).length}/12</b><span>metas cumpridas em ${a}</span></div><div style="--c:#ef6c00"><b>${faltam}</b><span>metas sem ações no cronograma</span></div></div>
+      <div class="es-acoes">${ger && faltam ? `<button class="b main" id="es-metacrono">📌 Colocar as ações de ${a} no cronograma</button>` : ''}<button class="b" id="es-metapdf">📄 Relatório das metas (PDF)</button><button class="b" id="es-metaword">⬇ Word</button><a class="b" href="ppp.html#metas" target="_blank">📖 Ver no PPP</a></div>
+      <div class="es-grid">${METAS.map((m, i) => { const st = todas[i], l = acoesDe(m, a).sort((x, y) => x.de.localeCompare(y.de)), d = docMeta(m, a), au = autoMeta(m, a);
+        return `<article class="es-card" style="--c:${st.cl === 'ok' ? '#2e7d32' : st.cl === 'atrasado' ? '#c62828' : '#b8860b'}"><div class="es-linha"><span class="chip ${st.cl}">${st.t}</span><span class="chip">⏳ ${m.pz}</span></div>
+          <h3>${m.e} ${i + 1}. ${m.t}</h3><p>${m.ind}</p><p style="color:var(--tx2);font-size:13px">👤 ${m.resp}</p>
+          <div class="es-barra"><i style="width:${st.p}%"></i></div>
+          ${au ? `<p>📊 <b>${au.v}%</b> — ${esc(au.txt)}</p>` : ''}${m.alvo ? `<p>📊 ${d.valor !== undefined && d.valor !== '' ? `<b>${esc(d.valor)}${m.un}</b> (meta: ${m.alvo}${m.un})` : 'Sem valor lançado'}</p>` : ''}
+          ${l.length ? `<ul class="es-pend">${l.map(it => { const [cl, tx] = estado(it); return `<li><b style="font-size:13.5px">${esc(it.titulo)}<br><small style="font-weight:600;color:var(--tx2)">${periodo(it)}</small></b><span class="chip ${cl}">${tx}</span>${ger && !it.controle ? `<button class="b" data-feito="${it.id}" style="padding:4px 8px">${it.feito ? '↩' : '✔'}</button>` : ''}</li>`; }).join('')}</ul>` : ''}
+          ${ger ? `<div class="es-linha"><button class="b" data-metaed="${m.id}">✏️ Registrar resultado</button></div>` : ''}${d.nota ? `<p style="font-size:13px">📝 ${esc(d.nota)}</p>` : ''}</article>`; }).join('')}</div></section>`;
+  }
+  function telaMetaEd(id) {
+    const m = METAS.find(x => x.id === id), d = docMeta(m, anoMeta);
+    $('#es').innerHTML = `<form class="es-form" id="es-fmeta"><h3>${m.e} ${esc(m.t)} — ${anoMeta}</h3><p class="es-dica">${esc(m.ind)}</p>
+      ${m.alvo ? `<label>${esc(m.pede)}<input name="valor" inputmode="numeric" value="${esc(d.valor ?? '')}"></label>` : ''}
+      <label>Situação da meta em ${anoMeta}<select name="status"><option value="">Automática (pelas ações do cronograma)</option><option value="feito" ${d.status === 'feito' ? 'selected' : ''}>✅ Cumprida</option><option value="nao" ${d.status === 'nao' ? 'selected' : ''}>🔴 Não cumprida</option></select></label>
+      <label>O que foi feito / observações<textarea name="nota">${esc(d.nota || '')}</textarea></label>
+      <div class="es-acoes"><button class="b main">💾 Salvar</button><button type="button" class="b" data-ir="metas">Cancelar</button></div></form>`;
+    $('#es-fmeta').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target); await D.salvar('metas', { id: m.id + '|' + anoMeta, meta: m.id, ano: anoMeta, valor: (f.get('valor') || '').trim(), status: f.get('status'), nota: f.get('nota').trim() }); aba = 'metas'; desenhar(); };
+  }
+  async function metasNoCrono() {
+    let n = 0; for (const m of METAS) { if (acoesDe(m, anoMeta).length) continue; for (const x of m.acoes(anoMeta)) { await D.salvar('cronograma', Object.assign(x, { ano: anoMeta, de: utilDepois(x.de), ate: util(x.ate) < utilDepois(x.de) ? utilDepois(x.de) : util(x.ate), obs: `Meta ${METAS.indexOf(m) + 1} do PPP: ${m.t} — ${m.ind}.` })); n++; } }
+    alert(`${n} ação(ões) das metas colocadas no cronograma de ${anoMeta}. Elas já aparecem no painel Hoje de quem faz e de quem acompanha.`); desenhar();
+  }
+  async function relatorioMetas(tipo) {
+    const a = anoMeta, F = await window.seiFolha.compor({ estilo: 'folha', titulo: 'Metas do PPP', curto: `Acompanhamento das metas do PPP — ${a}`, placa: { grande: a, linhas: ['METAS', 'DO PPP'] },
+      campos: [['Documento', 'Acompanhamento das metas'], ['PPP', 'Educação Infantil 2027–2031'], ['Ano', a], ['Emitido por', 'Coordenação']], selo: ['COD. INEP', '15590798'], rodape: ['Coordenação Pedagógica', 'Sistema de Ensino Incentivo'], num: 'SEI' });
+    let h = `<img class="folha-cab" src="${F.cab}" alt=""><p style="font-size:10pt;color:#24324f;margin:0 0 6px">Situação das 12 metas do PPP da Educação Infantil em ${a}, com as ações do cronograma e os resultados registrados. Documento para a revisão anual do PPP.</p>`;
+    h += '<table width="100%" style="border-collapse:collapse;table-layout:fixed;width:100%">' + METAS.map((m, i) => { const st = andamento(m, a), d = docMeta(m, a), au = autoMeta(m, a), l = acoesDe(m, a), c = st.cl === 'ok' ? '#2e7d32' : st.cl === 'atrasado' ? '#c62828' : '#b8860b', fl = i % 2 ? '#FFFFFF' : '#F3F6FC';
+      return `<tr><td width="5%" style="background:${c}" align="center"><p style="font-size:10pt;color:#ffffff;margin:0">${i + 1}</p></td><td width="58%" data-fill="${fl}" style="background:${fl};padding:4px 8px"><p style="font-size:9.5pt;color:#0b2a6b;font-weight:bold;margin:0">${m.e} ${esc(m.t)}</p><p style="font-size:8.5pt;color:#24324f;margin:0">${esc(m.ind)}${l.length ? ' · Ações: ' + l.map(it => esc(it.titulo) + (estado(it)[0] === 'ok' ? ' ✔' : '')).join('; ') : ''}${au ? ` · Indicador: ${au.v}% (${esc(au.txt)})` : ''}${d.valor ? ` · Resultado: ${esc(d.valor)}${m.un || ''}` : ''}${d.nota ? ` · ${esc(d.nota)}` : ''}</p></td><td width="37%" data-fill="${fl}" style="background:${fl};padding:4px 8px"><p style="font-size:9pt;color:${c};font-weight:bold;margin:0">${st.t.replace(/^\S+ /, '')}</p><p style="font-size:8pt;color:#55627e;margin:0">Prazo: ${esc(m.pz)} · ${esc(m.resp)}</p></td></tr>`; }).join('') + '</table>';
+    if (tipo === 'pdf') await window.seiBaixar.pdf(h, `Metas do PPP ${a}`, F); else await window.seiBaixar.word(h, `Metas do PPP ${a}`, '', F);
+  }
+
   async function desenhar() {
     emEntregas = null; await carregar(); montaVerComo(); $$('#abas button').forEach(b => b.classList.toggle('on', b.dataset.aba === aba));
     const nv = D.nuvem && D.nuvem.usuario, dir = nv && nv.perfil === 'direcao'; $('[data-aba=acessos]').hidden = !dir; if (aba === 'acessos' && !dir) aba = 'hoje';
     if (nv) $('#es-onde').innerHTML = `☁️ Conectado como <b>${esc(nv.nome)}</b> (${esc(nv.email)}). Tudo o que você salva aparece nos outros aparelhos da escola. <button class="b" id="es-sair">Sair</button>`;
     if (aba === 'acessos') return telaAcessos();
+    if (aba === 'metas') { $('#es').innerHTML = telaMetas(); return; }
     $('#es').innerHTML = aba === 'hoje' ? telaHoje() : aba === 'crono' ? telaCrono() : aba === 'diario' ? telaDiario() : telaCad();
     if (aba === 'diario') { const on = (sel, f) => { const el = $(sel); if (el) el.onchange = f; };
       on('#d-turma', e => { dTurma = e.target.value; desenhar(); }); on('#d-disc', e => { dDisc = e.target.value; desenhar(); }); on('#d-av', e => { dAv = e.target.value; desenhar(); }); on('#d-data', e => { dData = e.target.value; desenhar(); }); on('#d-sem', e => { dAv = e.target.value; desenhar(); });
@@ -375,6 +460,11 @@
     if (b.id === 'es-libpais') return liberarPais();
     if (d.usat) { const u = usuarios.find(x => x.email === d.usat); return D.nuvem.salvarUsuario({ email: u.email, ativo: u.ativo === false }); }
     if (b.id === 'es-gerar') return telaGerar();
+    if (d.anometa) { anoMeta = d.anometa; return desenhar(); }
+    if (b.id === 'es-metacrono') return metasNoCrono();
+    if (b.id === 'es-metapdf') return relatorioMetas('pdf');
+    if (b.id === 'es-metaword') return relatorioMetas('word');
+    if (d.metaed) return telaMetaEd(d.metaed);
     if (b.id === 'es-nova') return telaItem();
     if (b.id === 'es-pdf') return exportar('pdf');
     if (b.id === 'es-word') return exportar('word');
@@ -402,6 +492,6 @@
   D.ouvir(() => { if (!document.querySelector('#es form') && !emEntregas && aba !== 'diario') desenhar(); });
   document.addEventListener('sei-nuvem', () => desenhar());
   document.addEventListener('click', e => { if (e.target.id === 'es-sair' && D.nuvem) D.nuvem.sair(); });
-  const h = location.hash.slice(1); if (['hoje', 'crono', 'diario', 'cad', 'acessos'].includes(h)) aba = h;
+  const h = location.hash.slice(1); if (['hoje', 'crono', 'diario', 'metas', 'cad', 'acessos'].includes(h)) aba = h;
   desenhar();
 })();
