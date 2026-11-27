@@ -212,13 +212,13 @@
   /* ---------- CADASTRO ---------- */
   function telaCad() {
     const q = busca.trim().toLowerCase(); let x = `<section class="es-sec"><div class="es-sub"><button data-sub="alunos" class="${sub === 'alunos' ? 'on' : ''}">🎒 Alunos (${alunos.length})</button><button data-sub="func" class="${sub === 'func' ? 'on' : ''}">👩‍🏫 Funcionários (${pessoas.length})</button></div>
-      <div class="es-acoes"><input class="es-busca" id="es-busca" type="search" placeholder="🔎 Procurar pelo nome" value="${esc(busca)}">${!gestor() ? '' : sub === 'alunos' ? '<button class="b main" id="es-novoal">➕ Novo aluno</button><button class="b" id="es-colar">📋 Colar lista de nomes</button>' : '<button class="b main" id="es-novofu">➕ Novo funcionário</button><button class="b" id="es-trazer">↧ Trazer professores do Horário</button>'}</div>`;
+      <div class="es-acoes"><input class="es-busca" id="es-busca" type="search" placeholder="🔎 Procurar pelo nome" value="${esc(busca)}">${!gestor() ? '' : sub === 'alunos' ? '<button class="b main" id="es-novoal">➕ Novo aluno</button><button class="b" id="es-colar">📋 Colar lista de nomes</button><button class="b" id="es-virada">🎓 Virada do ano</button>' : '<button class="b main" id="es-novofu">➕ Novo funcionário</button><button class="b" id="es-trazer">↧ Trazer professores do Horário</button>'}</div>`;
     if (sub === 'alunos') {
       const l = alunos.filter(a => !q || a.nome.toLowerCase().includes(q));
       if (!alunos.length) x += '<div class="es-vazio"><b>Nenhum aluno cadastrado.</b>Cadastre um por um ou use <b>📋 Colar lista de nomes</b> para lançar a turma inteira de uma vez.</div>';
       for (const t of TURMAS.concat([''])) { const lt = l.filter(a => (a.turma || '') === t); if (!lt.length) continue;
         x += `<div class="es-turma">${t ? esc(t) : 'Sem turma'} <span>${lt.length} aluno${lt.length > 1 ? 's' : ''}</span></div><div class="es-grid">` + lt.map(a => { const r = a.responsaveis || [];
-          return `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(a.nome)}</h3><div class="es-linha">${a.aee ? '<span class="chip">🤝 AEE</span>' : ''}${a.situacao && a.situacao !== 'Ativo' ? `<span class="chip atrasado">${esc(a.situacao)}</span>` : ''}${r.some(x => x.acesso && x.email) ? '<span class="chip ok">👨‍👩‍👧 acesso dos pais</span>' : ''}</div>${r.filter(x => x.nome).map(x => `<p>👤 ${esc(x.nome)}${x.parentesco ? ` (${esc(x.parentesco)})` : ''}${x.whatsapp ? ` · 📱 ${esc(x.whatsapp)}` : ''}</p>`).join('')}${gestor() ? `<div class="es-linha"><button class="b" data-edal="${a.id}">✏️ Editar</button></div>` : ''}</article>`; }).join('') + '</div>'; }
+          return `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(a.nome)}</h3><div class="es-linha">${a.aee ? '<span class="chip">🤝 AEE</span>' : ''}${a.situacao && a.situacao !== 'Ativo' ? `<span class="chip ${a.situacao === 'Retido' ? 'breve' : 'atrasado'}">${esc(a.situacao)}</span>` : ''}${a.saida ? `<a class="chip ok" href="secretaria.html" style="text-decoration:none">📄 documentos de saída prontos</a>` : ''}${r.some(x => x.acesso && x.email) ? '<span class="chip ok">👨‍👩‍👧 acesso dos pais</span>' : ''}</div>${r.filter(x => x.nome).map(x => `<p>👤 ${esc(x.nome)}${x.parentesco ? ` (${esc(x.parentesco)})` : ''}${x.whatsapp ? ` · 📱 ${esc(x.whatsapp)}` : ''}</p>`).join('')}${gestor() ? `<div class="es-linha"><button class="b" data-edal="${a.id}">✏️ Editar</button>${a.saida ? `<button class="b" data-docsaida="${a.id}">↻ Refazer documentos</button>` : ''}</div>` : ''}</article>`; }).join('') + '</div>'; }
     } else {
       const l = pessoas.filter(p => !q || p.nome.toLowerCase().includes(q));
       if (!pessoas.length) x += '<div class="es-vazio"><b>Nenhum funcionário cadastrado.</b>Cadastre a equipe com a função e o WhatsApp: é com ele que a secretaria cobra os prazos em um toque. Se os professores já estão no Horário de aula, use <b>↧ Trazer professores do Horário</b>.</div>';
@@ -227,19 +227,74 @@
     }
     return x + '</section>';
   }
+  /* ---------- VIRADA DO ANO e DOCUMENTOS DE SAÍDA ---------- */
+  const PROX = { 'Maternal': 'Pré I', 'Pré I': 'Pré II', 'Pré II': '1º ano', '1º ano': '2º ano', '2º ano': '3º ano', '3º ano': '4º ano', '4º ano': '5º ano', '5º ano': '6º ano', '6º ano': '7º ano', '7º ano': '8º ano', '8º ano': '9º ano', '9º ano': '1ª série (Médio)', '1ª série (Médio)': '2ª série (Médio)', '2ª série (Médio)': '3ª série (Convênio)', '3ª série (Convênio)': null, 'Pré-vestibular': null };
+  const SAIU = ['Transferido', 'Desistente'];
+  const anoDoAluno = a => a.anoLetivo || String(+hoje().slice(0, 4) - (new Date().getMonth() >= 9 ? 0 : 1));
+  // quem passa: todos os ativos, menos os retidos; quem saiu ou concluiu não muda
+  function planoVirada(novo) {
+    const l = alunos.filter(a => (a.situacao || 'Ativo') !== 'Concluiu' && !SAIU.includes(a.situacao) && a.turma && +anoDoAluno(a) < +novo);
+    return l.map(a => { const retido = a.situacao === 'Retido'; const p = retido ? a.turma : PROX[a.turma]; return { a, de: a.turma, para: p, retido, conclui: !retido && p === null }; });
+  }
+  function telaVirada() {
+    const novo = String(+hoje().slice(0, 4) + (new Date().getMonth() >= 9 ? 1 : 0)), pl = planoVirada(novo);
+    const grupos = {}; pl.forEach(x => { (grupos[x.de] = grupos[x.de] || []).push(x); });
+    $('#es').innerHTML = `<section class="es-sec"><h2>🎓 Virada do ano letivo → ${novo}</h2>
+      <p class="es-dica">Todos os alunos ativos passam para a série seguinte. <b>Só não passa</b> quem estiver marcado como <b>Retido</b> (repete a série) ou que <b>saiu da escola</b> (Transferido ou Desistente). Quem termina a última série fica como <b>Concluiu</b>. Confira antes de confirmar.</p>
+      ${pl.length ? `<div class="es-grid">${TURMAS.filter(t => grupos[t]).map(t => `<article class="es-card" style="--c:#1e4fb8"><h3>${esc(t)} → ${esc(PROX[t] || 'Concluiu')}</h3><p>${grupos[t].length} aluno(s)</p><ul class="es-pend">${grupos[t].map(x => `<li><b style="font-size:13.5px">${esc(x.a.nome)}</b><span class="chip ${x.retido ? 'atrasado' : x.conclui ? 'ok' : 'aberto'}">${x.retido ? '↺ retido: ' + esc(x.de) : x.conclui ? '🎓 concluiu' : '→ ' + esc(x.para)}</span></li>`).join('')}</ul></article>`).join('')}</div>
+      <div class="es-acoes" style="margin-top:12px"><button class="b main" id="es-virar" data-novo="${novo}">✅ Confirmar a passagem para ${novo}</button><button class="b" data-ir="cad">Cancelar</button></div>`
+      : `<div class="es-vazio"><b>Nada para passar.</b>Todos os alunos já estão no ano letivo de ${novo}, ou ainda não há alunos cadastrados.</div><div class="es-acoes"><button class="b" data-ir="cad">‹ Voltar</button></div>`}</section>`;
+  }
+  async function virar(novo) {
+    const pl = planoVirada(novo); if (!pl.length) return;
+    for (const x of pl) { const a = x.a, velho = anoDoAluno(a);
+      a.historico = (a.historico || []).concat([{ ano: velho, turma: x.de, resultado: x.retido ? 'Retido' : 'Aprovado' }]);
+      if (x.conclui) { a.situacao = 'Concluiu'; } else { a.turma = x.para; a.etapa = etapaDe(a.turma); a.situacao = 'Ativo'; }
+      a.anoLetivo = novo; await D.salvar('alunos', a); }
+    alert(`Pronto! ${pl.filter(x => !x.retido && !x.conclui).length} aluno(s) passaram de série, ${pl.filter(x => x.retido).length} ficaram retidos e ${pl.filter(x => x.conclui).length} concluíram. Ano letivo: ${novo}.`);
+    aba = 'cad'; sub = 'alunos'; desenhar();
+  }
+  // documentos que ficam prontos quando o aluno sai da escola (vão para a Secretaria)
+  const SEG_DE = t => ({ ei: 'ei', f1: 'ai', f2: 'ef', em: 'em', cv: 'em', pv: 'pv' }[etapaDe(t)] || 'ef');
+  const COL_HIST = { '1º ano': '1º', '2º ano': '2º', '3º ano': '3º', '4º ano': '4º', '5º ano': '5º', '6º ano': '6º', '7º ano': '7º', '8º ano': '8º', '9º ano': '9º', '1ª série (Médio)': '1ª EM', '2ª série (Médio)': '2ª EM', '3ª série (Convênio)': '3ª EM' };
+  const DISC_HIST = { 'língua portuguesa': 'Língua Portuguesa', 'português': 'Língua Portuguesa', 'arte': 'Ensino das Artes', 'artes': 'Ensino das Artes', 'matemática': 'Matemática', 'ciências': 'Ciências', 'história': 'História', 'geografia': 'Geografia', 'educação física': 'Educação Física', 'química': 'Química', 'biologia': 'Biologia', 'física': 'Física', 'sociologia': 'Sociologia', 'filosofia': 'Filosofia', 'inglês': 'Inglês', 'espanhol': 'Espanhol', 'estudos amazônicos': 'Estudos Amazônicos', 'literatura': 'Literatura', 'redação': 'Redação', 'ensino religioso': 'Ensino Religioso', 'empreendedorismo': 'Empreendedorismo', 'informática': 'Informática' };
+  function historicoDe(a) {
+    const anos = (((boletins.find(b => b.id === a.id) || {}).anos) || {}), hist = {}, est = {};
+    for (const [ano, b] of Object.entries(anos)) { const col = COL_HIST[b.turma]; if (!col) continue; est[col] = { ano, esc: 'Sistema de Ensino Incentivo', cid: 'São Miguel do Guamá/PA' };
+      for (const [disc, av] of Object.entries(b.notas || {})) { const k = DISC_HIST[disc.toLowerCase()]; if (!k) continue; const v = ['1ª Avaliação', '2ª Avaliação', '3ª Avaliação', '4ª Avaliação'].map(x => av[x]).filter(x => x !== undefined && x !== '');
+        if (v.length) (hist[k] = hist[k] || {})[col] = (Math.round(v.reduce((s, x) => s + +x, 0) / v.length * 10) / 10).toFixed(1).replace('.', ','); } }
+    (a.historico || []).forEach(h => { const col = COL_HIST[h.turma]; if (col && !est[col]) est[col] = { ano: h.ano, esc: 'Sistema de Ensino Incentivo', cid: 'São Miguel do Guamá/PA' }; });
+    return { hist, est };
+  }
+  const gravaDoc = o => new Promise(ok => { try { const r = indexedDB.open('sei-docs', 1); r.onupgradeneeded = () => r.result.createObjectStore('docs', { keyPath: 'id' }); r.onsuccess = () => { const t = r.result.transaction('docs', 'readwrite'); t.objectStore('docs').put(o); t.oncomplete = () => ok(true); t.onerror = () => ok(false); }; r.onerror = () => ok(false); } catch (e) { ok(false); } });
+  async function docsDeSaida(a) {
+    const data = hoje(), ano = anoDoAluno(a), seg = SEG_DE(a.turma), base = { setor: 'secretaria', seg, criado: Date.now(), atualizado: Date.now(), cargo: 'Secretária Escolar', data, alunoRef: a.id };
+    const aprovado = (a.historico || []).some(h => h.ano === ano && h.resultado === 'Aprovado');
+    const serie = t => ({ 'Maternal': 'Maternal', 'Pré I': 'Pré I', 'Pré II': 'Pré II' }[t] || t);
+    const texto = `Declaramos, para os devidos fins, que o(a) aluno(a) *${a.nome.toUpperCase()}*${a.nasc ? ', nascido(a) em ' + fmt(a.nasc) + '/' + a.nasc.slice(0, 4) : ''}, esteve regularmente matriculado(a) neste Sistema de Ensino, cursando o(a) *${serie(a.turma)}* no ano letivo de ${ano}, e solicitou transferência nesta data.\n\nO histórico escolar será expedido no prazo de até 30 (trinta) dias.`;
+    const { hist, est } = historicoDe(a), id = k => 'saida-' + a.id + '-' + k;
+    const l = [
+      Object.assign({ id: id('dec'), tipo: 'declaracao', modelo: 'transferencia', alunoM: a.nome, nasc: a.nasc || '', turma: a.turma, anoM: ano, texto }, base),
+      Object.assign({ id: id('res'), tipo: 'ressalva', aluno: a.nome, nasc: a.nasc || '', turma: aprovado ? (PROX[a.turma] || a.turma) : a.turma, sit: aprovado ? 'Aprovado(a)' : 'Cursando', prazo: '30' }, base),
+      Object.assign({ id: id('hist'), tipo: 'historico', aluno: a.nome, nasc: a.nasc || '', estado: 'Pará', hist, est, obs: `Aluno(a) transferido(a) em ${fmt(data)}/${data.slice(0, 4)}, cursando o(a) ${serie(a.turma)}.` }, base)];
+    let ok = 0; for (const d of l) if (await gravaDoc(d)) ok++;
+    return ok;
+  }
+
   function telaAluno(a) {
     a = a || { nome: '', turma: '', situacao: 'Ativo', responsaveis: [{}, {}] }; const r = (a.responsaveis || []).concat([{}, {}]).slice(0, 2);
     $('#es').innerHTML = `<form class="es-form" id="es-fa"><h3>${a.id ? '✏️ Editar aluno' : '➕ Novo aluno'}</h3>
       <label>Nome completo<input name="nome" required value="${esc(a.nome)}"></label>
-      <div class="es-g3"><label>Turma<select name="turma"><option value="">—</option>${TURMAS.map(t => `<option ${t === a.turma ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label>Nascimento<input type="date" name="nasc" value="${a.nasc || ''}"></label><label>Situação<select name="situacao">${['Ativo', 'Transferido', 'Desistente', 'Concluiu'].map(s => `<option ${s === a.situacao ? 'selected' : ''}>${s}</option>`).join('')}</select></label></div>
+      <div class="es-g3"><label>Turma<select name="turma"><option value="">—</option>${TURMAS.map(t => `<option ${t === a.turma ? 'selected' : ''}>${t}</option>`).join('')}</select></label><label>Nascimento<input type="date" name="nasc" value="${a.nasc || ''}"></label><label>Situação<select name="situacao">${[['Ativo', 'Ativo'], ['Retido', 'Retido (repete a série)'], ['Transferido', 'Transferido (saiu)'], ['Desistente', 'Desistente (saiu)'], ['Concluiu', 'Concluiu']].map(([v, t]) => `<option value="${v}" ${v === (a.situacao || 'Ativo') ? 'selected' : ''}>${t}</option>`).join('')}</select></label></div>
       <label class="es-marcas" style="flex-direction:row"><input type="checkbox" name="aee" ${a.aee ? 'checked' : ''} style="width:auto"> Atendido(a) pelo AEE</label>
       ${r.map((x, i) => `<div class="es-resp"><b>👤 Responsável ${i + 1}</b><div class="es-g2"><label>Nome<input name="rn${i}" value="${esc(x.nome || '')}"></label><label>Parentesco<input name="rp${i}" value="${esc(x.parentesco || '')}" placeholder="Mãe, pai, avó…"></label><label>WhatsApp<input name="rw${i}" inputmode="tel" value="${esc(x.whatsapp || '')}" placeholder="(91) 9 0000-0000"></label><label>E-mail (para o acesso dos pais)<input name="re${i}" type="email" value="${esc(x.email || '')}"></label></div><label class="es-marcas" style="flex-direction:row"><input type="checkbox" name="ra${i}" ${x.acesso ? 'checked' : ''} style="width:auto"> Acesso à área dos pais liberado</label></div>`).join('')}
       <label>Observações<textarea name="obs">${esc(a.obs || '')}</textarea></label>
       <div class="es-acoes"><button class="b main">💾 Salvar</button><button type="button" class="b" data-ir="cad">Cancelar</button>${a.id ? `<button type="button" class="b" data-delal="${a.id}">🗑️ Apagar</button>` : ''}</div></form>`;
-    $('#es-fa').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target);
+    $('#es-fa').onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target); const antes = a.situacao || 'Ativo';
       Object.assign(a, { nome: f.get('nome').trim(), turma: f.get('turma'), nasc: f.get('nasc'), situacao: f.get('situacao'), aee: !!f.get('aee'), obs: f.get('obs').trim(),
         responsaveis: [0, 1].map(i => ({ nome: f.get('rn' + i).trim(), parentesco: f.get('rp' + i).trim(), whatsapp: f.get('rw' + i).trim(), email: f.get('re' + i).trim().toLowerCase(), acesso: !!f.get('ra' + i) })).filter(x => x.nome || x.email || x.whatsapp) });
-      a.etapa = etapaDe(a.turma); await D.salvar('alunos', a); aba = 'cad'; sub = 'alunos'; await desenhar(); };
+      a.etapa = etapaDe(a.turma); const saiu = SAIU.includes(a.situacao) && !SAIU.includes(antes); if (saiu) a.saida = { data: hoje(), turma: a.turma, ano: anoDoAluno(a), situacao: a.situacao }; if (!SAIU.includes(a.situacao)) delete a.saida;
+      await D.salvar('alunos', a); if (saiu) { await carregar(); const n = await docsDeSaida(a); alert(`${a.nome} saiu da escola. ${n} documento(s) já estão prontos na Secretaria: Declaração de transferência, Ressalva e Histórico escolar (com as notas do diário). É só conferir e imprimir.`); } aba = 'cad'; sub = 'alunos'; await desenhar(); };
   }
   function telaColar() {
     $('#es').innerHTML = `<form class="es-form" id="es-fc"><h3>📋 Colar lista de nomes</h3><p class="es-dica">Um nome por linha. Nomes que já estão cadastrados na mesma turma são ignorados.</p>
@@ -478,6 +533,9 @@
     if (d.sub) { sub = d.sub; busca = ''; return desenhar(); }
     if (d.dmodo) { dModo = d.dmodo; return desenhar(); }
     if (b.id === 'es-novoal') return telaAluno();
+    if (b.id === 'es-virada') return telaVirada();
+    if (b.id === 'es-virar') { if (confirm('Confirmar a passagem de série de todos os alunos listados?')) await virar(d.novo); return; }
+    if (d.docsaida) { const al = alunos.find(x => x.id === d.docsaida); const n = await docsDeSaida(al); alert(n + ' documento(s) prontos na Secretaria.'); return; }
     if (b.id === 'es-colar') return telaColar();
     if (b.id === 'es-novofu') return telaFunc();
     if (b.id === 'es-trazer') return trazerHorario();

@@ -654,7 +654,7 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .tiles-doc .tile-doc:nth-child(24n+22){--pi:linear-gradient(165deg,#c0bbfb,#857af4);--fx:#1e148e;--rt:1.5deg}
 .tiles-doc .tile-doc:nth-child(24n+23){--pi:linear-gradient(165deg,#fbbbc5,#f47a8f);--fx:#8e1428;--rt:-1.1deg}
 .tiles-doc .tile-doc:nth-child(24n+24){--pi:linear-gradient(165deg,#d5fbbb,#adf47a);--fx:#478e14;--rt:0.8deg}
-main#docs{background:linear-gradient(180deg,#1f5be0 0,#123fae 55%,#0b2a8a 100%);color:#fff}
+main#docs{background:linear-gradient(180deg,#1f5be0 0,#123fae 55%,#0b2a8a 100%)}
 main#docs>.dica,main#docs>p,main#docs .trilha b,main#docs .trilha>span{color:#e8f1ff}
 main#docs .trilha .b{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(160,220,255,.45)}
 main#docs .tiles-doc .tile-doc{box-shadow:0 10px 18px rgba(2,10,45,.45)}

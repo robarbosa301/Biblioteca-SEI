@@ -228,8 +228,8 @@
         <div class="m-servico">${lab('Atividades (opcional)', inp('ativ', d.ativ, 'Ex.: no planejamento e execução de atividades pedagógicas no AEE'), 1)}</div>
         <div class="g2 m-liberacao">${lab('Ao gestor(a) da escola', inp('gestor', d.gestor, 'Nome do gestor(a)'))}${lab('Escola / órgão (opcional)', inp('escola', d.escola))}</div>
         <div class="g3 m-liberacao">${lab('Motivo / evento', inp('motivo', d.motivo, 'Ex.: XVI Jogos Internos do SEI'))}${lab('Dia(s)', inp('quando', d.quando, 'Ex.: 01, 02 e 03 de outubro de 2025'))}${lab('Turno(s)', inp('turno', d.turno, 'Ex.: tarde e noite'))}</div>
-        <div class="g3 m-matricula">${lab('Aluno(a)', inp('alunoM', d.alunoM))}${lab('Nascimento', inp('nasc', d.nasc, '', 'date'))}${lab('Turno', inp('turnoM', d.turnoM, 'Manhã'))}</div>
-        <div class="g3 m-pagamento m-matricula">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}<span class="m-matricula">${lab('Ano letivo', inp('anoM', d.anoM || String(new Date().getFullYear())))}</span></div>
+        <div class="g3 m-matricula m-transferencia">${lab('Aluno(a)', inp('alunoM', d.alunoM))}${lab('Nascimento', inp('nasc', d.nasc, '', 'date'))}${lab('Turno', inp('turnoM', d.turnoM, 'Manhã'))}</div>
+        <div class="g3 m-pagamento m-matricula m-transferencia">${lab('Série / ano', sel('turma', d.turma, turmasAtuais()))}<span class="m-matricula m-transferencia">${lab('Ano letivo', inp('anoM', d.anoM || String(new Date().getFullYear())))}</span></div>
         ${lab('Texto da declaração <small>(montado sozinho a partir dos campos; pode ajustar e formatar com a barra)</small>', txt('texto', d.texto, '', 7), 1)}<button type="button" class="b ghost" id="refazTx">↻ Montar o texto de novo a partir dos campos</button>
         <div class="g3">${lab('Data', inp('data', d.data, '', 'date'))}${lab('Quem assina', inp('assinante', d.assinante))}${lab('Cargo', inp('cargo', d.cargo))}</div>`,
       campos: ['modelo', 'resp', 'rg', 'cpf', 'valor', 'aluno', 'anoRef', 'nome', 'rg2', 'cpf2', 'funcao', 'desde', 'ate', 'ativ', 'gestor', 'escola', 'motivo', 'quando', 'turno', 'alunoM', 'nasc', 'turnoM', 'turma', 'anoM', 'texto', 'data', 'assinante', 'cargo'],
@@ -1216,6 +1216,7 @@ Prática e tira-dúvidas`;
     servico: { nome: 'Prestação de serviço (funcionário ou ex-funcionário)', curto: 'Serviço prestado' },
     liberacao: { nome: 'Liberação de funcionário (para outra escola ou órgão)', curto: 'Liberação' },
     matricula: { nome: 'Matrícula do aluno (está estudando na escola)', curto: 'Matrícula' },
+    transferencia: { nome: 'Transferência do aluno (saiu da escola)', curto: 'Transferência' },
     livre: { nome: 'Texto livre', curto: 'Livre' }
   };
   // valor por extenso em reais
@@ -1248,6 +1249,7 @@ Prática e tira-dúvidas`;
     if (o.modelo === 'servico') return `Declaramos, para os devidos fins, que *${(o.nome || L).toUpperCase()}*${doc2(o.rg2, o.cpf2) ? ', portador(a) do ' + doc2(o.rg2, o.cpf2) : ''}, ${o.ate ? 'prestou' : 'presta'} serviços neste Sistema de Ensino como *${(o.funcao || '__________').toUpperCase()}*${o.ativ ? ', atuando ' + o.ativ.replace(/^atuando\s+/i, '') : ''}, desde ${o.desde || '__________'}${o.ate ? ' até ' + o.ate : ' até a presente data'}.`;
     if (o.modelo === 'liberacao') return `Honrados em cumprimentá-lo(a), vimos por meio deste solicitar a liberação do(a) Sr.(a) *${(o.nome || L).toUpperCase()}*${doc2(o.rg2, o.cpf2) ? ', portador(a) do ' + doc2(o.rg2, o.cpf2) : ''}, em razão do(a) ${o.motivo || '__________'}, que ocorrerá ${/^\d|^nos?\b|^dias?\b/i.test(o.quando || '') ? (/^\d/.test(o.quando) ? 'no(s) dia(s) ' : '') + o.quando : 'no dia ' + (o.quando || '__________')}${o.turno ? ', no(s) turno(s) da ' + o.turno : ''}.\n\nSem mais para o momento, reiteramos votos de estima e consideração.\n\nAtenciosamente,`;
     if (o.modelo === 'matricula') return `Declaramos, para os devidos fins, que o(a) aluno(a) *${(o.alunoM || L).toUpperCase()}*${o.nasc ? ', nascido(a) em ' + fmt(o.nasc) : ''}, está regularmente matriculado(a) neste Sistema de Ensino, cursando o(a) *${serieNome(o.turma)}*${o.turnoM ? ', no turno da ' + o.turnoM.toLowerCase() : ''}, no ano letivo de ${o.anoM || new Date().getFullYear()}.`;
+    if (o.modelo === 'transferencia') return `Declaramos, para os devidos fins, que o(a) aluno(a) *${(o.alunoM || L).toUpperCase()}*${o.nasc ? ', nascido(a) em ' + fmt(o.nasc) : ''}, esteve regularmente matriculado(a) neste Sistema de Ensino, cursando o(a) *${serieNome(o.turma)}* no ano letivo de ${o.anoM || new Date().getFullYear()}, e solicitou transferência nesta data${o.motivo ? ' (' + o.motivo + ')' : ''}.\n\nO histórico escolar será expedido no prazo de até 30 (trinta) dias.`;
     return o.texto || 'Declaramos, para os devidos fins, que ';
   }
   const COLS = [['a1', '1ª Aval.'], ['a2', '2ª Aval.'], ['a3', '3ª Aval.'], ['a4', '4ª Aval.'], ['r1', '1ª Rec.'], ['r2', '2ª Rec.']];
