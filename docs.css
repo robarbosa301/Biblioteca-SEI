@@ -630,9 +630,10 @@ body.folha #imprimir .doc-2 .doc-aviso,.sei-pdf .doc-2 .doc-aviso{height:122mm}
 .tiles-doc .tile-doc b{font-size:15px;line-height:1.2;color:#0b2a6b}
 .tiles-doc .tile-doc small{font-size:12px;line-height:1.3;color:#3d4a66;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tiles-doc .tile-doc em{align-self:center;background:#0b2a6b;color:#fff;font-size:11px;margin-top:auto}
-.tiles-doc .tile-doc:nth-child(6n+1){--pi:linear-gradient(160deg,#ffffff,#e3efff);--fx:#1e6bff;--rt:-1.4deg}.tiles-doc .tile-doc:nth-child(6n+2){--pi:linear-gradient(160deg,#e6fbff,#bfefff);--fx:#00b8d9;--rt:1.2deg}.tiles-doc .tile-doc:nth-child(6n+3){--pi:linear-gradient(160deg,#fffbe6,#ffeaa0);--fx:#e6b422;--rt:-.6deg}
-.tiles-doc .tile-doc:nth-child(6n+4){--pi:linear-gradient(160deg,#eef4ff,#c9dcff);--fx:#0b2a6b;--rt:1.5deg}.tiles-doc .tile-doc:nth-child(6n+5){--pi:linear-gradient(160deg,#ffffff,#d6ecff);--fx:#3b8bff;--rt:-1.1deg}.tiles-doc .tile-doc:nth-child(6n+6){--pi:linear-gradient(160deg,#e9f9ff,#cdeeff);--fx:#1a4fd6;--rt:.8deg}
-main#docs{background:linear-gradient(180deg,#d9e8ff 0,#c7dcff 100%)}
+.tiles-doc .tile-doc:nth-child(6n+1){--pi:linear-gradient(170deg,#ffffff,#f6f9ff);--fx:#1e6bff;--rt:-1.4deg}.tiles-doc .tile-doc:nth-child(6n+2){--pi:linear-gradient(170deg,#ffffff,#f3fcff);--fx:#00b8d9;--rt:1.2deg}.tiles-doc .tile-doc:nth-child(6n+3){--pi:linear-gradient(170deg,#fffdf2,#fff4c7);--fx:#e6b422;--rt:-.6deg}
+.tiles-doc .tile-doc:nth-child(6n+4){--pi:linear-gradient(170deg,#ffffff,#f6f9ff);--fx:#0b2a6b;--rt:1.5deg}.tiles-doc .tile-doc:nth-child(6n+5){--pi:linear-gradient(170deg,#ffffff,#f3fcff);--fx:#3b8bff;--rt:-1.1deg}.tiles-doc .tile-doc:nth-child(6n+6){--pi:linear-gradient(170deg,#fffdf2,#fff4c7);--fx:#e6b422;--rt:.8deg}
+main#docs{background:linear-gradient(180deg,#a9c9f7 0,#8fb6f0 100%)}
+main#docs .tiles-doc .tile-doc{box-shadow:0 8px 16px rgba(6,22,80,.28),0 0 0 1px rgba(11,42,107,.08)}
 .tiles-doc .tile-doc{border-top:6px solid var(--fx,#1e6bff)}
 .tiles-doc .tile-doc::before{background:rgba(255,255,255,.8);box-shadow:0 1px 3px rgba(11,42,91,.25)}
 .tiles-doc .tile-doc.tem-conf{--pi:linear-gradient(160deg,#fff1f1,#ffd0d0);--fx:#e53935}.tiles-doc .tile-doc.ideal{--pi:linear-gradient(160deg,#fffbe6,#ffe48a);--fx:#e6b422}
