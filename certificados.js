@@ -6,7 +6,7 @@
   const TIPOS = {
     nota10: { rotulo: 'ALUNO NOTA 10', emoji: '⭐', grande: 'NOTA 10', cor: '#ffd600', cor2: '#ffb300', texto2: '#0b1a4a', claro: 'rgba(255,214,0,.35)', painel: 'linear-gradient(180deg,#fff8a6 0,#ffe11a 45%,#ffb800 100%)', brilho: '#ffd600', balao: 'Você é demais! 🌟',
       texto: 'Você mandou muito bem no {BIMESTRE} bimestre de {ANO} e conquistou a nota máxima! 🎉 Sua dedicação inspira a gente. Continue brilhando: o SEI tem muito orgulho de você!' },
-    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '💙', grande: 'DESTAQUE', cor: '#5dff4a', cor2: '#00c853', texto2: '#06183f', claro: 'rgba(93,255,74,.32)', painel: 'linear-gradient(180deg,#d6ffb8 0,#6dff52 45%,#00c853 100%)', brilho: '#5dff4a', balao: 'Orgulho de você! 💙',
+    destaque: { rotulo: 'ALUNO DESTAQUE', emoji: '🧩', pecas: true, grande: 'DESTAQUE', cor: '#5dff4a', cor2: '#00c853', texto2: '#06183f', claro: 'rgba(93,255,74,.32)', painel: 'linear-gradient(180deg,#d6ffb8 0,#6dff52 45%,#00c853 100%)', brilho: '#5dff4a', balao: 'Cada jeito de aprender é especial! 🧩',
       texto: 'Cada conquista sua no {BIMESTRE} bimestre de {ANO} mostrou garra, esforço e coragem. 💙 Você é destaque e inspira toda a Família SEI. Siga em frente: a gente acredita em você!' },
     aprovado: { rotulo: 'ALUNO APROVADO', emoji: '🎓', grande: 'APROVADO', cor: '#ff9a1f', cor2: '#ff6a00', texto2: '#0b1a4a', claro: 'rgba(255,154,31,.32)', painel: 'linear-gradient(180deg,#ffe0b0 0,#ffb347 45%,#ff7a00 100%)', brilho: '#ff9a1f', balao: 'Partiu próxima série! 🚀', anual: true,
       texto: 'Parabéns, você foi aprovado(a) no ano letivo de {ANO}! 🎓 Foi um ano de esforço e conquistas. Agora é comemorar e seguir em frente: a Família SEI tem orgulho de você!' }
@@ -73,10 +73,18 @@
   function confete() { let s = 3, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ffd600', '#00d9ff', '#ffffff', '#4f8bff', '#7df9ff', '#ffe600'];
     for (let i = 0; i < 46; i++) { const lado = i % 2, x = lado ? 196 + rnd() * 80 : 6 + rnd() * 80, y = 14 + rnd() * 46, w = 1.2 + rnd() * 1.6; h += `<i style="left:${x}mm;top:${y}mm;width:${w}mm;height:${w * 2.4}mm;background:${cs[i % cs.length]};transform:rotate(${rnd() * 180}deg)"></i>`; }
     return h; }
+  // peças de quebra-cabeça coloridas (símbolo da inclusão) para o Aluno Destaque do AEE
+  const PECA_D = 'M20 30 H40 C36 22 40 14 50 14 C60 14 64 22 60 30 H80 V50 C88 46 96 50 96 60 C96 70 88 74 80 70 V90 H60 C64 82 60 74 50 74 C40 74 36 82 40 90 H20 V70 C12 74 4 70 4 60 C4 50 12 46 20 50 Z';
+  const pecaPng = {};
+  const desenhaPeca = c => pecaPng[c] || (pecaPng[c] = (() => { const k = 3, cv = document.createElement('canvas'); cv.width = cv.height = 100 * k; const g = cv.getContext('2d'); g.scale(k, k); const p = new Path2D(PECA_D);
+    g.fillStyle = c; g.fill(p); g.lineWidth = 4; g.lineJoin = 'round'; g.strokeStyle = '#ffffff'; g.stroke(p); const gr = g.createLinearGradient(0, 14, 0, 90); gr.addColorStop(0, 'rgba(255,255,255,.35)'); gr.addColorStop(.5, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fill(p); return cv.toDataURL('image/png'); })());
+  function pecas() { let s = 7, h = ''; const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280, cs = ['#ff3b3b', '#ffd600', '#00c853', '#00b8ff', '#ff7a00', '#9d5cff'];
+    for (let i = 0; i < 16; i++) { const lado = i % 2, x = lado ? 198 + rnd() * 74 : 12 + rnd() * 70, y = 12 + rnd() * 46, w = 8.5 + rnd() * 5; h += `<img alt="" src="${desenhaPeca(cs[i % cs.length])}" style="position:absolute;left:${x}mm;top:${y}mm;width:${w}mm;height:${w}mm;transform:rotate(${rnd() * 360}deg);opacity:.92;filter:drop-shadow(0 .4mm .6mm rgba(0,0,0,.35))">`; }
+    return h; }
   // folha do certificado (A4 deitada, em mm). semTexto: só a arte, para o fundo do Word
   function certificado(tipo, nome, semTexto) {
     const T = TIPOS[tipo], el = document.createElement('div'), nm = bonito(nome), some = semTexto ? ' style="visibility:hidden"' : ''; el.className = 'ct-art';
-    el.innerHTML = `<div class="ca-bg"></div><div class="ca-vinheta"></div><div class="ca-conf">${confete()}</div><div class="ca-linha"></div>
+    el.innerHTML = `<div class="ca-bg"></div><div class="ca-vinheta"></div><div class="ca-conf">${T.pecas ? pecas() : confete()}</div><div class="ca-linha"></div>
       <img class="ca-logo" src="assets/docs/logo-sei.png" alt="">
       <span class="ca-chip" style="background:${T.cor};color:${T.texto2}">${T.anual ? 'ANO LETIVO' : esc(st.bim) + ' BIMESTRE'} · ${esc(st.ano)}</span><span class="ca-insta">@_sei01</span>
       <div class="ca-tit"><i>✦</i>CERTIFICADO<i>✦</i></div>
