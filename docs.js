@@ -1358,6 +1358,7 @@ Prática e tira-dúvidas`;
     '<ellipse cx="12" cy="9" rx="5" ry="6"/><path d="M12 15l-1 2h2zM12 17c0 2-2 2-1 5"/>',
     '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M20 10v6"/>',
     '<path d="M12 2l2.4 5 5.6.8-4 3.9.9 5.6L12 14.6 7.1 17.3 8 11.7 4 7.8 9.6 7z"/><path d="M12 17v5M9 22h6"/>'];
+  const escMes = h => '#' + [1, 3, 5].map(i => Math.round(parseInt(h.slice(i, i + 2), 16) * .45).toString(16).padStart(2, '0')).join('');
   const svgMes = m => `<img class="cm-ic" alt="" src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='48' height='48' fill='none' stroke='#ffffff' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'>${ICO_MES[m]}</svg>`)}">`;
   const CURTO_EV = { 'Feriado': 'Feriado', 'Ponto facultativo': 'Facultativo', 'Recesso / férias': 'Recesso' };
   function docCalendario(d) {
@@ -1374,7 +1375,7 @@ Prática e tira-dúvidas`;
       const me = evs.filter(e => (+e.de.slice(5, 7) - 1) === m && +e.de.slice(0, 4) === y);
       const extra = []; if (ini && +ini.slice(5, 7) - 1 === m && +ini.slice(0, 4) === y) extra.push({ de: ini, tipo: '_ini', desc: 'Início das aulas' }); if (fim && +fim.slice(5, 7) - 1 === m && +fim.slice(0, 4) === y) extra.push({ de: fim, tipo: '_fim', desc: 'Encerramento das aulas' });
       const lista = me.concat(extra).filter(e => !fx || (e.de <= fx[1] && (e.ate || e.de) >= fx[0])).sort((a, b) => a.de.localeCompare(b.de));
-      return `<div class="cm${mini ? ' mini' : ''}" style="--c:${c};--pt:${tintaHex(c, .3)};--pt2:${tintaHex(c, .16)};--rt:${[-1.1, .8, -.5, 1, -.8, .5][m % 6]}deg"><div class="cm-h" style="background:linear-gradient(120deg,${c},${tintaHex(c, .62)})">${svgMes(m)}<b>${MESES[m].toUpperCase()}</b><em>${String(m + 1).padStart(2, '0')}</em>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
+      return `<div class="cm${mini ? ' mini' : ''}" style="--c:${c};--pt:${tintaHex(c, .3)};--pt2:${tintaHex(c, .16)};--rt:${[-1.1, .8, -.5, 1, -.8, .5][m % 6]}deg"><div class="cm-h cm-art" style="background:${c} url(assets/calendario/mes-${String(m + 1).padStart(2, '0')}.jpg?v=1) right center/cover no-repeat;--cd:${escMes(c)}"><b>${MESES[m].toUpperCase()}</b><em>${String(m + 1).padStart(2, '0')}</em>${nl !== null ? `<span>${nl} dias letivos</span>` : ''}</div>
         <table class="cm-t"><tr>${['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'].map((x, i) => `<th class="${i === 0 ? 'dom' : ''}" style="color:${i === 0 ? '#e53935' : c}">${x}</th>`).join('')}</tr>${h}</tr></table>
         ${mini ? '' : `<div class="cm-ev">${lista.map(e => `<p style="border-left-color:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}"><i style="background:${e.tipo === '_ini' || e.tipo === '_fim' ? '#e0a800' : COR_EV[e.tipo] || c}">${dd(e.de)}${e.ate && e.ate !== e.de ? '–' + dd(e.ate) : ''}</i><span>${esc(e.desc || e.tipo)}${CURTO_EV[e.tipo] ? ` <em>(${CURTO_EV[e.tipo]})</em>` : ''}</span></p>`).join('') || '<p class="vazio">—</p>'}</div>`}</div>`;
     };
