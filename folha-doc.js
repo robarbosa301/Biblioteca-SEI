@@ -66,8 +66,8 @@
   }
   function banda(x, t, sub, campos) {
     x.textAlign = 'left'; x.textBaseline = 'alphabetic';
-    const p = cabe(x, t, 470, 50, 'SEI Poppins', 700, 24); x.font = F(700, p, 'SEI Poppins'); x.fillStyle = '#8fb3ec'; x.fillText(t, 172, 70);
-    const q = cabe(x, sub, 470, 27, 'SEI Poppins', 700, 14); x.font = F(700, q, 'SEI Poppins'); x.fillStyle = '#fff'; x.fillText(sub, 172, 104);
+    const p = cabe(x, t, 465, 50, 'SEI Poppins', 700, 14); x.font = F(700, p, 'SEI Poppins'); x.fillStyle = '#8fb3ec'; x.fillText(t, 172, 70, 465);
+    const q = cabe(x, sub, 470, 27, 'SEI Poppins', 700, 14); x.font = F(700, q, 'SEI Poppins'); x.fillStyle = '#fff'; x.fillText(sub, 172, 104, 465);
     campos.slice(0, 2).forEach(([r, v], i) => { const y = [56, 98][i]; x.font = F(700, 22, 'SEI Poppins'); x.fillStyle = '#fff'; const rr = r + ':'; x.fillText(rr, 660, y); const xv = 660 + x.measureText(rr).width + 10;
       if (v) { const s = cabe(x, v, 1040 - xv, 22, 'SEI Poppins', 700, 11); x.font = F(700, s, 'SEI Poppins'); x.fillStyle = '#9fdcff'; x.fillText(v, xv, y); } else { x.strokeStyle = '#fff'; x.lineWidth = 2; x.beginPath(); x.moveTo(xv, y + 4); x.lineTo(1035, y + 4); x.stroke(); } });
   }
